@@ -1,0 +1,136 @@
+/**
+ * design-system/base.css
+ * ---------------------------------------------------------------------------
+ * Réinitialisation et fondations typographiques. S'applique à toutes les
+ * applications qui importent le design system.
+ *
+ * Les encoches et barres système sont gérées via `env(safe-area-inset-*)`,
+ * désormais standardisé : le navigateur public collé en PWA réserve ainsi la
+ * place nécessaire sans que l'application ait à la calculer.
+ */
+
+:root {
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--body);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+img {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.12;
+  /* `text-wrap: balance` évite les lignes orphelines dans les titres courts. */
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* L'attribut `hidden` doit l'emporter sur tout `display` de composant. */
+[hidden] {
+  display: none !important;
+}
+
+/**
+ * Anneau de focus : visible au clavier uniquement, jamais au pointeur.
+ * Le jaune soleil sur fond clair reste lisible tout en se faisant discret.
+ */
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/** Conteneur de largeur maximale. Toutes les sections l'utilisent. */
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+/**
+ * Les montants et quantités utilisent des chiffres à chasse fixe : sans cela,
+ * une colonne de frais « 420 000 FCFA » tremble à chaque changement de valeur.
+ */
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/**
+ * Lien d'évitement pour les lecteurs d'écran.
+ *
+ * Invisible en permanence, il apparaît dès qu'il reçoit le focus clavier. Il
+ * doit être le PREMIER élément focusable du document, donc placé avant
+ * l'en-tête.
+ */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 12px 18px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 0 0 12px 0;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* La zone principale reçoit le focus après navigation au clavier. */
+main:focus {
+  outline: none;
+}
+
+/**
+ * Respect de la préférence système « réduire les animations ».
+ *
+ * Les transitions sont coupées net ; le défilement programmatique reste
+ * instantané. Chaque application peut en plus tester
+ * `matchMedia("(prefers-reduced-motion: reduce)")` pour ses animations
+ * pilotées en JavaScript.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
