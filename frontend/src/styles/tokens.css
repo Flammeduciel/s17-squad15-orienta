@@ -1,0 +1,86 @@
+/**
+ * design-system/tokens.css
+ * ---------------------------------------------------------------------------
+ * Les briques de valeur du design system Kelasi : couleurs, typographies,
+ * ombres, espacements de rayon. Aucun sélecteur de composant ici — modifier ce
+ * fichier suffit à faire evolves l'ensemble du site et des deux back-offices.
+ *
+ * Thème sombre appliqué par deux leviers complémentaires :
+ *   1. `@media (prefers-color-scheme: dark)` — suit le réglage du système ;
+ *   2. `[data-theme="dark"]` — permet d'imposer un thème depuis l'interface
+ *      (bouton « thème » du site public). Le sélecteur `:not([data-theme])`
+ *      empêche un thème clair choisi manuellement d'être écrasé par le système.
+ *
+ * Convention : les noms de variables restent stables d'un thème à l'autre,
+ * seule la valeur change. Un composant ne doit donc jamais lire la couleur
+ * en dur, mais toujours passer par une variable.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* --- Surfaces et texte ------------------------------------------------- */
+  --bg: #ffffff;
+  --soft: #f3f5f2;
+  --card: #ffffff;
+  --ink: #14201b;
+  --muted: #5e6b64;
+  --line: #e1e5e0;
+
+  /* --- Couleurs d'accent ------------------------------------------------- */
+  --green: #17693f;
+  --green-soft: #e3f0e8;
+  --sun: #f0b415;
+  --heart: #e0405a;
+  --blue: #1d4ed8;
+  --blue-soft: #e8f0fe;
+  --wa: #1da851;
+
+  /* --- Élévation --------------------------------------------------------- */
+  --shadow: 0 6px 24px rgba(16, 35, 27, 0.1);
+
+  /* --- Typographies ------------------------------------------------------
+   * `display` sert aux titres et aux chiffres (large, avec distinction) ;
+   * `body` sert au texte courant (plus neutre, plus lisible en petit corps).
+   */
+  --display: "Avenir Next", "Segoe UI Semibold", ui-sans-serif, system-ui, sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+/* Thème sombre — piloté par le système, sauf thème clair choisi manuellement. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1512;
+    --soft: #18211c;
+    --card: #141c18;
+    --ink: #e9f0eb;
+    --muted: #9daba3;
+    --line: #26322b;
+    --green: #4fbf86;
+    --green-soft: #1b3326;
+    --sun: #f2c233;
+    --heart: #ff6b82;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+    --blue: #93b4f5;
+    --blue-soft: #1b2a44;
+    color-scheme: dark;
+  }
+}
+
+/* Thème sombre imposé depuis l'interface. */
+:root[data-theme="dark"] {
+  --bg: #0f1512;
+  --soft: #18211c;
+  --card: #141c18;
+  --ink: #e9f0eb;
+  --muted: #9daba3;
+  --line: #26322b;
+  --green: #4fbf86;
+  --green-soft: #1b3326;
+  --sun: #f2c233;
+  --heart: #ff6b82;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  --blue: #93b4f5;
+  --blue-soft: #1b2a44;
+  color-scheme: dark;
+}
