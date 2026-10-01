@@ -64,22 +64,24 @@ npm run dev
 
 ## Contrat d'API
 
-Le fichier `openapi.yaml` (à la racine) est la source de vérité pour les 3 applications. Il décrit tous les endpoints, les paramètres et les formats de réponses. Toute modification passe par une PR revue par le lead dev.
+Le fichier `docs/openapi.yaml` est la source de vérité pour les 3 applications. Il décrit tous les endpoints, les paramètres et les formats de réponses. Toute modification passe par une PR revue par le lead dev.
+
+**Nomenclature :** chemins, paramètres et champs de réponse sont en anglais, alignés sur les colonnes de la base (`docs/schema.sql`). Seul le contenu métier reste en français — libellés affichés, messages d'erreur, valeurs d'énumération comme `BTS` ou `en_cours`. Les paths `/contact`, `/auth/*` et `/admin/images` étaient déjà en anglais.
 
 ### Endpoints principaux
 
 | Méthode | Endpoint | Description |
 |---|---|---|
-| GET | /formations | Rechercher des formations (filtres) |
-| GET | /formations/:id | Fiche détaillée d'une formation |
-| GET | /instituts | Lister les instituts |
-| GET | /instituts/:id | Fiche détaillée d'un institut |
+| GET | /programs | Rechercher des formations (filtres) |
+| GET | /programs/:id | Fiche détaillée d'une formation |
+| GET | /institutes | Lister les instituts |
+| GET | /institutes/:id | Fiche détaillée d'un institut |
 | POST | /contact | Envoyer une question à un institut |
-| POST | /referencement | Demande de référencement |
+| POST | /referrals | Demande de référencement |
 | POST | /auth/login | Connexion Squad |
-| GET | /admin/indicateurs | KPI du dashboard |
-| POST/PUT/DELETE | /admin/formations | CRUD formations |
-| POST/PUT/DELETE | /admin/instituts | CRUD instituts |
+| GET | /admin/indicators | KPI du dashboard |
+| POST/PUT/DELETE | /admin/programs | CRUD formations |
+| POST/PUT/DELETE | /admin/institutes | CRUD instituts |
 
 ## Rôles de l'équipe
 
