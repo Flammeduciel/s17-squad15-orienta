@@ -1,0 +1,28 @@
+/**
+ * styles/index.css
+ * ---------------------------------------------------------------------------
+ * Point d'entrée du design system Kelasi.
+ *
+ * Importé une seule fois, au démarrage de l'application :
+ *
+ *   import './styles/index.css';
+ *
+ * L'ordre d'import est significatif :
+ *   1. `tokens`     — les variables, dont tout le reste dépend ;
+ *   2. `base`       — réinitialisation et typographie ;
+ *   3. `components` — boutons, champs, étiquettes ;
+ *   4. `layout`     — structures de page ;
+ *   5. `cards`      — cartes et blocs de contenu ;
+ *   6. `pages`      — mises en page propres à une page.
+ *
+ * `components` précède `layout` : à spécificité égale, l'ordre de la cascade
+ * décide qui l'emporte lorsqu'une classe de composant rencontre une classe de
+ * mise en page (`.btn.sm` dans `.rbar`, par exemple).
+ */
+
+@import './tokens.css';
+@import './base.css';
+@import './components.css';
+@import './layout.css';
+@import './cards.css';
+@import './pages.css';
