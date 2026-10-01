@@ -1,0 +1,836 @@
+openapi: 3.0.3
+
+# ============================================================================
+# API KELASI — Contrat d'API officiel (V1)
+# ----------------------------------------------------------------------------
+# Source de vérité unique pour le backend, le frontend public et le back-office.
+# Toute modification de ce fichier passe par une PR revue par le lead dev,
+# puis est annoncée à toute la Squad. Aucune modification silencieuse.
+# ============================================================================
+
+info:
+  title: API Kelasi
+  version: 1.0.0
+  description: |
+    API de la plateforme **Kelasi** — orientation des nouveaux bacheliers vers
+    les instituts privés de Brazzaville (MVP V1, périmètre Brazzaville).
+
+    **Rappels de cadrage :**
+    - L'accès public est totalement libre : aucun compte utilisateur côté étudiant.
+    - L'administration (routes `/admin` + `/auth`) est réservée à la Squad (authentification Bearer).
+    - Le numéro d'agrément est recopié du document officiel ; `null` = en cours de vérification,
+      et l'interface DOIT afficher le badge « Agrément en cours de vérification » dans ce cas.
+    - Les montants sont exprimés en FCFA (entiers).
+
+    **Convention d'erreur :** toute erreur renvoie le schéma `Erreur`
+    avec un code machine (`code`) et un message lisible (`message`).
+
+servers:
+  - url: http://localhost:4000/api
+    description: Développement local
+  - url: https://kelasi.cg/api
+    description: Production (prévu)
+
+tags:
+  - name: Public
+    description: Consultation libre — site étudiant (frontend)
+  - name: Contact
+    description: Formulaires publics (contact institut, référencement)
+  - name: Auth
+    description: Authentification Squad (back-office)
+  - name: Admin
+    description: CRUD back-office — authentification Bearer requise
+
+security: []
+
+paths:
+  # --------------------------------------------------------------------------
+  # PUBLIC
+  # --------------------------------------------------------------------------
+  /formations:
+    get:
+      tags: [Public]
+      summary: Rechercher des formations
+      description: |
+        Recherche multi-critères. Le paramètre `q` cherche dans le nom de la
+        formation, les métiers visés, les cours, le nom et le sigle de l'institut
+        (insensible à la casse et aux accents).
+      parameters:
+        - name: q
+          in: query
+          description: Recherche plein-texte (nom, métier, cours, institut)
+          schema: { type: string }
+          example: infirmier
+        - name: domaine
+          in: query
+          description: Identifiant du domaine
+          schema:
+            type: string
+            enum: [gestion, info, sante, btp, petrole, com, logi, droit, agro, hotel]
+          example: sante
+        - name: arrondissement
+          in: query
+          description: Un des 9 arrondissements de Brazzaville
+          schema:
+            type: string
+            enum: [Makelekele, Bacongo, Poto-Poto, Moungali, Ouenze, Talangai, Mfilou, Madibou, Djoue]
+        - name: diplome
+          in: query
+          schema:
+            type: string
+            enum: [BTS, Licence, Licence pro, Master]
+        - name: metier
+          in: query
+          description: Métier visé (débouché) exact
+          schema: { type: string }
+          example: Infirmier
+        - name: duree
+          in: query
+          description: Durée en années
+          schema: { type: integer, enum: [2, 3] }
+        - name: maxFrais
+          in: query
+          description: Budget maximum par an (FCFA)
+          schema: { type: integer, minimum: 0 }
+          example: 500000
+        - name: serie
+          in: query
+          description: Série du bac requise
+          schema:
+            type: string
+            enum: [A, B, C, D, E, F, G]
+        - name: soir
+          in: query
+          description: Uniquement les formations avec cours du soir
+          schema: { type: boolean, default: false }
+        - name: stage
+          in: query
+          description: Uniquement les formations avec stage inclus
+          schema: { type: boolean, default: false }
+        - name: tranches
+          in: query
+          description: Uniquement les formations payables en tranches
+          schema: { type: boolean, default: false }
+        - name: tri
+          in: query
+          description: Ordre de tri des résultats
+          schema:
+            type: string
+            enum: [pert, prix, prixd, duree]
+            default: pert
+      responses:
+        "200":
+          description: Liste des formations correspondant aux critères
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListeFormations" }
+        "400":
+          description: Paramètre invalide
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+              example:
+                code: PARAMETRE_INVALIDE
+                message: "« maxFrais » doit être un nombre entier positif."
+
+  /formations/{id}:
+    get:
+      tags: [Public]
+      summary: Consulter une formation
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      responses:
+        "200":
+          description: Fiche détaillée de la formation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FormationDetail" }
+        "404":
+          description: Formation introuvable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+              example:
+                code: FORMATION_INTROUVABLE
+                message: "Aucune formation ne correspond à cet identifiant."
+
+  /instituts:
+    get:
+      tags: [Public]
+      summary: Lister les instituts
+      parameters:
+        - name: arrondissement
+          in: query
+          schema:
+            type: string
+            enum: [Makelekele, Bacongo, Poto-Poto, Moungali, Ouenze, Talangai, Mfilou, Madibou, Djoue]
+        - name: agre
+          in: query
+          description: Uniquement les instituts agréés
+          schema: { type: boolean, default: false }
+      responses:
+        "200":
+          description: Liste des instituts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, items]
+                properties:
+                  total: { type: integer }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/InstitutResume" }
+
+  /instituts/{id}:
+    get:
+      tags: [Public]
+      summary: Consulter la fiche d'un institut
+      description: |
+        Fiche complète de l'établissement, incluant la liste résumée de ses
+        formations (US-04 / EX-04).
+      parameters:
+        - $ref: "#/components/parameters/IdInstitut"
+      responses:
+        "200":
+          description: Fiche détaillée de l'institut
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InstitutDetail" }
+        "404":
+          description: Institut introuvable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+              example:
+                code: INSTITUT_INTROUVABLE
+                message: "Aucun institut ne correspond à cet identifiant."
+
+  /domaines:
+    get:
+      tags: [Public]
+      summary: Lister les domaines de formation
+      responses:
+        "200":
+          description: Les 10 domaines
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Domaine" }
+
+  /arrondissements:
+    get:
+      tags: [Public]
+      summary: Lister les 9 arrondissements de Brazzaville
+      responses:
+        "200":
+          description: Arrondissements avec nombre de formations disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Arrondissement" }
+
+  /metiers:
+    get:
+      tags: [Public]
+      summary: Lister les métiers (débouchés)
+      description: Liste distincte et triée des métiers — pour le filtre « métier visé ».
+      responses:
+        "200":
+          description: Métiers avec nombre de formations associées
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Metier" }
+
+  # --------------------------------------------------------------------------
+  # CONTACT (formulaires publics)
+  # --------------------------------------------------------------------------
+  /contact:
+    post:
+      tags: [Contact]
+      summary: Envoyer une question à un institut
+      description: |
+        Transmet la question d'un bachelier au secrétariat de l'institut
+        (e-mail) sans créer de compte (EX-06).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DemandeContact" }
+            example:
+              formationId: infirm
+              nom: Grâce Mabiala
+              email: grace.mabiala@email.com
+              message: Reste-t-il des places pour la rentrée ?
+      responses:
+        "202":
+          description: Demande acceptée et mise en file d'envoi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recu]
+                properties:
+                  recu: { type: boolean, example: true }
+        "400":
+          description: Champs invalides
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+        "404":
+          description: Formation ou institut introuvable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+
+  /referencement:
+    post:
+      tags: [Contact]
+      summary: Demande de référencement d'un institut
+      description: |
+        Formulaire public « Référencer mon institut ». La Squad reprend ensuite
+        contact pour un rendez-vous et la vérification de l'agrément — l'institut
+        ne crée jamais sa fiche lui-même (exclusion V1).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DemandeReferencement" }
+            example:
+              nomInstitut: Institut Supérieur de Technologie de Madibou
+              arrondissement: Madibou
+              telephone: "+242 06 000 00 00"
+              responsable: Alain Boulou
+              agrementNumero: null
+      responses:
+        "202":
+          description: Demande acceptée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [recu]
+                properties:
+                  recu: { type: boolean, example: true }
+        "400":
+          description: Champs invalides
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+
+  # --------------------------------------------------------------------------
+  # AUTH (back-office)
+  # --------------------------------------------------------------------------
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion Squad
+      description: Authentifie un membre de la Squad et renvoie un token JWT pour les routes `/admin`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Identifiants" }
+            example:
+              identifiant: squad
+              motDePasse: kelasi2026
+      responses:
+        "200":
+          description: Token d'authentification
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReponseLogin" }
+        "401":
+          description: Identifiants incorrects
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+              example:
+                code: IDENTIFIANTS_INVALIDES
+                message: "Identifiant ou mot de passe incorrect."
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Déconnexion
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Session terminée
+
+  # --------------------------------------------------------------------------
+  # ADMIN (back-office — Bearer requis)
+  # --------------------------------------------------------------------------
+  /admin/indicateurs:
+    get:
+      tags: [Admin]
+      summary: KPI du dashboard
+      description: |
+        Les 5 indicateurs officiels du dashboard Squad — cette liste est LA
+        référence unique (elle doit être identique partout : FRD, back-office).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Indicateurs de pilotage
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Indicateurs" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /admin/formations:
+    post:
+      tags: [Admin]
+      summary: Créer une formation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FormationEcriture" }
+      responses:
+        "201":
+          description: Formation créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FormationDetail" }
+        "400":
+          description: Champs invalides
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /admin/formations/{id}:
+    put:
+      tags: [Admin]
+      summary: Modifier une formation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FormationEcriture" }
+      responses:
+        "200":
+          description: Formation mise à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FormationDetail" }
+        "404":
+          description: Formation introuvable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+    delete:
+      tags: [Admin]
+      summary: Supprimer une formation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      responses:
+        "204":
+          description: Formation supprimée
+        "404":
+          description: Formation introuvable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /admin/instituts:
+    post:
+      tags: [Admin]
+      summary: Créer un institut
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstitutEcriture" }
+      responses:
+        "201":
+          description: Institut créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InstitutDetail" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /admin/instituts/{id}:
+    put:
+      tags: [Admin]
+      summary: Modifier un institut
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdInstitut"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstitutEcriture" }
+      responses:
+        "200":
+          description: Institut mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InstitutDetail" }
+        "404":
+          description: Institut introuvable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+    delete:
+      tags: [Admin]
+      summary: Supprimer un institut
+      description: Refusé (409) tant que l'institut possède des formations.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdInstitut"
+      responses:
+        "204":
+          description: Institut supprimé
+        "409":
+          description: Institut avec formations rattachées
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+              example:
+                code: INSTITUT_NON_VIDE
+                message: "Supprimez ou déplacez d'abord les formations de cet institut."
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+  /admin/images:
+    post:
+      tags: [Admin]
+      summary: Téléverser une image d'institut
+      description: Upload multipart (image de la fiche — EX-04). Formats acceptés JPEG/PNG/WebP, 5 Mo maximum.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [fichier]
+              properties:
+                fichier:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Image enregistrée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url: { type: string, example: "/uploads/instituts/isd-2026.jpg" }
+        "400":
+          description: Fichier invalide
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Erreur" }
+        "401":
+          $ref: "#/components/responses/NonAutorise"
+
+# =============================================================================
+# COMPOSANTS
+# =============================================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdFormation:
+      name: id
+      in: path
+      required: true
+      description: Identifiant de la formation
+      schema: { type: string }
+      example: infirm
+    IdInstitut:
+      name: id
+      in: path
+      required: true
+      description: Identifiant de l'institut
+      schema: { type: string }
+      example: isd
+
+  responses:
+    NonAutorise:
+      description: Token manquant ou invalide
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Erreur" }
+          example:
+            code: NON_AUTORISE
+            message: "Authentification Squad requise."
+
+  schemas:
+    # ------------------------------------------------------------------ Commun
+    Erreur:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Code machine stable (ne jamais l'afficher tel quel à l'utilisateur)
+          example: FORMATION_INTROUVABLE
+        message:
+          type: string
+          description: Message lisible, en français
+          example: "Aucune formation ne correspond à cet identifiant."
+
+    Domaine:
+      type: object
+      required: [id, nom, couleur]
+      properties:
+        id: { type: string, example: sante }
+        nom: { type: string, example: "Santé" }
+        couleur: { type: string, example: "#B03352", description: Couleur de la couverture (hex) }
+
+    Arrondissement:
+      type: object
+      required: [nom, nbFormations]
+      properties:
+        nom: { type: string, example: Makélékélé }
+        nbFormations: { type: integer, example: 5 }
+
+    Metier:
+      type: object
+      required: [nom, nbFormations]
+      properties:
+        nom: { type: string, example: Infirmier }
+        nbFormations: { type: integer, example: 1 }
+
+    # --------------------------------------------------------------- Instituts
+    InstitutResume:
+      type: object
+      required: [id, sigle, nom, arrondissement, agrementStatut]
+      properties:
+        id: { type: string, example: isd }
+        sigle: { type: string, example: ISD }
+        nom: { type: string, example: "Institut de Santé du Djoué" }
+        arrondissement: { type: string, example: Makélékélé }
+        agrementStatut:
+          type: string
+          enum: [agre, en_cours]
+          description: "`agre` → badge bleu ; `en_cours` → badge gris « en cours de vérification »"
+        agrementNumero:
+          type: string
+          nullable: true
+          example: "N° 156/MESRTI/2012"
+          description: Recopié du document officiel ; null si en_cours
+
+    InstitutDetail:
+      allOf:
+        - $ref: "#/components/schemas/InstitutResume"
+        - type: object
+          required: [adresse, telephone, whatsapp, email, couleur, description, fraisInscription, clotureInscriptions, rentree, formations]
+          properties:
+            adresse: { type: string, example: "Route du Djoué, Makélékélé" }
+            telephone: { type: string, example: "+242 06 409 88 52" }
+            whatsapp: { type: string, example: "242064098852", description: Numéro international sans « + » (pour wa.me) }
+            email: { type: string, format: email, example: "contact@isd.cg" }
+            couleur: { type: string, example: "#B03352" }
+            imageUrl:
+              type: string
+              nullable: true
+              example: "/uploads/instituts/isd-2026.jpg"
+              description: Image de l'institut (EX-04) ; null → couverture de couleur
+            description: { type: string, example: "Métiers paramédicaux, avec stages encadrés dans des centres de santé de Brazzaville." }
+            fraisInscription: { type: integer, example: 75000, description: FCFA }
+            clotureInscriptions: { type: string, example: "27 sept." }
+            rentree: { type: string, example: "20 oct. 2026" }
+            formations:
+              type: array
+              description: Formations résumées de cet institut
+              items: { $ref: "#/components/schemas/FormationResume" }
+
+    # -------------------------------------------------------------- Formations
+    FormationResume:
+      type: object
+      required: [id, nom, diplome, duree, frais, jobs, domaine, institut]
+      properties:
+        id: { type: string, example: infirm }
+        nom: { type: string, example: "Sciences infirmières" }
+        diplome:
+          type: string
+          enum: [BTS, Licence, Licence pro, Master]
+        duree: { type: integer, example: 3, description: Années }
+        frais: { type: integer, example: 650000, description: Scolarité par an, en FCFA }
+        serieBac:
+          type: string
+          nullable: true
+          example: "CD"
+          description: Séries acceptées ; null si accessible post-Licence (Master)
+        soir: { type: boolean, example: false }
+        stage: { type: integer, example: 6, description: Durée du stage en mois ; 0 = aucun }
+        tranches: { type: boolean, example: true, description: Paiement en plusieurs fois possible }
+        jobs:
+          type: array
+          description: Métiers visés (débouchés)
+          items: { type: string }
+          example: ["Infirmier", "Agent de santé communautaire"]
+        domaine: { $ref: "#/components/schemas/Domaine" }
+        institut: { $ref: "#/components/schemas/InstitutResume" }
+
+    AnneeProgramme:
+      type: object
+      required: [niveau, cours]
+      properties:
+        niveau: { type: string, example: L1, description: "L1/L2/L3, 1re année/2e année ou M1/M2" }
+        cours:
+          type: array
+          items: { type: string }
+          example: ["Anatomie et physiologie", "Soins infirmiers de base"]
+
+    FormationDetail:
+      allOf:
+        - $ref: "#/components/schemas/FormationResume"
+        - type: object
+          required: [cours, annees]
+          properties:
+            cours:
+              type: array
+              items: { type: string }
+              description: Liste plate des cours (les années sont regroupées dans `annees`)
+            annees:
+              type: array
+              description: Programme découpé par année
+              items: { $ref: "#/components/schemas/AnneeProgramme" }
+            dossierInscription:
+              type: array
+              items: { type: string }
+              example: ["Copie du baccalauréat ou de l'attestation de réussite", "Relevé de notes du bac", "Acte de naissance", "2 photos d'identité"]
+
+    ListeFormations:
+      type: object
+      required: [total, items]
+      properties:
+        total: { type: integer, example: 1 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/FormationResume" }
+
+    # -------------------------------------------------------------- Écritures
+    FormationEcriture:
+      type: object
+      required: [nom, institutId, domaineId, diplome, duree, frais, jobs, cours]
+      properties:
+        nom: { type: string, example: "Sciences infirmières" }
+        institutId: { type: string, example: isd }
+        domaineId: { type: string, example: sante }
+        diplome: { type: string, enum: [BTS, Licence, Licence pro, Master] }
+        duree: { type: integer, enum: [2, 3] }
+        frais: { type: integer, example: 650000 }
+        serieBac: { type: string, nullable: true, example: "CD" }
+        soir: { type: boolean, default: false }
+        stage: { type: integer, example: 6 }
+        tranches: { type: boolean, default: false }
+        jobs: { type: array, items: { type: string }, example: ["Infirmier"] }
+        cours: { type: array, items: { type: string }, example: ["Anatomie et physiologie", "Soins infirmiers de base"] }
+
+    InstitutEcriture:
+      type: object
+      required: [nom, sigle, arrondissement, telephone, whatsapp, email, couleur, description, fraisInscription, clotureInscriptions, rentree, agrementStatut]
+      properties:
+        nom: { type: string, example: "Institut de Santé du Djoué" }
+        sigle: { type: string, example: ISD }
+        arrondissement:
+          type: string
+          enum: [Makelekele, Bacongo, Poto-Poto, Moungali, Ouenze, Talangai, Mfilou, Madibou, Djoue]
+        adresse: { type: string, example: "Route du Djoué, Makélékélé" }
+        telephone: { type: string, example: "+242 06 409 88 52" }
+        whatsapp: { type: string, example: "242064098852" }
+        email: { type: string, format: email, example: "contact@isd.cg" }
+        couleur: { type: string, example: "#B03352" }
+        imageUrl: { type: string, nullable: true, example: null }
+        description: { type: string, example: "Métiers paramédicaux..." }
+        fraisInscription: { type: integer, example: 75000 }
+        clotureInscriptions: { type: string, example: "27 sept." }
+        rentree: { type: string, example: "20 oct. 2026" }
+        agrementStatut: { type: string, enum: [agre, en_cours] }
+        agrementNumero: { type: string, nullable: true, example: "N° 156/MESRTI/2012" }
+
+    # ----------------------------------------------------------------- Divers
+    DemandeContact:
+      type: object
+      required: [formationId, nom, email, message]
+      properties:
+        formationId: { type: string, example: infirm }
+        nom: { type: string, example: "Grâce Mabiala" }
+        email: { type: string, format: email, example: "grace.mabiala@email.com" }
+        message: { type: string, example: "Reste-t-il des places pour la rentrée ?" }
+
+    DemandeReferencement:
+      type: object
+      required: [nomInstitut, arrondissement, telephone, responsable]
+      properties:
+        nomInstitut: { type: string, example: "Institut Supérieur de Technologie de Madibou" }
+        arrondissement:
+          type: string
+          description: Un des 9 arrondissements, ou « Autre »
+          example: Madibou
+        telephone: { type: string, example: "+242 06 000 00 00" }
+        responsable: { type: string, example: "Alain Boulou" }
+        agrementNumero:
+          type: string
+          nullable: true
+          example: null
+          description: Numéro d'agrément si l'institut en a un
+
+    Identifiants:
+      type: object
+      required: [identifiant, motDePasse]
+      properties:
+        identifiant: { type: string, example: squad }
+        motDePasse: { type: string, example: kelasi2026 }
+
+    ReponseLogin:
+      type: object
+      required: [token, nom]
+      properties:
+        token: { type: string, description: "JWT à envoyer en `Authorization: Bearer <token>`" }
+        nom: { type: string, example: "Membre Squad" }
+
+    Indicateurs:
+      type: object
+      description: KPI du dashboard — liste de référence unique
+      required: [nbEtablissements, nbArrondissementsCouverts, nbCategoriesFormations, nbDiplomes, nbDebouches]
+      properties:
+        nbEtablissements: { type: integer, example: 8 }
+        nbArrondissementsCouverts:
+          type: integer
+          example: 8
+          description: Sur 9 arrondissements au total
+        nbCategoriesFormations: { type: integer, example: 9, description: Domaines distincts proposés }
+        nbDiplomes: { type: integer, example: 4, description: Types de diplôme distincts }
+        nbDebouches: { type: integer, example: 62, description: Métiers distincts }
