@@ -1,0 +1,130 @@
+/**
+ * assets/css/dashboard.css
+ * ---------------------------------------------------------------------------
+ * Blocs de contenu : cartes KPI, panneaux, colonnes, lignes libellé / valeur.
+ */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(186px,1fr));
+  gap: 14px;
+}
+
+.stat {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  background: var(--card);
+  display: grid;
+  gap: 7px;
+}
+
+.stat {
+  min-width: 0;
+}
+
+.stat .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.stat .row > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.stat b {
+  display: block;
+  font: 800 clamp(22px,6vw,30px)/1.1 var(--display);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat small {
+  display: block;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+  overflow-wrap: break-word;
+  margin-top: 4px;
+}
+
+.stat .ico {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--green-soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+}
+
+.stat .ico svg {
+  width: 19px;
+  height: 19px;
+}
+
+.stat .ico.blue {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.panel > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel > header h2 {
+  font: 800 18px var(--display);
+}
+
+.panel > header small {
+  color: var(--muted);
+}
+
+.panel .pad {
+  padding: 18px;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0,1.6fr) minmax(0,1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.kv {
+  display: grid;
+  gap: 9px;
+  font-size: 14.5px;
+}
+
+.kv div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.kv span:first-child {
+  color: var(--muted);
+}
+
+.kv b {
+  font-weight: 700;
+  text-align: right;
+}
