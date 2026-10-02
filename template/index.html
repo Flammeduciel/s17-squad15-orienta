@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Kelasi Brazzaville — Les instituts privés de Brazzaville, au même endroit</title>
-<meta name="description" content="Kelasi centralise les formations, diplômes, frais, agréments et contacts des instituts privés de Brazzaville, pour aider les nouveaux bacheliers à choisir en connaissance de cause.">
+<title>Orienta Brazzaville — Les instituts privés de Brazzaville, au même endroit</title>
+<meta name="description" content="Orienta centralise les formations, diplômes, frais, agréments et contacts des instituts privés de Brazzaville, pour aider les nouveaux bacheliers à choisir en connaissance de cause.">
 <style>
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -78,6 +78,16 @@ button{font-family:inherit;color:inherit}
 .cat svg{width:26px;height:26px}
 .cat:hover{color:var(--ink);opacity:1;border-bottom-color:var(--line)}
 .cat[aria-pressed="true"]{color:var(--ink);opacity:1;border-bottom-color:var(--ink)}
+
+.access{margin:22px auto 0;max-width:900px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;text-align:left}
+.acc{display:flex;gap:12px;align-items:center;min-width:0;border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:var(--card);color:var(--ink);cursor:pointer;font:inherit;text-align:left}
+.acc svg{flex:none;width:24px;height:24px;color:var(--green)}
+.acc b{display:block;font-size:16px}
+.acc small{display:block;color:var(--muted);font-size:13px}
+.acc:hover{border-color:var(--ink)}
+.acc[aria-pressed="true"]{border-color:var(--green);box-shadow:inset 0 0 0 1.5px var(--green)}
+.job small{display:block;color:var(--muted);font-weight:500;font-size:13px}
+.cover .big-sigle{position:relative;font:800 34px var(--display);letter-spacing:.03em}
 
 .layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:36px;padding-block:28px 64px}
 .filters{align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 92px);max-height:calc(100vh - 110px);overflow:auto;padding-right:6px;scrollbar-width:thin}
@@ -155,9 +165,6 @@ select.plain{width:100%;border:1px solid var(--line);background:var(--card);colo
 .sec{margin-top:36px}
 .sec h2{font:800 22px var(--display);margin-bottom:14px}
 
-.cta{margin-top:56px;border-radius:22px;background:var(--soft);padding:32px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-.cta h2{font:800 26px var(--display)}
-.cta p{color:var(--muted);margin-top:6px;max-width:56ch}
 
 .detail{padding-block:24px 80px}
 .back{display:inline-flex;align-items:center;gap:6px;font-weight:600;text-decoration:none;font-size:15px;padding:6px 0}
@@ -218,17 +225,6 @@ select.plain{width:100%;border:1px solid var(--line);background:var(--card);colo
 .err{background:var(--heart);color:#fff;border-radius:12px;padding:12px 14px;font-size:14px}
 .mbar{display:none}
 
-.ref{max-width:760px;margin:0 auto;padding-block:40px 80px;display:grid;gap:28px}
-.ref h1{font:800 clamp(30px,4.4vw,44px)/1.05 var(--display)}
-.ref .lead{color:var(--muted);font-size:18px}
-.perks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.perk{border:1px solid var(--line);border-radius:16px;padding:18px}
-.perk b{display:block;margin-bottom:4px}
-.perk span{color:var(--muted);font-size:15px}
-.refform{border:1px solid var(--line);border-radius:18px;padding:24px;display:grid;gap:14px;background:var(--card)}
-.refform .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.refform h2{font:800 22px var(--display)}
-
 .about{max-width:820px;margin:0 auto;padding-block:40px 80px;display:grid;gap:22px}
 .about h1{font:800 clamp(30px,4.4vw,44px)/1.05 var(--display)}
 .about .lead{color:var(--muted);font-size:18px}
@@ -237,18 +233,11 @@ select.plain{width:100%;border:1px solid var(--line);background:var(--card);colo
 .about p{color:var(--muted);font-size:16px}
 .about p b{color:var(--ink)}
 
-.adm{padding-block:32px 80px}
-.adm h1{font:800 clamp(26px,3.6vw,38px) var(--display);margin-bottom:24px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:34px}
-.kpi{border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--card)}
-.kpi b{display:block;font:800 30px var(--display)}
-.kpi small{color:var(--muted);font-weight:600}
 .tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line)}
 .tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:12px 14px;border-bottom:1px solid var(--line)}
 .tbl td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
 .tbl tr:last-child td{border-bottom:0}
 .tblwrap{overflow:auto;border-radius:14px}
-.admbar{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 22px}
 
 footer{border-top:1px solid var(--line);background:var(--soft);padding-block:26px;font-size:14px;color:var(--muted)}
 footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -280,11 +269,10 @@ footer a{color:inherit;text-decoration:underline}
   .go{grid-column:1/-1;justify-content:center;margin:6px 0 0}
   .top-actions .hide-s{display:none}
   .cats .wrap{gap:22px}
+  .access{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .acc{padding:12px}
   .grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr))}
   .dcover{height:200px}
-  .perks{grid-template-columns:minmax(0,1fr)}
-  .refform .two{grid-template-columns:minmax(0,1fr)}
-  .cta{padding:22px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -293,17 +281,12 @@ footer a{color:inherit;text-decoration:underline}
 
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="#accueil" aria-label="Kelasi, accueil">
+    <a class="logo" href="#accueil" aria-label="Orienta, accueil">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M7 13.5 16 9l9 4.5-9 4.5-9-4.5Z" fill="#fff"/><path d="M11 16v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V16" stroke="#fff" stroke-width="2" fill="none"/><path d="M24 14v5" stroke="#F0B415" stroke-width="2" stroke-linecap="round"/></svg>
-      Kelasi
+      Orienta
     </a>
     <div class="top-actions">
       <a class="lnk hide-s" href="#apropos">À propos</a>
-      <a class="lnk hide-s" href="#referencer">Référencer mon institut</a>
-      <a class="lnk" href="#admin" title="Espace Squad">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.2 2.2M16.9 16.9l2.2 2.2M19.1 4.9l-2.2 2.2M7.1 16.9l-2.2 2.2"/></svg>
-        <span class="hide-s">Squad</span>
-      </a>
       <button class="lnk" id="themebtn" type="button" title="Basculer le thème clair / sombre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10Z"/></svg>
       </button>
@@ -319,8 +302,8 @@ footer a{color:inherit;text-decoration:underline}
 
 <footer>
   <div class="wrap">
-    <span>© 2026 Kelasi · Les instituts privés de Brazzaville, au même endroit</span>
-    <span><a href="#apropos">À propos</a> · <a href="#referencer">Référencer un institut</a> · <a href="#admin">Espace Squad</a></span>
+    <span>© 2026 Orienta · Les instituts privés de Brazzaville, au même endroit</span>
+    <span><a href="#apropos">À propos</a></span>
     <span>Instituts et chiffres de démonstration</span>
   </div>
 </footer>
@@ -348,9 +331,11 @@ const P = {
   pin:'<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/>',
   cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
   back:'<path d="M15 18l-6-6 6-6"/>',
+  building:'<path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M16 9h2a2 2 0 0 1 2 2v10M2 21h20M8 7h4M8 11h4M8 15h4"/>',
+  award:'<circle cx="12" cy="9" r="6"/><path d="M9 14.5 7.5 22l4.5-2.5 4.5 2.5L15 14.5"/>',
   check:'<path d="M20 6 9 17l-5-5"/>'
 };
-const icon = (k, cls) => '<svg class="'+(cls||"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+P[k]+'</svg>';
+const icon = (k, cls) => '<svg class="'+(cls||"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[k]||P.all)+'</svg>';
 
 /* ---------- Données (démonstration) ---------- */
 const DOMAINES = [
@@ -378,7 +363,7 @@ const INST = {
   iht:{nom:"Institut Horizon de Talangaï", sigle:"IHT", arr:"Talangaï", adr:"Avenue de l'Intendance, Talangaï", tel:"+242 05 744 31 60", wa:"242057443160", mail:"contact@iht.cg", ag:"N° 203/MESRTI/2015", insc:40000, rentree:"10 nov. 2026", clot:"31 oct.", c:"#6D40A6", desc:"Communication, journalisme et marketing digital. Studio radio et atelier vidéo sur place."},
   eclc:{nom:"École de Commerce et Logistique de la Corniche", sigle:"ECLC", arr:"Ouenzé", adr:"Boulevard de la Corniche, Ouenzé", tel:"+242 06 255 67 09", wa:"242062556709", mail:"contact@eclc.cg", ag:"N° 178/MESRTI/2014", insc:50000, rentree:"3 nov. 2026", clot:"15 oct.", c:"#0D6F7C", desc:"Commerce international, transit et logistique, en lien avec le port fluvial et le corridor vers Pointe-Noire."},
   ijl:{nom:"Institut Juridique Lumière", sigle:"IJL", arr:"Djoué", adr:"Route du Pool, Djoué", tel:"+242 06 318 72 44", wa:"242063187244", mail:"contact@ijl.cg", ag:"N° 131/MESRTI/2010", insc:40000, rentree:"3 nov. 2026", clot:"25 oct.", c:"#7A2E2E", desc:"Droit, administration et secrétariat. Nombreuses formations en cours du soir pour ceux qui travaillent."},
-  isam:{nom:"Institut des Sciences Appliquées de Mfilou", sigle:"ISAM", arr:"Mfilou", adr:"Route de Kinkala, Mfilou", tel:"+242 05 690 13 27", wa:"242056901327", mail:"contact@isam.cg", ag:"en cours", insc:35000, rentree:"27 oct. 2026", clot:"10 oct.", c:"#4C7A1E", desc:"Agronomie, environnement et tourisme, avec une ferme-école et un hôtel d'application."}
+  isam:{nom:"Institut des Sciences Appliquées de Mfilou", sigle:"ISAM", arr:"Mfilou", adr:"Route de Kinkala, Mfilou", tel:"+242 05 690 13 27", wa:"242056901327", mail:"contact@isam.cg", ag:"", insc:35000, rentree:"27 oct. 2026", clot:"10 oct.", c:"#4C7A1E", desc:"Agronomie, environnement et tourisme, avec une ferme-école et un hôtel d'application."}
 };
 
 /* [id, inst, domaine, nom, diplôme, durée, frais/an, séries, soir, stage(mois), tranches, débouchés, cours] */
@@ -424,38 +409,65 @@ const store = {
   del(k){ try{ localStorage.removeItem(k) }catch(e){} }
 };
 
-/* ---------- Modèle & persistance (CRUD Squad) ---------- */
+/* ---------- Modèle ---------- */
 function buildAnnees(f){
-  const lab = f.dip==="Master" ? ["M1","M2"] : f.dip==="BTS" ? ["1re année","2e année"] : ["L1","L2","L3"];
+  const lab = Array.from({length:f.duree||1}, (_,k)=> f.dip==="Master" ? "M"+(k+1) : (k ? (k+1)+"e" : "1re")+" année");
+  /* Le programme saisi année par année dans le back-office fait foi ; à défaut,
+     les cours sont répartis à parts égales. */
   const per = Math.max(1, Math.ceil(f.cours.length/lab.length));
-  const annees = lab.map((l,k)=>[l, f.cours.slice(k*per,(k+1)*per)]).filter(a=>a[1].length);
-  if(f.stage) annees[annees.length-1][1].push("Stage en entreprise ("+f.stage+" mois)");
+  const annees = lab.map((l,k)=>[l, f.programme ? (f.programme[k]||[]).slice() : f.cours.slice(k*per,(k+1)*per)]).filter(a=>a[1].length);
+  if(f.stage && annees.length) annees[annees.length-1][1].push("Stage en entreprise ("+f.stage+" mois)");
   return annees;
 }
-function mkForm(o){ return Object.assign({}, o, {annees: buildAnnees(o)}); }
+/* Les séries admises sont une liste ; l'ancien format (« BCDG ») est encore accepté. */
+function mkForm(o){
+  const f = Object.assign({}, o, {series: Array.isArray(o.series) ? o.series : String(o.series||"").split("")});
+  f.annees = buildAnnees(f);
+  return f;
+}
 
-const DB = store.get("kelasi-db", null);
-if(DB && DB.inst){ for(const k in DB.inst){ if(INST[k]) Object.assign(INST[k], DB.inst[k]); } }
-let F = (DB && DB.forms && DB.forms.length) ? DB.forms.map(mkForm)
-  : RAW.map(r=>{ const t=r; return mkForm({id:t[0],inst:t[1],dom:t[2],nom:t[3],dip:t[4],duree:t[5],frais:t[6],series:t[7],soir:!!t[8],stage:t[9],tranches:!!t[10],jobs:t[11],cours:t[12]}); });
+
+
+/* Le back-office, ouvert dans le même navigateur, fait foi dès qu'il a enregistré
+   quelque chose : instituts, formations publiées et diplômes viennent de lui. */
+const jour = d => /^\d{4}-\d{2}-\d{2}$/.test(d||"") ? new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"}) : (d||"");
+const BO = store.get("orienta-bo", null);
+/* Domaines d'insertion : ceux du back-office remplacent la liste de démonstration. */
+if(BO && BO.domaines){
+  DOMAINES.length = 0; DOMAINES.push(...BO.domaines);
+  for(const k in DOM) delete DOM[k];
+  for(const x of DOMAINES) DOM[x.id] = x;
+}
+if(BO && BO.inst){
+  for(const k in INST) delete INST[k];
+  for(const k in BO.inst) INST[k] = Object.assign({}, BO.inst[k], {rentree:jour(BO.inst[k].rentree), clot:jour(BO.inst[k].clot)});
+}
+if(BO && BO.dips){ DIPS.length = 0; DIPS.push(...BO.dips); }
+/* Séries du bac : référentiel du back-office, sinon les séries de démonstration. */
+const SERIES = BO && BO.series ? BO.series : [["A","Lettres"],["B","Économie"],["C","Maths-Physique"],["D","Sciences"],["E","Technique"],["F","Technique ind."],["G","Tertiaire"]].map(p=>({nom:p[0], lib:p[1]}));
+const ans = n => n+" an"+(n>1?"s":"");
+let F = (BO && BO.formes
+  ? Object.values(BO.formes).filter(f=>f.statut==="publiee" && INST[f.inst] && DOM[f.dom])
+  : RAW.map(t=>({id:t[0],inst:t[1],dom:t[2],nom:t[3],dip:t[4],duree:t[5],frais:t[6],series:t[7],soir:!!t[8],stage:t[9],tranches:!!t[10],jobs:t[11],cours:t[12]}))
+).map(mkForm);
+
+/* Durées réellement proposées : elles viennent des diplômes, pas d'une liste figée. */
+const DUREES = () => [...new Set(F.map(f=>f.duree))].sort((a,b)=>a-b);
 
 let METIERS = [];
 function rebuildDerived(){ METIERS = [...new Set(F.flatMap(f=>f.jobs))].sort((a,b)=>a.localeCompare(b,"fr")); }
 rebuildDerived();
-function saveDB(){ store.set("kelasi-db", {inst:INST, forms:F.map(f=>{const o={}; for(const k in f){ if(k!=="annees") o[k]=f[k]; } return o;})}); rebuildDerived(); }
 
 /* ---------- État ---------- */
-const fresh = () => ({q:"",cat:"",metiers:[],dips:[],durees:[],budget:MAXF,arrondissements:[],serie:"",soir:false,stage:false,tranches:false,sort:"pert",fav:false});
+const fresh = () => ({q:"",cat:"",metiers:[],dips:[],durees:[],budget:MAXF,arrondissements:[],serie:"",soir:false,stage:false,tranches:false,sort:"pert",fav:false,vue:"inst"});
 const S = fresh();
-let favs = new Set(store.get("kelasi-favs",[]));
-let V = store.get("kelasi-visits",{});       /* popularité — compatible avec l'accès anonyme */
-let REC = store.get("kelasi-recent",[]);      /* consultées récemment */
-let ADMIN = !!store.get("kelasi-admin",false);
-const ADM = {edit:null};
+let favs = new Set(store.get("orienta-favs",[]));
+let V = store.get("orienta-visits",{});       /* popularité — compatible avec l'accès anonyme */
+let REC = store.get("orienta-recent",[]);      /* consultées récemment */
 
 function track(id){
-  V[id] = (V[id]||0)+1; store.set("kelasi-visits",V);
-  REC = [id].concat(REC.filter(x=>x!==id)).slice(0,8); store.set("kelasi-recent",REC);
+  V[id] = (V[id]||0)+1; store.set("orienta-visits",V);
+  REC = [id].concat(REC.filter(x=>x!==id)).slice(0,8); store.set("orienta-recent",REC);
 }
 
 function matches(f, skip){
@@ -468,10 +480,10 @@ function matches(f, skip){
   if(skip!=="metiers" && S.metiers.length && !S.metiers.some(m=>f.jobs.includes(m))) return false;
   if(skip!=="dips" && S.dips.length && !S.dips.includes(f.dip)) return false;
   if(skip!=="durees" && S.durees.length && !S.durees.includes(f.duree)) return false;
-  if(f.frais > S.budget) return false;
+  if(S.budget<MAXF && f.frais > S.budget) return false;
   if(skip!=="arrondissements" && S.arrondissements.length && !S.arrondissements.includes(i.arr)) return false;
-  if(S.serie && f.series && !f.series.includes(S.serie)) return false;
-  if(S.serie && !f.series) return false;
+  /* Sans série rattachée, une formation est ouverte à toutes les séries, sauf un Master (post-licence). */
+  if(S.serie && !(f.series.length ? f.series.includes(S.serie) : f.dip!=="Master")) return false;
   if(S.soir && !f.soir) return false;
   if(S.stage && !f.stage) return false;
   if(S.tranches && !f.tranches) return false;
@@ -485,6 +497,26 @@ function results(){
   if(S.sort==="duree") r.sort((a,b)=>a.duree-b.duree||a.frais-b.frais);
   return r;
 }
+/* Instituts à afficher : ceux qui ont au moins une formation correspondant aux
+   filtres ; sans filtre de formation, tous les instituts (liste exhaustive). */
+function instResults(){
+  const formOnly = S.cat||S.fav||S.metiers.length||S.dips.length||S.durees.length||S.budget<MAXF||S.serie||S.soir||S.stage||S.tranches;
+  const words = norm(S.q).split(/\s+/).filter(Boolean);
+  return Object.keys(INST).filter(id=>{
+    const i = INST[id];
+    if(F.some(f=>f.inst===id && matches(f))) return true;
+    if(formOnly) return false;
+    if(S.arrondissements.length && !S.arrondissements.includes(i.arr)) return false;
+    const hay = norm([i.nom,i.sigle,i.arr].join(" "));
+    return words.every(w=>hay.includes(w));
+  });
+}
+function pick(key, val){
+  const save = S[key];
+  S[key] = [val];
+  const r = F.filter(f=>matches(f));
+  S[key] = save; return r;
+}
 const nActive = () => S.metiers.length+S.dips.length+S.durees.length+S.arrondissements.length+(S.budget<MAXF)+(!!S.serie)+S.soir+S.stage+S.tranches;
 function countFor(key, val){
   const save = S[key];
@@ -493,10 +525,14 @@ function countFor(key, val){
   S[key] = save; return n;
 }
 
-/* ---------- Badge agrément (règle métier n°3) ---------- */
+/* ---------- Badge agrément (EX-05 / EX-14) : badge bleu si agréé, nom seul sinon ---------- */
 const agb = i => (i.ag && i.ag!=="en cours")
   ? '<span class="agb">'+icon("check")+'Agréé · '+esc(i.ag)+'</span>'
-  : '<span class="agb p">Agrément en cours de vérification</span>';
+  : '';
+const niv = k => (k ? (k+1)+"e" : "1re")+" année";
+const tarifsTxt = f => (f.tarifs && new Set(f.tarifs).size>1) ? f.tarifs.map((v,k)=>niv(k)+" : "+fcfa(v)).join("<br>") : fcfa(f.frais);
+const admission = f => [f.series.length ? "Bac série"+(f.series.length>1?"s":"")+" "+f.series.join(", ") : (f.dip==="Master" ? "Licence dans le domaine" : "Bac toutes séries"), f.admission].filter(Boolean).join(" · ");
+const photo = i => i.logo ? '<img src="'+esc(i.logo)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' : '';
 
 const waLink = (i, msg) => "https://wa.me/"+i.wa+"?text="+encodeURIComponent(msg);
 const mailLink = (i, sujet) => "mailto:"+i.mail+"?subject="+encodeURIComponent(sujet);
@@ -513,29 +549,54 @@ function card(f){
     + '<button class="heart" type="button" data-fav="'+f.id+'" aria-pressed="'+on+'" aria-label="'+(on?"Retirer des":"Ajouter aux")+' favoris"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg></button>'
     + '<a href="#f-'+f.id+'" style="text-decoration:none;display:flex;flex-direction:column;gap:10px">'
     + '<div style="position:relative">'+cover(f)+'<span class="dip" style="position:absolute;left:12px;top:12px;background:#fff;color:#14201B;font-size:13px;font-weight:800;padding:5px 10px;border-radius:99px">'+esc(f.dip)+'</span></div>'
-    + '<div class="t"><h3>'+esc(f.nom)+'</h3><span class="dur">'+f.duree+' ans</span></div>'
+    + '<div class="t"><h3>'+esc(f.nom)+'</h3><span class="dur">'+ans(f.duree)+'</span></div>'
     + '<p class="meta">'+esc(i.nom)+' · '+esc(i.arr)+'</p>'
     + '<div style="margin-top:-6px">'+agb(i)+'</div>'
-    + '<p class="jobs"><b>Métiers :</b> '+f.jobs.map(esc).join(", ")+'</p>'
+    + '<p class="jobs"><b>Débouchés :</b> '+f.jobs.map(esc).join(", ")+'</p>'
     + '<div class="tags">'+(f.soir?'<span class="tag">Cours du soir</span>':"")+(f.stage?'<span class="tag">Stage '+f.stage+' mois</span>':"")+(f.tranches?'<span class="tag">Paiement en tranches</span>':"")+'</div>'
     + '<p class="price"><b class="num">'+fcfa(f.frais)+'</b> par an</p>'
     + '</a></div>';
 }
+const pl = (n, w) => n+" "+w+(n>1?"s":"");
+function instCard(id){
+  const i = INST[id];
+  const all = F.filter(f=>f.inst===id), hit = all.filter(f=>matches(f));
+  const forms = hit.length ? hit : all;
+  const dips = [...new Set(forms.map(f=>f.dip))];
+  return '<div class="fcard">'
+    + '<a href="#i-'+id+'" style="text-decoration:none;display:flex;flex-direction:column;gap:10px">'
+    + '<div class="cover" style="background:'+i.c+'"><div class="pat"></div><div class="blob"></div>'+(photo(i) || '<span class="big-sigle">'+esc(i.sigle)+'</span>')+'</div>'
+    + '<div class="t"><h3>'+esc(i.nom)+'</h3></div>'
+    + '<p class="meta">'+esc(i.arr)+', Brazzaville</p>'
+    + '<div style="margin-top:-6px">'+agb(i)+'</div>'
+    + '<p class="jobs"><b>'+pl(forms.length,"formation")+(forms.length?" :":"")+'</b> '+dips.map(esc).join(", ")+'</p>'
+    + '<p class="price">Inscription <b class="num">'+fcfa(i.insc)+'</b></p>'
+    + '</a></div>';
+}
+const choice = (attr, ic, name, forms) => '<button class="job" type="button" data-'+attr+'="'+esc(name)+'">'+icon(ic)+'<span>'+esc(name)+'<small>'+(attr==="vdip" ? ans(forms[0].duree)+' · ' : "")+pl(forms.length,"formation")+' · '+pl(new Set(forms.map(f=>f.inst)).size,"institut")+'</small></span></button>';
 const mini = f => '<a class="mini" href="#f-'+f.id+'"><b>'+esc(f.nom)+'</b><small>'+esc(f.dip)+' · '+esc(INST[f.inst].sigle)+' · '+fcfa(f.frais)+'/an</small></a>';
 
 /* ---------- Accueil (US-09) ---------- */
+function accessHTML(){
+  const a = [["inst","building","Instituts",Object.keys(INST).length],["form","cap","Formations",F.length],["dip","award","Diplômes",DIPS.length],["deb","brief","Débouchés",METIERS.length]];
+  return '<div class="access" role="group" aria-label="Parcourir">'
+    + a.map(x=>'<button class="acc" type="button" data-vue="'+x[0]+'" aria-pressed="'+(S.vue===x[0])+'">'+icon(x[1])+'<span><b>'+x[2]+'</b><small>'+x[3]+' à Brazzaville</small></span></button>').join("")
+    + '</div>';
+}
 function pageHome(){
   const aOpts = ARR.map(a=>'<option'+(S.arrondissements.length===1&&S.arrondissements[0]===a?" selected":"")+'>'+a+'</option>').join("");
   const dOpts = DIPS.map(d=>'<option'+(S.dips.length===1&&S.dips[0]===d?" selected":"")+'>'+d+'</option>').join("");
   return '<section class="hero"><div class="wrap">'
-    + '<h1>Quel métier veux-tu faire&nbsp;?</h1>'
-    + '<p>Trouve la formation qui y mène dans les instituts privés de Brazzaville — diplômes, frais, agréments et contacts, au même endroit.</p>'
+    + '<h1>Trouve ton institut à Brazzaville</h1>'
+    + '<p>Instituts privés, formations, diplômes et débouchés : tout au même endroit, sans te déplacer.</p>'
     + '<form class="search" id="search" autocomplete="off" role="search">'
-    + '<div class="sf q"><label for="s-q">Formation ou métier</label><input id="s-q" placeholder="ex. infirmier, comptable, développeur" value="'+esc(S.q)+'"><div class="sugg" id="sugg" hidden></div></div>'
+    + '<div class="sf q"><label for="s-q">Institut, filière ou diplôme</label><input id="s-q" placeholder="ex. ISGF, comptabilité, BTS" value="'+esc(S.q)+'"><div class="sugg" id="sugg" hidden></div></div>'
     + '<div class="sf"><label for="s-arr">Arrondissement</label><select id="s-arr"><option value="">Tout Brazzaville</option>'+aOpts+'</select></div>'
     + '<div class="sf dip"><label for="s-dip">Diplôme</label><select id="s-dip"><option value="">Tous</option>'+dOpts+'</select></div>'
     + '<button class="go" type="submit">'+icon("search")+'<span>Rechercher</span></button>'
-    + '</form></div></section>'
+    + '</form>'
+    + accessHTML()
+    + '</div></section>'
     + '<nav class="cats" aria-label="Domaines"><div class="wrap">'
     + '<button class="cat" type="button" data-cat="" aria-pressed="'+(!S.cat)+'">'+icon("all")+'Tout</button>'
     + DOMAINES.map(d=>'<button class="cat" type="button" data-cat="'+d.id+'" aria-pressed="'+(S.cat===d.id)+'">'+icon(d.id)+esc(d.nom)+'</button>').join("")
@@ -556,7 +617,6 @@ function pageHome(){
     + '<div class="grid" id="grid"></div>'
     + '<div class="sec" id="recent-sec" hidden><h2>Consultées récemment</h2><div class="minigrid" style="margin-top:6px"></div></div>'
     + '<div class="sec" id="pop-sec" hidden><h2>Formations les plus visitées</h2><div class="minigrid" style="margin-top:6px"></div></div>'
-    + '<div class="cta"><div><h2>Vous dirigez un institut&nbsp;?</h2><p>Présentez vos formations aux bacheliers gratuitement, sans avoir besoin d\'un site web. Notre équipe s\'occupe de la fiche avec vous.</p></div><a class="btn" href="#referencer">Référencer mon institut</a></div>'
     + '</div></div>'
     + '<div class="scrim" id="scrim" hidden></div>';
 }
@@ -565,25 +625,25 @@ function filtersHTML(){
   const mq = norm((document.getElementById("mfind")&&document.getElementById("mfind").value)||"");
   const jobs = METIERS.filter(m=>!mq || norm(m).includes(mq));
   return '<div class="fhead"><h2>Filtres</h2><button class="clear" type="button" data-clear>Tout effacer</button></div>'
-    + '<div class="fgroup"><h3>Métier visé</h3><p class="hint">Les formations qui mènent à ces débouchés.</p>'
-    + '<input class="mfind" id="mfind" placeholder="Chercher un métier" value="'+esc((document.getElementById("mfind")&&document.getElementById("mfind").value)||"")+'">'
-    + '<div class="mlist" id="mlist">'+(jobs.map(m=>{const n=countFor("metiers",m);return '<label class="check"><input type="checkbox" data-arr="metiers" value="'+esc(m)+'"'+(S.metiers.includes(m)?" checked":"")+'>'+esc(m)+'<span class="n">'+n+'</span></label>';}).join("") || '<p class="hint" style="margin:0">Aucun métier trouvé.</p>')+'</div></div>'
-    + '<div class="fgroup"><h3>Diplôme préparé</h3><div class="pills">'+DIPS.map(d=>'<button class="pill" type="button" data-parr="dips" data-v="'+d+'" aria-pressed="'+(S.dips.includes(d))+'">'+d+'</button>').join("")+'</div></div>'
-    + '<div class="fgroup"><h3>Durée des études</h3><div class="pills">'+[2,3].map(d=>'<button class="pill" type="button" data-parr="durees" data-v="'+d+'" aria-pressed="'+(S.durees.includes(d))+'">'+d+' ans</button>').join("")+'</div></div>'
-    + '<div class="fgroup"><h3>Budget par an</h3><input class="range" id="budget" type="range" min="'+MINF+'" max="'+MAXF+'" step="10000" value="'+S.budget+'" aria-label="Budget maximum par an">'
-    + '<div class="rangeval"><span>Jusqu\'à</span><b id="bval">'+(S.budget>=MAXF?"Sans limite":fcfa(S.budget))+'</b></div></div>'
-    + '<div class="fgroup"><h3>Ma série du bac</h3><select class="plain" id="serie" aria-label="Série du bac"><option value="">Toutes les séries</option>'
-    + [["A","A (Lettres)"],["B","B (Économie)"],["C","C (Maths-Physique)"],["D","D (Sciences)"],["E","E (Technique)"],["F","F (Technique ind.)"],["G","G (Tertiaire)"]].map(p=>'<option value="'+p[0]+'"'+(S.serie===p[0]?" selected":"")+'>Série '+p[1]+'</option>').join("")
-    + '</select></div>'
     + '<div class="fgroup"><h3>Arrondissement</h3>'
     + ARR.map(a=>'<label class="check"><input type="checkbox" data-arr="arrondissements" value="'+a+'"'+(S.arrondissements.includes(a)?" checked":"")+'>'+a+'<span class="n">'+countFor("arrondissements",a)+'</span></label>').join("")
     + '</div>'
+    + '<div class="fgroup"><h3>Débouché visé</h3><p class="hint">Les formations qui mènent à ces débouchés.</p>'
+    + '<input class="mfind" id="mfind" placeholder="Chercher un débouché" value="'+esc((document.getElementById("mfind")&&document.getElementById("mfind").value)||"")+'">'
+    + '<div class="mlist" id="mlist">'+(jobs.map(m=>{const n=countFor("metiers",m);return '<label class="check"><input type="checkbox" data-arr="metiers" value="'+esc(m)+'"'+(S.metiers.includes(m)?" checked":"")+'>'+esc(m)+'<span class="n">'+n+'</span></label>';}).join("") || '<p class="hint" style="margin:0">Aucun débouché trouvé.</p>')+'</div></div>'
+    + '<div class="fgroup"><h3>Diplôme préparé</h3><div class="pills">'+DIPS.map(d=>'<button class="pill" type="button" data-parr="dips" data-v="'+d+'" aria-pressed="'+(S.dips.includes(d))+'">'+d+'</button>').join("")+'</div></div>'
+    + '<div class="fgroup"><h3>Durée des études</h3><div class="pills">'+DUREES().map(d=>'<button class="pill" type="button" data-parr="durees" data-v="'+d+'" aria-pressed="'+(S.durees.includes(d))+'">'+ans(d)+'</button>').join("")+'</div></div>'
+    + '<div class="fgroup"><h3>Budget par an</h3><input class="range" id="budget" type="range" min="'+MINF+'" max="'+MAXF+'" step="10000" value="'+S.budget+'" aria-label="Budget maximum par an">'
+    + '<div class="rangeval"><span>Jusqu\'à</span><b id="bval">'+(S.budget>=MAXF?"Sans limite":fcfa(S.budget))+'</b></div></div>'
+    + '<div class="fgroup"><h3>Ma série du bac</h3><select class="plain" id="serie" aria-label="Série du bac"><option value="">Toutes les séries</option>'
+    + SERIES.map(x=>'<option value="'+esc(x.nom)+'"'+(S.serie===x.nom?" selected":"")+'>Série '+esc(x.nom)+(x.lib?' ('+esc(x.lib)+')':"")+'</option>').join("")
+    + '</select></div>'
     + '<div class="fgroup" style="border-bottom:0"><h3>Organisation</h3>'
     + '<label class="toggle"><span>Cours du soir<small>Pour étudier en travaillant</small></span><input class="sw" type="checkbox" data-bool="soir"'+(S.soir?" checked":"")+'></label>'
     + '<label class="toggle"><span>Stage en entreprise<small>Inclus dans la formation</small></span><input class="sw" type="checkbox" data-bool="stage"'+(S.stage?" checked":"")+'></label>'
     + '<label class="toggle"><span>Paiement en plusieurs fois<small>Frais réglables par tranches</small></span><input class="sw" type="checkbox" data-bool="tranches"'+(S.tranches?" checked":"")+'></label>'
     + '</div>'
-    + '<div class="sheet-foot"><button class="clear" type="button" data-clear>Tout effacer</button><button class="btn" type="button" id="closef">Voir les formations</button></div>';
+    + '<div class="sheet-foot"><button class="clear" type="button" data-clear>Tout effacer</button><button class="btn" type="button" id="closef">Voir les résultats</button></div>';
 }
 
 function renderFilters(){
@@ -610,15 +670,30 @@ function renderGrid(){
   const g = document.getElementById("grid"); if(!g) return;
   const r = results();
   const catName = S.cat ? DOM[S.cat].nom : "";
-  document.getElementById("count").textContent = S.fav ? r.length+" formation"+(r.length>1?"s":"")+" en favoris"
-    : r.length+" formation"+(r.length>1?"s":"")+(catName?" en "+catName:"")+" à Brazzaville";
+  let label = "", html = "";
+  if(S.vue==="inst"){
+    const li = instResults();
+    label = pl(li.length,"institut")+(catName?" en "+catName:"")+" à Brazzaville";
+    html = li.map(instCard).join("");
+  } else if(S.vue==="dip" || S.vue==="deb"){
+    const dip = S.vue==="dip";
+    const li = (dip?DIPS:METIERS).map(v=>[v, pick(dip?"dips":"metiers", v)]).filter(x=>x[1].length);
+    label = dip ? pl(li.length,"diplôme")+" préparé"+(li.length>1?"s":"")+" à Brazzaville" : pl(li.length,"débouché")+(catName?" en "+catName:"");
+    if(li.length) html = '<div class="jobgrid" style="grid-column:1/-1">'+li.map(x=>choice(dip?"vdip":"vdeb", dip?"award":"brief", x[0], x[1])).join("")+'</div>';
+  } else {
+    label = S.fav ? pl(r.length,"formation")+" en favoris" : pl(r.length,"formation")+(catName?" en "+catName:"")+" à Brazzaville";
+    html = r.map(card).join("");
+  }
+  document.getElementById("count").textContent = label;
+  document.getElementById("sort").hidden = S.vue!=="form";
+  document.querySelectorAll("[data-vue]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.vue===S.vue));
   const n = nActive(); document.getElementById("nf").textContent = n?"("+n+")":"";
   const tags = [];
   if(S.q) tags.push(["q",null,"« "+S.q+" »"]);
   if(S.fav) tags.push(["fav",null,"Mes favoris"]);
   S.metiers.forEach(v=>tags.push(["metiers",v,v]));
   S.dips.forEach(v=>tags.push(["dips",v,v]));
-  S.durees.forEach(v=>tags.push(["durees",v,v+" ans"]));
+  S.durees.forEach(v=>tags.push(["durees",v,ans(v)]));
   S.arrondissements.forEach(v=>tags.push(["arrondissements",v,v]));
   if(S.budget<MAXF) tags.push(["budget",null,"≤ "+fcfa(S.budget)]);
   if(S.serie) tags.push(["serie",null,"Série "+S.serie]);
@@ -635,7 +710,8 @@ function renderGrid(){
     if(k==="fav") syncFav();
     update();
   });
-  g.innerHTML = r.length ? r.map(card).join("") : '<div class="empty"><h3>Aucune formation ne correspond</h3><p>Retire un filtre ou élargis ton budget pour voir plus de résultats.</p><button class="btn line" type="button" data-clear>Effacer tous les filtres</button></div>';
+  /* EX-13 : recherche vide ou mal saisie */
+  g.innerHTML = html || '<div class="empty"><h3>Résultat introuvable</h3><p>Vérifie l\'orthographe ou retire un filtre pour voir plus de résultats.</p><button class="btn line" type="button" data-clear>Effacer tous les filtres</button></div>';
 }
 
 function update(){ renderGrid(); renderFilters(); renderExtra(); }
@@ -646,30 +722,30 @@ function pageDetail(f){
   const others = F.filter(x=>x.inst===f.inst && x.id!==f.id);
   const similar = F.filter(x=>x.dom===f.dom && x.inst!==f.inst).slice(0,3);
   const on = favs.has(f.id);
-  const series = f.series ? f.series.split("").join(", ") : "";
   const waMsg = "Bonjour "+i.sigle+", je suis bachelier(ère) et je m'intéresse à la formation « "+f.nom+" ». Pouvez-vous me donner plus d'informations (admission, frais, places disponibles) ?";
   return '<div class="wrap detail">'
-    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Toutes les formations</a>'
+    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Retour aux résultats</a>'
     + '<div class="dtitle"><div><h1>'+esc(f.nom)+'</h1>'
-    + '<p class="sub"><b>'+esc(f.dip)+'</b> · '+f.duree+' ans · <a class="ilnk" href="#i-'+f.inst+'">'+esc(i.nom)+'</a> · '+esc(i.arr)+'</p></div>'
+    + '<p class="sub"><b>'+esc(f.dip)+'</b> · '+ans(f.duree)+' · <a class="ilnk" href="#i-'+f.inst+'">'+esc(i.nom)+'</a> · '+esc(i.arr)+'</p></div>'
     + '<button class="lnk" type="button" data-fav="'+f.id+'" aria-pressed="'+on+'" style="text-decoration:underline">'+(on?"♥ Dans mes favoris":"♡ Ajouter aux favoris")+'</button></div>'
     + '<div class="dcover" style="background:'+DOM[f.dom].c+'"><div style="width:100%;height:100%">'+cover(f).replace('aspect-ratio:20/19','aspect-ratio:auto').replace('class="cover"','class="cover" style="background:none"')+'</div></div>'
     + '<div class="dgrid"><div class="dmain">'
+    + (f.desc ? '<section><h2>Présentation</h2><p style="max-width:70ch">'+esc(f.desc)+'</p></section>' : "")
     + '<section class="highlights">'
-    + '<div class="hl">'+icon("cap")+'<div><b>'+esc(f.dip)+' en '+f.duree+' ans</b><span>'+(f.dip==="Master"?"Accessible après une Licence dans le domaine":"Accessible après le bac, séries "+series)+'</span></div></div>'
+    + '<div class="hl">'+icon("cap")+'<div><b>'+esc(f.dip)+' en '+ans(f.duree)+'</b><span>'+esc(admission(f))+'</span></div></div>'
     + '<div class="hl">'+icon("brief")+'<div><b>'+(f.stage?'Stage de '+f.stage+' mois en entreprise':"Projet de fin d'études")+'</b><span>'+(f.stage?"Organisé par l'institut en dernière année":"Réalisé avec un encadrant de l'institut")+'</span></div></div>'
     + '<div class="hl">'+icon(f.soir?"moon":"clock")+'<div><b>'+(f.soir?"Cours du jour ou du soir":"Cours en journée")+'</b><span>'+(f.soir?"Tu peux étudier tout en travaillant":"Du lundi au vendredi")+'</span></div></div>'
     + '<div class="hl">'+icon("cash")+'<div><b>'+(f.tranches?"Paiement en plusieurs fois":"Paiement à l'inscription")+'</b><span>'+(f.tranches?"Scolarité réglable en plusieurs tranches":"Scolarité réglée en une fois")+'</span></div></div>'
     + '</section>'
-    + '<section><h2>Les métiers après cette formation</h2><div class="jobgrid">'+f.jobs.map(j=>'<button class="job" type="button" data-job="'+esc(j)+'">'+icon("brief")+esc(j)+'</button>').join("")+'</div>'
-    + '<p style="color:var(--muted);font-size:14px;margin-top:10px">Touche un métier pour voir toutes les formations qui y mènent.</p></section>'
+    + '<section><h2>Les débouchés après cette formation</h2><div class="jobgrid">'+f.jobs.map(j=>'<button class="job" type="button" data-job="'+esc(j)+'">'+icon("brief")+esc(j)+'</button>').join("")+'</div>'
+    + '<p style="color:var(--muted);font-size:14px;margin-top:10px">Touche un débouché pour voir toutes les formations qui y mènent.</p></section>'
     + '<section><h2>Ce que tu vas apprendre</h2><div class="years">'+f.annees.map(a=>'<div class="year"><h3>'+esc(a[0])+'</h3><ul>'+a[1].map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul></div>').join("")+'</div></section>'
     + '<section><h2>Dossier d\'inscription</h2><ul class="checklist">'+((f.dip==="Master"?["Copie de la Licence et relevés de notes","Curriculum vitae","Lettre de motivation","2 photos d'identité"]:DOSSIER).map(x=>'<li>'+x+'</li>').join(""))+(f.dom==="sante"?'<li>Certificat médical et carnet de vaccination</li>':"")+'</ul></section>'
     + '<section><h2>L\'institut</h2><div class="instbox"><div class="instlogo" style="background:'+i.c+'">'+esc(i.sigle)+'</div>'
     + '<div><b style="font-size:18px"><a class="ilnk" href="#i-'+f.inst+'">'+esc(i.nom)+'</a></b><div style="margin-top:6px">'+agb(i)+'</div>'
     + '<p style="margin-top:6px">'+icon("pin").replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')+' '+esc(i.adr)+', Brazzaville</p></div></div>'
     + '<p style="margin-top:14px;max-width:64ch">'+esc(i.desc)+'</p>'
-    + (others.length?'<h3 style="margin-top:24px;font-size:16px">Autres formations de '+esc(i.sigle)+'</h3><div class="minigrid">'+others.map(o=>'<a class="mini" href="#f-'+o.id+'"><b>'+esc(o.nom)+'</b><small>'+esc(o.dip)+' · '+o.duree+' ans · '+fcfa(o.frais)+'/an</small></a>').join("")+'</div>':"")
+    + (others.length?'<h3 style="margin-top:24px;font-size:16px">Autres formations de '+esc(i.sigle)+'</h3><div class="minigrid">'+others.map(o=>'<a class="mini" href="#f-'+o.id+'"><b>'+esc(o.nom)+'</b><small>'+esc(o.dip)+' · '+ans(o.duree)+' · '+fcfa(o.frais)+'/an</small></a>').join("")+'</div>':"")
     + '</section>'
     + (similar.length?'<section style="border-bottom:0"><h2>Formations similaires ailleurs</h2><div class="minigrid">'+similar.map(o=>'<a class="mini" href="#f-'+o.id+'"><b>'+esc(o.nom)+'</b><small>'+esc(INST[o.inst].sigle)+' · '+esc(INST[o.inst].arr)+' · '+fcfa(o.frais)+'/an</small></a>').join("")+'</div></section>':"")
     + '</div>'
@@ -695,13 +771,16 @@ function pageDetail(f){
 function pageInst(id){
   const i = INST[id];
   const forms = F.filter(f=>f.inst===id);
+  const dips = [...new Set(forms.map(f=>f.dip))];
+  const jobs = [...new Set(forms.flatMap(f=>f.jobs))].sort((a,b)=>a.localeCompare(b,"fr"));
   return '<div class="wrap detail">'
-    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Toutes les formations</a>'
+    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Retour aux résultats</a>'
     + '<div class="dtitle"><div><h1>'+esc(i.nom)+'</h1>'
-    + '<p class="sub"><b>'+esc(i.sigle)+'</b> · '+esc(i.arr)+', Brazzaville · '+agb(i)+'</p></div></div>'
-    + '<div class="dcover" style="background:'+i.c+'"><span class="big-sigle">'+esc(i.sigle)+'</span></div>'
+    + '<p class="sub"><b>'+esc(i.sigle)+'</b> · '+esc(i.arr)+', Brazzaville'+(agb(i)?' · '+agb(i):'')+'</p></div></div>'
+    + '<div class="dcover" style="background:'+i.c+';position:relative">'+(photo(i) || '<span class="big-sigle">'+esc(i.sigle)+'</span>')+'</div>'
     + '<div class="dmain" style="margin-top:36px">'
     + '<section><h2>Présentation</h2><p style="max-width:70ch">'+esc(i.desc)+'</p></section>'
+    + (i.avantages && i.avantages.length ? '<section><h2>Avantages</h2><ul class="checklist">'+i.avantages.map(a=>'<li>'+esc(a)+'</li>').join("")+'</ul></section>' : "")
     + '<section><h2>Coordonnées et inscriptions</h2><div class="lines" style="max-width:560px">'
     + '<div><span>Adresse</span><span>'+esc(i.adr)+', Brazzaville</span></div>'
     + '<div><span>Téléphone</span><span class="num">'+esc(i.tel)+'</span></div>'
@@ -713,118 +792,29 @@ function pageInst(id){
     + '<div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">'
     + '<a class="btn wa" href="'+waLink(i,"Bonjour "+i.sigle+", je souhaite obtenir des informations sur vos formations.")+'" target="_blank" rel="noopener">WhatsApp — message pré-rempli</a>'
     + '<a class="btn line" href="'+mailLink(i,"Demande d'informations")+'">Écrire par e-mail</a>'
+    + '<a class="btn line" href="tel:'+esc(i.tel.replace(/\s/g,""))+'">Appeler</a>'
     + '</div></section>'
+    + (forms.length ? '<section><h2>Diplômes délivrés et débouchés</h2><div class="pills">'+dips.map(d=>'<span class="pill" style="cursor:default">'+esc(d)+'</span>').join("")+'</div>'
+      + '<div class="jobgrid" style="margin-top:16px">'+jobs.map(j=>'<button class="job" type="button" data-job="'+esc(j)+'">'+icon("brief")+esc(j)+'</button>').join("")+'</div></section>'
+      + '<section><h2>Tarifs et conditions d\'admission</h2><div class="tblwrap"><table class="tbl"><thead><tr><th>Formation</th><th>Diplôme</th><th>Durée</th><th>Frais par an</th><th>Admission</th></tr></thead><tbody>'
+      + forms.map(f=>'<tr><td><a class="ilnk" href="#f-'+f.id+'">'+esc(f.nom)+'</a></td><td>'+esc(f.dip)+'</td><td>'+ans(f.duree)+'</td><td class="num">'+tarifsTxt(f)+'</td><td>'+esc(admission(f))+'</td></tr>').join("")
+      + '</tbody></table></div></section>' : "")
     + '<section style="border-bottom:0"><h2>Formations proposées ('+forms.length+')</h2><div class="grid" style="margin-top:8px">'+(forms.length?forms.map(card).join(""):'<div class="empty"><h3>Aucune formation publiée</h3><p>La Squad n\'a pas encore saisi les formations de cet institut.</p></div>')+'</div></section>'
     + '</div></div>';
-}
-
-/* ---------- Référencer ---------- */
-function pageRef(){
-  return '<div class="wrap"><div class="ref">'
-    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Retour aux formations</a>'
-    + '<div><h1>Faites connaître votre institut aux futurs étudiants</h1>'
-    + '<p class="lead" style="margin-top:12px">Chaque année, des milliers de bacheliers cherchent leur formation. Avec Kelasi, ils trouvent la vôtre sans que vous ayez besoin d\'un site web.</p></div>'
-    + '<div class="perks">'
-    + '<div class="perk"><b>Gratuit</b><span>Aucun frais pour publier votre fiche et vos formations.</span></div>'
-    + '<div class="perk"><b>On s\'en occupe</b><span>Notre équipe passe vous voir, vérifie votre agrément et rédige la fiche avec vous.</span></div>'
-    + '<div class="perk"><b>Des contacts directs</b><span>Les bacheliers vous contactent par WhatsApp, téléphone ou e-mail depuis la fiche.</span></div>'
-    + '</div>'
-    + '<form class="refform" id="refform">'
-    + '<h2>Demander un rendez-vous</h2>'
-    + '<div class="fld"><label for="r-nom">Nom de l\'institut</label><input id="r-nom" required></div>'
-    + '<div class="two"><div class="fld"><label for="r-qua">Arrondissement</label><select id="r-qua">'+ARR.map(a=>'<option>'+a+'</option>').join("")+'<option>Autre</option></select></div>'
-    + '<div class="fld"><label for="r-tel">Téléphone</label><input id="r-tel" required inputmode="tel" placeholder="+242 …"></div></div>'
-    + '<div class="fld"><label for="r-resp">Nom du responsable</label><input id="r-resp" required></div>'
-    + '<div class="fld"><label for="r-ag">Numéro d\'agrément ministériel (si vous en avez un)</label><input id="r-ag" placeholder="ex. N° 047/MESRTI/2009"></div>'
-    + '<button class="btn" type="submit">Envoyer la demande</button>'
-    + '<div class="ok" id="ref-ok" hidden></div>'
-    + '</form></div></div>';
 }
 
 /* ---------- À propos ---------- */
 function pageAbout(){
   return '<div class="wrap"><div class="about">'
-    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Retour aux formations</a>'
+    + '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Retour à l\'accueil</a>'
     + '<h1>Faire le bon choix d\'orientation, sans courir la ville</h1>'
-    + '<p class="lead">Kelasi centralise l\'information sur les instituts privés de Brazzaville pour que chaque bachelier choisisse en connaissance de cause.</p>'
+    + '<p class="lead">Orienta centralise l\'information sur les instituts privés de Brazzaville pour que chaque bachelier choisisse en connaissance de cause.</p>'
     + '<section><h2>Le problème</h2><p>Chaque année, des milliers de jeunes Congolais obtiennent leur baccalauréat et doivent choisir un institut supérieur. Mais une grande partie des instituts privés n\'a pas de site web : les familles doivent se déplacer d\'un établissement à l\'autre ou s\'en remettre au bouche-à-oreille, sans certitude sur les formations réellement proposées, les diplômes délivrés ou les frais pratiqués.</p></section>'
-    + '<section><h2>Ce que fait Kelasi</h2><p><b>Une fiche claire par formation</b> : diplôme préparé, durée, programme par année, métiers visés, frais détaillés et calendrier d\'inscription. <b>Un badge d\'agrément</b> affiché avec son numéro officiel pour chaque institut agréé. <b>Un contact direct</b> : WhatsApp, téléphone ou e-mail, sans créer de compte.</p></section>'
+    + '<section><h2>Ce que fait Orienta</h2><p><b>Une fiche claire par formation</b> : diplôme préparé, durée, programme par année, métiers visés, frais détaillés et calendrier d\'inscription. <b>Un badge d\'agrément</b> affiché avec son numéro officiel pour chaque institut agréé. <b>Un contact direct</b> : WhatsApp, téléphone ou e-mail, sans créer de compte.</p></section>'
     + '<section><h2>Pour qui&nbsp;?</h2><p><b>Pour les nouveaux bacheliers et leurs familles</b>, qui peuvent comparer les offres à distance, gratuitement et sans inscription. <b>Pour les instituts sérieux</b> sans site web, qui gagnent en visibilité auprès des futurs étudiants — notre équipe collecte et vérifie l\'information avec eux, gratuitement.</p></section>'
-    + '<section><h2>Notre engagement sur l\'information</h2><p>Chaque fiche est renseignée avec l\'institut lui-même et le numéro d\'agrément est recopié du document officiel communiqué par l\'établissement. Quand l\'agrément est en cours de vérification, il est affiché comme tel : nous ne publions jamais d\'information que nous ne pouvons pas sourcer. Les tarifs et calendriers sont ceux communiqués par l\'institut et restent susceptibles d\'évoluer : le secrétariat de l\'établissement reste la référence finale.</p></section>'
-    + '<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="#accueil">Voir les formations</a><a class="btn line" href="#referencer">Référencer mon institut</a></div>'
+    + '<section><h2>Notre engagement sur l\'information</h2><p>Chaque fiche est renseignée avec l\'institut lui-même et le numéro d\'agrément est recopié du document officiel communiqué par l\'établissement. Un institut non agréé apparaît sans badge : nous ne publions jamais d\'information que nous ne pouvons pas sourcer. Les tarifs et calendriers sont ceux communiqués par l\'institut et restent susceptibles d\'évoluer : le secrétariat de l\'établissement reste la référence finale.</p></section>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="#accueil">Voir les instituts</a></div>'
     + '</div></div>';
-}
-
-/* ---------- Espace Squad (US-07 / US-08 / US-12) ---------- */
-function pageAdmin(){
-  const head = '<a class="back" href="#accueil">'+icon("back").replace('<svg','<svg width="18" height="18"')+'Retour au site</a><h1>Espace Squad</h1>';
-  if(!ADMIN){
-    return '<div class="wrap adm">'+head
-      + '<form class="refform" id="li-form" style="max-width:420px">'
-      + '<div class="fld"><label for="li-u">Identifiant</label><input id="li-u" required autocomplete="username"></div>'
-      + '<div class="fld"><label for="li-p">Mot de passe</label><input id="li-p" type="password" required autocomplete="current-password"></div>'
-      + '<button class="btn" type="submit">Se connecter</button>'
-      + '<div class="err" id="li-err" hidden></div>'
-      + '<p style="color:var(--muted);font-size:13px">Démo : identifiant <b>squad</b>, mot de passe <b>kelasi2026</b>. L\'accès public, lui, reste totalement libre, sans compte (règle métier n°1).</p>'
-      + '</form></div>';
-  }
-  const nbEtab = Object.keys(INST).length;
-  const nbArr = new Set(Object.values(INST).map(i=>i.arr)).size;
-  const nbDom = new Set(F.map(f=>f.dom)).size;
-  const nbDip = new Set(F.map(f=>f.dip)).size;
-  let edit = "";
-  if(ADM.edit && ADM.edit.type==="inst"){
-    const i = INST[ADM.edit.id];
-    edit = '<form class="refform" id="inst-form" style="margin-bottom:26px"><h2>Modifier — '+esc(i.sigle)+'</h2>'
-      + '<div class="fld"><label>Nom complet</label><input id="e-nom" value="'+esc(i.nom)+'" required></div>'
-      + '<div class="two"><div class="fld"><label>Sigle</label><input id="e-sigle" value="'+esc(i.sigle)+'" required></div>'
-      + '<div class="fld"><label>Arrondissement</label><select id="e-arr">'+ARR.map(a=>'<option'+(i.arr===a?" selected":"")+'>'+a+'</option>').join("")+'</select></div></div>'
-      + '<div class="fld"><label>Adresse</label><input id="e-adr" value="'+esc(i.adr)+'"></div>'
-      + '<div class="two"><div class="fld"><label>Téléphone</label><input id="e-tel" value="'+esc(i.tel)+'"></div>'
-      + '<div class="fld"><label>WhatsApp (international, sans +)</label><input id="e-wa" value="'+esc(i.wa)+'"></div></div>'
-      + '<div class="two"><div class="fld"><label>E-mail</label><input id="e-mail" type="email" value="'+esc(i.mail)+'"></div>'
-      + '<div class="fld"><label>N° d\'agrément (« en cours » si non vérifié)</label><input id="e-ag" value="'+esc(i.ag)+'"></div></div>'
-      + '<div class="two"><div class="fld"><label>Frais d\'inscription (FCFA)</label><input id="e-insc" type="number" min="0" value="'+i.insc+'"></div>'
-      + '<div class="fld"><label>Clôture des inscriptions</label><input id="e-clot" value="'+esc(i.clot)+'"></div></div>'
-      + '<div class="fld"><label>Rentrée</label><input id="e-rentree" value="'+esc(i.rentree)+'"></div>'
-      + '<div class="fld"><label>Description</label><textarea id="e-desc">'+esc(i.desc)+'</textarea></div>'
-      + '<button class="btn" type="submit">Enregistrer</button> <button class="btn line" type="button" data-cancel>Annuler</button></form>';
-  }
-  if(ADM.edit && ADM.edit.type==="form"){
-    const f = ADM.edit.id ? F.find(x=>x.id===ADM.edit.id) : null;
-    const cur = f || {inst:Object.keys(INST)[0], dom:DOMAINES[0].id, dip:"BTS", duree:2, frais:400000, series:"ABCDG", soir:false, stage:0, tranches:false, jobs:[], cours:[]};
-    edit = '<form class="refform" id="form-form" style="margin-bottom:26px"><h2>'+(f?"Modifier":"Ajouter")+' une formation</h2>'
-      + '<div class="fld"><label>Intitulé</label><input id="fe-nom" value="'+esc(f?f.nom:"")+'" required></div>'
-      + '<div class="two"><div class="fld"><label>Institut</label><select id="fe-inst">'+Object.entries(INST).map(p=>'<option value="'+p[0]+'"'+(cur.inst===p[0]?" selected":"")+'>'+esc(p[1].sigle)+'</option>').join("")+'</select></div>'
-      + '<div class="fld"><label>Domaine</label><select id="fe-dom">'+DOMAINES.map(d=>'<option value="'+d.id+'"'+(cur.dom===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")+'</select></div></div>'
-      + '<div class="two"><div class="fld"><label>Diplôme</label><select id="fe-dip">'+DIPS.map(d=>'<option'+(cur.dip===d?" selected":"")+'>'+d+'</option>').join("")+'</select></div>'
-      + '<div class="fld"><label>Durée (années)</label><select id="fe-duree">'+[2,3].map(d=>'<option value="'+d+'"'+(cur.duree===d?" selected":"")+'>'+d+'</option>').join("")+'</select></div></div>'
-      + '<div class="two"><div class="fld"><label>Frais / an (FCFA)</label><input id="fe-frais" type="number" min="0" step="10000" value="'+cur.frais+'"></div>'
-      + '<div class="fld"><label>Séries bac (ex. ABCDG, vide si post-Licence)</label><input id="fe-series" value="'+esc(f?f.series:"ABCDG")+'"></div></div>'
-      + '<div class="two"><div class="fld"><label>Stage (mois, 0 = aucun)</label><input id="fe-stage" type="number" min="0" max="12" value="'+(f?f.stage:0)+'"></div>'
-      + '<div class="fld"><label>Organisation</label><label class="check"><input id="fe-soir" type="checkbox"'+(cur.soir?" checked":"")+'>Cours du soir</label><label class="check"><input id="fe-tranches" type="checkbox"'+(cur.tranches?" checked":"")+'>Paiement en tranches</label></div></div>'
-      + '<div class="fld"><label>Débouchés (un métier par ligne)</label><textarea id="fe-jobs">'+esc(cur.jobs.join("\n"))+'</textarea></div>'
-      + '<div class="fld"><label>Cours (un cours par ligne)</label><textarea id="fe-cours">'+esc(cur.cours.join("\n"))+'</textarea></div>'
-      + '<button class="btn" type="submit">Enregistrer</button> <button class="btn line" type="button" data-cancel>Annuler</button></form>';
-  }
-  return '<div class="wrap adm">'+head
-    + '<div class="kpis">'
-    + '<div class="kpi"><b>'+nbEtab+'</b><small>Établissements</small></div>'
-    + '<div class="kpi"><b>'+nbArr+' / 9</b><small>Arrondissements couverts</small></div>'
-    + '<div class="kpi"><b>'+nbDom+'</b><small>Catégories de formations</small></div>'
-    + '<div class="kpi"><b>'+nbDip+'</b><small>Diplômes proposés</small></div>'
-    + '<div class="kpi"><b>'+METIERS.length+'</b><small>Débouchés (métiers)</small></div>'
-    + '</div>'
-    + '<div class="admbar"><button class="btn sm" type="button" data-addf>+ Ajouter une formation</button><button class="btn line sm" type="button" data-reset>Réinitialiser les données démo</button><button class="btn line sm" type="button" data-logout>Déconnexion</button></div>'
-    + edit
-    + '<section class="sec"><h2>Instituts ('+nbEtab+')</h2><div class="tblwrap"><table class="tbl"><thead><tr><th>Sigle</th><th>Nom</th><th>Arrondissement</th><th>Agrément</th><th></th></tr></thead><tbody>'
-    + Object.entries(INST).map(p=>{const i=p[1];return '<tr><td><b>'+esc(i.sigle)+'</b></td><td>'+esc(i.nom)+'</td><td>'+esc(i.arr)+'</td><td>'+((i.ag&&i.ag!=="en cours")?'<span class="agb">'+esc(i.ag)+'</span>':'<span class="agb p">en cours</span>')+'</td><td><button class="btn line sm" type="button" data-editi="'+p[0]+'">Modifier</button></td></tr>';}).join("")
-    + '</tbody></table></div></section>'
-    + '<section class="sec"><h2>Formations ('+F.length+')</h2><div class="tblwrap"><table class="tbl"><thead><tr><th>Intitulé</th><th>Institut</th><th>Diplôme</th><th>Frais / an</th><th></th></tr></thead><tbody>'
-    + F.map(f=>'<tr><td>'+esc(f.nom)+'</td><td>'+esc(INST[f.inst].sigle)+'</td><td>'+esc(f.dip)+'</td><td class="num">'+fcfa(f.frais)+'</td><td><button class="btn line sm" type="button" data-editf="'+f.id+'">Modifier</button> <button class="btn line sm" type="button" data-delf="'+f.id+'" style="color:var(--heart)">Supprimer</button></td></tr>').join("")
-    + '</tbody></table></div></section>'
-    + '<p style="color:var(--muted);font-size:13px;margin-top:10px">Les modifications sont enregistrées dans ce navigateur (démonstration) — dans la version finale, elles seront persistées dans la base de données via l\'API sécurisée.</p>'
-    + '</div>';
 }
 
 /* ---------- Rendu & routage ---------- */
@@ -839,13 +829,11 @@ function render(){
   const app = document.getElementById("app");
   const f = h.indexOf("f-")===0 && F.find(x=>x.id===h.slice(2));
   const inst = h.indexOf("i-")===0 && INST[h.slice(2)] ? h.slice(2) : null;
-  if(f){ track(f.id); app.innerHTML = pageDetail(f); document.title = f.nom+" · Kelasi"; window.scrollTo(0,0); }
-  else if(inst){ app.innerHTML = pageInst(inst); document.title = INST[inst].nom+" · Kelasi"; window.scrollTo(0,0); }
-  else if(h==="referencer"){ app.innerHTML = pageRef(); document.title="Référencer mon institut · Kelasi"; window.scrollTo(0,0); }
-  else if(h==="apropos"){ app.innerHTML = pageAbout(); document.title="À propos · Kelasi"; window.scrollTo(0,0); }
-  else if(h==="admin"){ app.innerHTML = pageAdmin(); document.title="Espace Squad · Kelasi"; window.scrollTo(0,0); }
+  if(f){ track(f.id); app.innerHTML = pageDetail(f); document.title = f.nom+" · Orienta"; window.scrollTo(0,0); }
+  else if(inst){ app.innerHTML = pageInst(inst); document.title = INST[inst].nom+" · Orienta"; window.scrollTo(0,0); }
+  else if(h==="apropos"){ app.innerHTML = pageAbout(); document.title="À propos · Orienta"; window.scrollTo(0,0); }
   else if(h==="book"){ return; }
-  else { app.innerHTML = pageHome(); document.title="Kelasi Brazzaville"; update(); bindHome(); }
+  else { app.innerHTML = pageHome(); document.title="Orienta Brazzaville"; update(); bindHome(); }
   syncFav();
 }
 
@@ -864,7 +852,7 @@ function bindHome(){
     const insts = Object.entries(INST).filter(p=>norm(p[1].nom).includes(v)||norm(p[1].sigle).includes(v)).slice(0,3);
     if(!jobs.length && !forms.length && !insts.length){ sugg.hidden = true; return; }
     sugg.innerHTML = (insts.length?'<h4>Instituts</h4>'+insts.map(p=>'<button type="button" data-si="'+p[0]+'"><span class="ic">'+icon("cap")+'</span><span>'+esc(p[1].nom)+'<small>'+esc(p[1].arr)+'</small></span></button>').join(""):"")
-      + (jobs.length?'<h4>Métiers</h4>'+jobs.map(m=>'<button type="button" data-sj="'+esc(m)+'"><span class="ic">'+icon("brief")+'</span><span>'+esc(m)+'<small>'+F.filter(x=>x.jobs.includes(m)).length+' formation(s)</small></span></button>').join(""):"")
+      + (jobs.length?'<h4>Débouchés</h4>'+jobs.map(m=>'<button type="button" data-sj="'+esc(m)+'"><span class="ic">'+icon("brief")+'</span><span>'+esc(m)+'<small>'+F.filter(x=>x.jobs.includes(m)).length+' formation(s)</small></span></button>').join(""):"")
       + (forms.length?'<h4>Formations</h4>'+forms.map(x=>'<button type="button" data-sf="'+x.id+'"><span class="ic">'+icon(x.dom)+'</span><span>'+esc(x.nom)+'<small>'+esc(x.dip)+' · '+esc(INST[x.inst].sigle)+'</small></span></button>').join(""):"");
     sugg.hidden = false;
   };
@@ -873,7 +861,7 @@ function bindHome(){
   document.addEventListener("click", e=>{ if(!e.target.closest(".sf.q")) sugg.hidden = true; });
   sugg.addEventListener("click", e=>{
     const j = e.target.closest("[data-sj]"), s = e.target.closest("[data-sf]"), si = e.target.closest("[data-si]");
-    if(j){ S.metiers=[j.dataset.sj]; S.q=""; q.value=""; sugg.hidden=true; update(); toResults(); }
+    if(j){ S.metiers=[j.dataset.sj]; S.vue="form"; S.q=""; q.value=""; sugg.hidden=true; update(); toResults(); }
     if(s){ location.hash = "f-"+s.dataset.sf; }
     if(si){ location.hash = "i-"+si.dataset.si; }
   });
@@ -889,6 +877,13 @@ function bindHome(){
     document.querySelectorAll("[data-cat]").forEach(x=>x.setAttribute("aria-pressed", x===b));
     update();
   }));
+  document.querySelectorAll("[data-vue]").forEach(b=>b.addEventListener("click",()=>{ S.vue = b.dataset.vue; update(); toResults(); }));
+  document.getElementById("grid").addEventListener("click", e=>{
+    const d = e.target.closest("[data-vdip]"), m = e.target.closest("[data-vdeb]");
+    if(d){ S.dips=[d.dataset.vdip]; document.getElementById("s-dip").value=d.dataset.vdip; }
+    if(m){ S.metiers=[m.dataset.vdeb]; }
+    if(d || m){ S.vue="form"; update(); toResults(); }
+  });
   document.getElementById("sort").addEventListener("change", e=>{ S.sort=e.target.value; renderGrid(); });
   const panel = document.getElementById("filters"), scrim = document.getElementById("scrim");
   const openP = o => { panel.classList.toggle("open",o); scrim.hidden=!o; document.body.style.overflow=o?"hidden":""; };
@@ -919,7 +914,7 @@ document.addEventListener("click", function(e){
     e.preventDefault();
     const id = fav.dataset.fav;
     if(favs.has(id)) favs.delete(id); else favs.add(id);
-    store.set("kelasi-favs",[...favs]);
+    store.set("orienta-favs",[...favs]);
     const on = favs.has(id);
     document.querySelectorAll('[data-fav="'+id+'"]').forEach(function(b){
       b.setAttribute("aria-pressed",on);
@@ -930,14 +925,14 @@ document.addEventListener("click", function(e){
     return;
   }
   if(e.target.closest("[data-clear]")){
-    const keep = {cat:S.cat,sort:S.sort,fav:S.fav};
+    const keep = {cat:S.cat,sort:S.sort,fav:S.fav,vue:S.vue};
     Object.assign(S, fresh(), keep); S.q="";
     const i=document.getElementById("s-q"); if(i) i.value="";
     const qa=document.getElementById("s-arr"), da=document.getElementById("s-dip"); if(qa) qa.value=""; if(da) da.value="";
     update(); return;
   }
   const job = e.target.closest("[data-job]");
-  if(job){ Object.assign(S, fresh()); S.metiers=[job.dataset.job]; location.hash="accueil"; setTimeout(toResults,50); return; }
+  if(job){ Object.assign(S, fresh()); S.metiers=[job.dataset.job]; S.vue="form"; location.hash="accueil"; setTimeout(toResults,50); return; }
   const cp = e.target.closest("[data-copy]");
   if(cp){
     const done=function(){cp.textContent="Copié";setTimeout(function(){cp.textContent="Copier"},1500)};
@@ -947,7 +942,7 @@ document.addEventListener("click", function(e){
   }
   if(e.target.id==="tobook"){ e.preventDefault(); const b=document.getElementById("book"); if(b) b.scrollIntoView({behavior:"smooth"}); return; }
   if(e.target.closest("#favbtn")){
-    S.fav = !S.fav;
+    S.fav = !S.fav; if(S.fav) S.vue="form";
     if(location.hash && location.hash.indexOf("#accueil")!==0){ location.hash="accueil"; }
     else { syncFav(); update(); toResults(); }
     return;
@@ -955,21 +950,9 @@ document.addEventListener("click", function(e){
   if(e.target.closest("#themebtn")){
     const dark = document.documentElement.getAttribute("data-theme")==="dark";
     document.documentElement.setAttribute("data-theme", dark?"light":"dark");
-    store.set("kelasi-theme", dark?"light":"dark");
+    store.set("orienta-theme", dark?"light":"dark");
     return;
   }
-  const ei = e.target.closest("[data-editi]");
-  if(ei){ ADM.edit={type:"inst", id:ei.dataset.editi}; render(); window.scrollTo(0,0); return; }
-  const ef = e.target.closest("[data-editf]");
-  if(ef){ ADM.edit={type:"form", id:ef.dataset.editf}; render(); window.scrollTo(0,0); return; }
-  if(e.target.closest("[data-addf]")){ ADM.edit={type:"form", id:null}; render(); window.scrollTo(0,0); return; }
-  if(e.target.closest("[data-cancel]")){ ADM.edit=null; render(); return; }
-  const df = e.target.closest("[data-delf]");
-  if(df){ const fm=F.find(function(x){return x.id===df.dataset.delf});
-    if(fm && confirm("Supprimer la formation « "+fm.nom+" » ?")){ F=F.filter(function(x){return x.id!==fm.id}); saveDB(); ADM.edit=null; render(); }
-    return; }
-  if(e.target.closest("[data-logout]")){ ADMIN=false; store.set("kelasi-admin",false); ADM.edit=null; render(); return; }
-  if(e.target.closest("[data-reset]")){ if(confirm("Réinitialiser toutes les données de démonstration ?")){ store.del("kelasi-db"); store.del("kelasi-visits"); store.del("kelasi-recent"); location.reload(); } return; }
 });
 
 document.addEventListener("submit", function(e){
@@ -979,40 +962,10 @@ document.addEventListener("submit", function(e){
     const o=document.getElementById("ask-ok"); o.hidden=false;
     o.textContent="Version de démonstration : dans le site final, ta question et ton e-mail seront transmis directement au secrétariat de "+esc(INST[fm.inst].sigle)+". Aucun message n'a été envoyé.";
     return; }
-  if(e.target.id==="refform"){ e.preventDefault();
-    const o=document.getElementById("ref-ok"); o.hidden=false;
-    o.textContent="Version de démonstration : dans le site final, notre équipe vous rappellera pour fixer un rendez-vous et vérifier votre agrément. Aucune demande n'a été envoyée.";
-    return; }
-  if(e.target.id==="li-form"){ e.preventDefault();
-    const u=document.getElementById("li-u").value.trim(), p=document.getElementById("li-p").value;
-    if(u==="squad" && p==="kelasi2026"){ ADMIN=true; store.set("kelasi-admin",true); render(); }
-    else { const o=document.getElementById("li-err"); o.hidden=false; o.textContent="Identifiants incorrects (démo : squad / kelasi2026)."; }
-    return; }
-  if(e.target.id==="inst-form"){ e.preventDefault();
-    if(!ADM.edit || ADM.edit.type!=="inst") return;
-    const g=function(x){return document.getElementById(x).value.trim()};
-    const i=INST[ADM.edit.id];
-    i.nom=g("e-nom"); i.sigle=g("e-sigle"); i.arr=g("e-arr"); i.adr=g("e-adr"); i.tel=g("e-tel");
-    i.wa=g("e-wa"); i.mail=g("e-mail"); i.ag=g("e-ag"); i.insc=+g("e-insc")||0;
-    i.rentree=g("e-rentree"); i.clot=g("e-clot"); i.desc=g("e-desc");
-    saveDB(); ADM.edit=null; render(); return; }
-  if(e.target.id==="form-form"){ e.preventDefault();
-    const g=function(x){return document.getElementById(x).value.trim()};
-    const lines=function(x){return g(x).split("\n").map(function(s){return s.trim()}).filter(Boolean)};
-    const id = ADM.edit.id || ("fx"+Date.now());
-    const base = F.find(function(x){return x.id===id}) || {id:id};
-    base.nom=g("fe-nom"); base.inst=g("fe-inst"); base.dom=g("fe-dom"); base.dip=g("fe-dip");
-    base.duree=+g("fe-duree")||2; base.frais=+g("fe-frais")||0; base.series=g("fe-series");
-    base.soir=!!document.getElementById("fe-soir").checked;
-    base.stage=+g("fe-stage")||0; base.tranches=!!document.getElementById("fe-tranches").checked;
-    base.jobs=lines("fe-jobs"); base.cours=lines("fe-cours");
-    if(!F.some(function(x){return x.id===id})) F.push(base);
-    F = F.map(function(x){return x.id===id?mkForm(x):x});
-    saveDB(); ADM.edit=null; render(); return; }
 });
 
 /* Thème */
-(function(){ const t=store.get("kelasi-theme",null); if(t) document.documentElement.setAttribute("data-theme",t); })();
+(function(){ const t=store.get("orienta-theme",null); if(t) document.documentElement.setAttribute("data-theme",t); })();
 
 window.addEventListener("hashchange", render);
 render();
