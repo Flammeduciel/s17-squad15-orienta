@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Espace Squad — Kelasi Brazzaville</title>
-<meta name="description" content="Back-office de Kelasi Brazzaville : catalogue des formations, fiches des instituts, demandes reçues et médiathèque.">
+<title>Espace Squad — Orienta Brazzaville</title>
+<meta name="description" content="Back-office de Orienta Brazzaville : tableau de bord, instituts, formations, diplômes et débouchés.">
 <style>
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -113,10 +113,12 @@ button{font-family:inherit;color:inherit}
 /* ---------- Blocs ---------- */
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:14px}
 .stat{border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--card);display:grid;gap:7px}
-.stat .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.stat b{font:800 30px/1 var(--display);font-variant-numeric:tabular-nums}
-.stat small{color:var(--muted);font-weight:600;font-size:14px}
-.stat .ico{width:38px;height:38px;border-radius:11px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+.stat{min-width:0}
+.stat .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-width:0}
+.stat .row > div{min-width:0;flex:1}
+.stat b{display:block;font:800 clamp(22px,6vw,30px)/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat small{display:block;color:var(--muted);font-weight:600;font-size:14px;overflow-wrap:break-word;margin-top:4px}
+.stat .ico{flex:none;width:38px;height:38px;border-radius:11px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
 .stat .ico svg{width:19px;height:19px}
 .stat .ico.sun{background:#FBF0D6;color:#8A6100}
 .stat .ico.blue{background:var(--blue-soft);color:var(--blue)}
@@ -187,7 +189,7 @@ legend{font:800 14px var(--display);padding:0 8px;color:var(--muted);text-transf
 /* ---------- Logo d'un institut ---------- */
 .logoedit{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .logoedit .ap{flex:none;width:104px;height:78px;border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;overflow:hidden;color:#fff;font:800 17px var(--display);background:var(--soft)}
-.logoedit .ap img{width:100%;height:100%;object-fit:contain;background:#fff;display:block}
+.logoedit .ap img{width:100%;height:100%;object-fit:cover;background:#fff;display:block}
 .logoedit .cmd{display:grid;gap:8px;justify-items:start;min-width:0}
 .logoedit .cmd .hint{max-width:460px}
 
@@ -238,6 +240,34 @@ legend{font:800 14px var(--display);padding:0 8px;color:var(--muted);text-transf
   .cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tarifs label{font-weight:600;color:var(--muted)}
+.deblist{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:8px}
+.linkbtn{background:none;border:0;padding:0;color:var(--green);font:700 13.5px var(--body);cursor:pointer;text-decoration:underline}
+.mbox .fld{margin:14px 0;text-align:left}
+.fld .check{display:flex;font-size:15px;font-weight:500;margin:0}
+.fld .check input{width:20px;height:20px;padding:0;flex:none}
+.fld .err{background:none;padding:0;border-radius:0}
+.programme{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px 14px}
+.lien{display:grid;grid-template-columns:minmax(0,1fr) 150px 34px;gap:10px;align-items:center;margin-bottom:8px}
+.attach{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
+.attach select{min-width:0;flex:1 1 180px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 12px;font:500 14px var(--body)}
+@media (max-width:520px){ .lien{grid-template-columns:minmax(0,1fr) 34px} .lien .lien-forme{grid-column:1/-1} }
+.programme .annee{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.programme ul{margin:8px 0 0;padding-left:18px;display:grid;gap:3px}
+@media (max-width:520px){
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  /* L'icône sort du flux : le libellé dispose de toute la largeur de la carte. */
+  .stat{padding:14px;position:relative}
+  .stat .ico{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:9px}
+  .stat b{padding-right:40px}
+  .stat .ico svg{width:16px;height:16px}
+  .stat small{font-size:13px}
+}
+@media (max-width:340px){
+  .cards{grid-template-columns:minmax(0,1fr)}
+}
 </style>
 </head>
 <body>
@@ -271,6 +301,10 @@ const P = {
   pin:'<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/>',
   cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
   info:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M1 20h22M9 8l-2 2 2 2M15 8l2 2-2 2"/>',
+  award:'<circle cx="12" cy="9" r="6"/><path d="M9 14.5 7.5 22l4.5-2.5 4.5 2.5L15 14.5"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   sort:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'
 };
 const icon = (k, cls) => '<svg class="'+(cls||"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[k]||"")+'</svg>';
@@ -304,11 +338,9 @@ function confirmBox(title, body, payload){
 
 /* ---------- Référentiels ---------- */
 const ARR = ["Makélékélé","Bacongo","Poto-Poto","Moungali","Ouenzé","Talangaï","Mfilou","Madibou","Djoué"];
-const DIPS = ["BTS","Licence","Licence pro","Master"];
-/* Règle métier : la durée imposée par le diplôme visé. */
-const DUREE_DIP = {"BTS":2,"Licence":3,"Licence pro":3,"Master":2};
-const SERIES = [["A","Lettres"],["B","Économie"],["C","Maths-Physique"],["D","Sciences"],["E","Technique"],["F","Technique industrielle"],["G","Tertiaire"]];
-const DOMAINES = [
+const DIPS_SEED = ["BTS","Licence","Licence pro","Master"];
+const SERIES_SEED = [["A","Lettres"],["B","Économie"],["C","Maths-Physique"],["D","Sciences"],["E","Technique"],["F","Technique industrielle"],["G","Tertiaire"]];
+const DOMAINES_SEED = [
   {id:"gestion",nom:"Gestion & Finance",c:"#1E6B4A"},
   {id:"info",nom:"Informatique",c:"#2B51A3"},
   {id:"sante",nom:"Santé",c:"#B03352"},
@@ -320,7 +352,6 @@ const DOMAINES = [
   {id:"agro",nom:"Agronomie & Environnement",c:"#4C7A1E"},
   {id:"hotel",nom:"Hôtellerie & Tourisme",c:"#B5562A"}
 ];
-const DOM = Object.fromEntries(DOMAINES.map(d=>[d.id,d]));
 
 const INST_SEED = [
   {id:"isgf",nom:"Institut Supérieur de Gestion du Fleuve",sigle:"ISGF",arr:"Poto-Poto",adr:"Avenue de la Paix, Poto-Poto",tel:"+242 06 612 40 18",wa:"242066124018",mail:"contact@isgf.cg",ag:"N° 047/MESRTI/2009",insc:50000,rentree:"2026-11-03",clot:"2026-10-15",c:"#1E6B4A",desc:"Spécialisé dans la gestion, la comptabilité et la banque depuis 2009. Cours en journée et en soirée."},
@@ -340,7 +371,7 @@ const FORMES_SEED = [
   ["audit","isgf","gestion","Audit et contrôle de gestion","Master",2,780000,"",0,6,1,["Auditeur","Contrôleur de gestion","Comptable"],["Audit comptable et financier","Contrôle interne","Normes OHADA","Tableaux de bord","Consolidation des comptes"],"publiee"],
   ["devweb","esim","info","Développement web et mobile","BTS",2,480000,"CDEF",0,3,1,["Développeur web","Développeur mobile","Intégrateur web"],["Algorithmique","HTML, CSS, JavaScript","Bases de données SQL","Anglais technique","Frameworks web","Développement Android","Projet client réel"],"publiee"],
   ["reseaux","esim","info","Réseaux et télécommunications","Licence",3,560000,"CDE",0,3,1,["Technicien réseau","Administrateur système","Technicien télécom"],["Électronique numérique","Systèmes d'exploitation","Mathématiques","Réseaux TCP/IP","Administration Linux","Téléphonie mobile","Sécurité des réseaux","Fibre optique"],"publiee"],
-  ["logiciel","esim","info","Génie logiciel","Master",2,750000,"",0,6,0,["Ingénieur logiciel","Chef de projet informatique"],["Architecture logicielle","Gestion de projet agile","Intelligence artificielle","Cloud et DevOps"],"brouillon"],
+  ["logiciel","esim","info","Génie logiciel","Master",2,750000,"",0,6,0,["Ingénieur logiciel","Chef de projet informatique"],["Architecture logicielle","Gestion de projet agile","Intelligence artificielle","Cloud et DevOps"],"publiee"],
   ["maint","esim","info","Maintenance informatique","BTS",2,380000,"CDEFG",1,2,1,["Technicien de maintenance","Support informatique"],["Architecture des ordinateurs","Installation de systèmes","Électronique","Dépannage matériel","Réseaux locaux","Accueil et support utilisateur"],"publiee"],
   ["electro","ipm","btp","Électrotechnique","BTS",2,450000,"CDEF",0,3,1,["Électricien bâtiment","Technicien de maintenance","Installateur solaire"],["Électricité générale","Schémas électriques","Mesures","Dessin technique","Machines électriques","Automatismes","Énergie solaire"],"publiee"],
   ["gc","ipm","btp","Génie civil et bâtiment","Licence",3,540000,"CDE",0,3,1,["Conducteur de travaux","Métreur","Dessinateur projeteur"],["Résistance des matériaux","Topographie","AutoCAD","Béton armé","Métré et devis","Géotechnique","Conduite de chantier","Routes et ouvrages"],"publiee"],
@@ -361,87 +392,136 @@ const FORMES_SEED = [
   ["envir","isam","agro","Environnement, eaux et forêts","Licence",3,470000,"CD",0,3,1,["Agent des eaux et forêts","Chargé environnement","Technicien en aménagement"],["Écologie","Botanique forestière","Cartographie SIG","Gestion des forêts","Faune sauvage","Études d'impact"],"publiee"],
   ["hotel","isam","hotel","Hôtellerie et tourisme","BTS",2,410000,"ABCDG",0,4,1,["Réceptionniste","Guide touristique","Gestionnaire hôtelier"],["Accueil et réception","Service en salle","Anglais du tourisme","Patrimoine du Congo","Gestion hôtelière","Organisation de circuits"],"publiee"]
 ];
-const CONTACT_SEED = [
-  {id:1,nom:"Grâce Mabiala",mail:"grace.mabiala@exemple.cg",tel:"+242 06 900 11 22",msg:"Reste-t-il des places en Développement web pour la rentrée d'octobre ? Je voudrais visiter l'institut.",prog:"devweb",quand:"2026-09-28T09:14:00",statut:"nouvelle"},
-  {id:2,nom:"Patient Nzombi",mail:"p.nzombi@exemple.cg",tel:"+242 05 412 87 03",msg:"Quel est le montant exact des frais de la première année, frais d'inscription compris ?",prog:"infirm",quand:"2026-09-28T14:02:00",statut:"traitee"},
-  {id:3,nom:"Sandrine Ossouka",mail:"sandrine.o@exemple.cg",tel:"+242 06 331 55 90",msg:"Les cours du soir existent-ils encore cette année ? Je travaille en journée.",prog:"adminpub",quand:"2026-09-29T08:41:00",statut:"nouvelle"},
-  {id:4,nom:"Michel Bombolo",mail:"m.bombolo@exemple.cg",tel:"+242 05 220 74 18",msg:"Le stage de six mois est-il rémunéré et se fait-il pendant la dernière année ?",prog:"infirm",quand:"2026-09-30T16:20:00",statut:"nouvelle"},
-  {id:5,nom:"Nadège Kimmou",mail:"n.kimmou@exemple.cg",tel:"+242 06 774 09 62",msg:"Y a-t-il une deuxième session en cas d'échec ?",prog:"compta",quand:"2026-10-01T10:05:00",statut:"archivee"},
-  {id:6,nom:"Junior Mvouono",mail:"j.mvouono@exemple.cg",tel:"+242 06 118 44 27",msg:"Le BTS Informatique prépare-t-il vraiment au métier de développeur, ou faut-il poursuivre en licence ?",prog:"devweb",quand:"2026-10-02T11:33:00",statut:"nouvelle"},
-  {id:7,nom:"Chantal Ekouma",mail:"c.ekouma@exemple.cg",tel:"+242 05 990 25 41",msg:"Quel matériel faut-il prévoir pour la licence en réseaux ?",prog:"reseaux",quand:"2026-10-03T13:12:00",statut:"traitee"}
-];
-const REF_SEED = [
-  {id:1,nom:"Institut Supérieur Polytechnique de l'Ouenzé",arr:"Ouenzé",tel:"+242 06 880 12 45",resp:"Blaise Impouzo",ag:"N° 311/MESRTI/2021",quand:"2026-09-25T09:00:00",statut:"nouvelle"},
-  {id:2,nom:"École de Gestion et de Commerce de Brazzaville",arr:"Poto-Poto",tel:"+242 05 455 30 76",resp:"Rita Mavoungou",ag:"",quand:"2026-09-27T15:30:00",statut:"nouvelle"},
-  {id:3,nom:"Institut des Métiers du Numérique",arr:"Mfilou",tel:"+242 06 640 78 19",resp:"Serge Bakala",ag:"N° 298/MESRTI/2020",quand:"2026-09-24T10:22:00",statut:"traitee"}
-];
 
 /* ---------- Données et persistance ---------- */
-const ENREG = store.get("kelasi-bo", null);
-const DB = Object.assign({inst:{},formes:{},contact:null,ref:null}, ENREG||{});
+const ENREG = store.get("orienta-bo", null);
+const DB = Object.assign({inst:{},formes:{},dips:null,dipDur:null,debs:null,cours:null,series:null,domaines:null}, ENREG||{});
+
+/* Domaines d'insertion : référentiel {id, nom, c}. L'identifiant ne change jamais,
+   donc renommer un domaine ne touche ni les formations ni les débouchés. */
+const DOMAINES = (DB.domaines || DOMAINES_SEED).map(x=>Object.assign({},x));
+const DOM = {};
+function majDom(){ for(const k in DOM) delete DOM[k]; for(const x of DOMAINES) DOM[x.id] = x; }
+majDom();
+const usageDom = nom => { const x = DOMAINES.find(v=>v.nom===nom); return x ? Object.values(FORMES).filter(f=>f.dom===x.id).length : 0; };
 
 /* Au premier lancement, tout vient du jeu de démonstration. Dès qu'un enregistrement
    existe, il fait foi : une entrée supprimée ne doit pas ressusciter au rechargement. */
 const INST = {};
 for(const s of INST_SEED){
   if(ENREG && !(s.id in DB.inst)) continue;
-  INST[s.id] = Object.assign({}, s, DB.inst[s.id]||{});
+  INST[s.id] = Object.assign({avantages:[],logo:null}, s, DB.inst[s.id]||{});
 }
 const FORMES = {};
 for(const r of FORMES_SEED){
   if(ENREG && !(r[0] in DB.formes)) continue;
   const [id,inst,dom,nom,dip,duree,frais,series,soir,stage,tranches,jobs,cours,statut] = r;
   FORMES[id] = Object.assign(
-    {id,inst,dom,nom,dip,duree,frais,series,soir:!!soir,stage,tranches:!!tranches,jobs:jobs.slice(),cours:cours.slice(),statut},
+    {id,inst,dom,nom,dip,duree,frais,tarifs:Array(duree).fill(frais),series,admission:"",desc:"",soir:!!soir,stage,tranches:!!tranches,jobs:jobs.slice(),cours:cours.slice(),statut},
     DB.formes[id]||{}
   );
 }
-const CONTACT = (DB.contact && DB.contact.length) ? DB.contact : CONTACT_SEED.map(x=>Object.assign({},x));
-const REF = (DB.ref && DB.ref.length) ? DB.ref : REF_SEED.map(x=>Object.assign({},x));
+/* Un institut ou une formation créés dans le back-office n'ont pas d'équivalent
+   dans le jeu de démonstration : ils viennent tels quels de l'enregistrement. */
+for(const k in DB.inst) if(!INST[k]) INST[k] = Object.assign({avantages:[],logo:null}, DB.inst[k]);
+for(const k in DB.formes) if(!FORMES[k]) FORMES[k] = Object.assign({tarifs:[],admission:"",desc:""}, DB.formes[k]);
 
-/* Un logo vit le temps de la session : c'est un aperçu local, pas un fichier
-   envoyé au serveur. On ne le range donc pas dans le stockage. */
-for(const k in INST) INST[k].logo = null;
+/* Référentiels gérés par la Squad (EX-08) : diplômes et débouchés. */
+const DIPS = DB.dips ? DB.dips.slice() : DIPS_SEED.slice();
+const DEBS = DB.debs ? DB.debs.map(x=>Object.assign({},x)) : (function(){
+  const m = {};
+  for(const f of Object.values(FORMES)) for(const j of f.jobs) if(!m[j]) m[j] = {nom:j, secteur:f.dom};
+  return Object.values(m);
+})();
+const usageDip = n => Object.values(FORMES).filter(f=>f.dip===n).length;
+const usageDeb = n => Object.values(FORMES).filter(f=>f.jobs.includes(n)).length;
+/* Séries du baccalauréat : référentiel {nom, lib}. Chaque formation porte la liste des séries admises. */
+const SERIES = DB.series ? DB.series.map(x=>Object.assign({},x)) : SERIES_SEED.map(p=>({nom:p[0], lib:p[1]}));
+for(const f of Object.values(FORMES)) if(!Array.isArray(f.series)) f.series = String(f.series||"").split("");
+const usageSer = n => Object.values(FORMES).filter(f=>f.series.includes(n)).length;
+/* Sans programme saisi année par année, les cours sont répartis à parts égales. */
+const repartir = (cours, duree) => {
+  const per = Math.max(1, Math.ceil(cours.length/Math.max(1,duree)));
+  return Array.from({length:Math.max(1,duree)}, (_,k)=>cours.slice(k*per,(k+1)*per));
+};
+for(const f of Object.values(FORMES)) if(!f.programme) f.programme = repartir(f.cours||[], f.duree);
 
-function saveBO(){
-  const inst = {}, formes = {};
-  /* On sauvegarde tout, y compris la suppression d'une entrée de démonstration :
-     sinon elle réapparaîtrait au prochain chargement. Le logo en est écarté :
-     c'est une image locale, trop lourde pour le stockage du navigateur. */
-  for(const k in FORMES) formes[k]=FORMES[k];
-  for(const k in INST){
-    const copie = Object.assign({}, INST[k]);
-    delete copie.logo;
-    inst[k] = copie;
+/* La durée des études est portée par le diplôme : elle s'impose aux formations qui le délivrent. */
+const DUREE = DB.dipDur ? Object.assign({}, DB.dipDur) : {"BTS":2,"Licence":3,"Licence pro":3,"Master":2};
+const dureeDip = (nom, defaut) => DUREE[nom] || defaut || 1;
+
+/* Catalogue de cours partagé : un cours (Français, Mathématiques…) peut être
+   rattaché à plusieurs formations, chacune avec son année d'études. */
+const COURS = (function(){
+  const parNom = {}, liste = [];
+  const cours = nom => {
+    const k = norm(nom);
+    if(!parNom[k]){ parNom[k] = {id:"c"+(liste.length+1), nom, liens:[]}; liste.push(parNom[k]); }
+    return parNom[k];
+  };
+  const lier = (c, forme, annee) => { if(!c.liens.some(l=>l.forme===forme)) c.liens.push({forme, annee}); };
+  if(DB.cours) for(const x of DB.cours){
+    /* Ancien enregistrement : un cours par formation, regroupé ici par intitulé. */
+    if(x.liens) liste.push({id:x.id, nom:x.nom, liens:x.liens.map(l=>Object.assign({},l))});
+    else lier(cours(x.nom), x.forme, x.annee);
   }
-  store.set("kelasi-bo",{inst,formes,contact:CONTACT,ref:REF});
+  else for(const f of Object.values(FORMES)) f.programme.forEach((noms,k)=>noms.forEach(nom=>lier(cours(nom), f.id, k+1)));
+  return liste;
+})();
+
+/* Recalcule, pour chaque formation, ce qui découle du diplôme et des cours :
+   durée, nombre de tarifs, programme par année. Le site public lit ce résultat. */
+function majProgrammes(){
+  for(const c of COURS) c.liens = c.liens.filter(l=>FORMES[l.forme]);
+  for(const f of Object.values(FORMES)){
+    f.duree = dureeDip(f.dip, f.duree);
+    const tarifs = (f.tarifs||[]).slice(0, f.duree);
+    while(tarifs.length < f.duree) tarifs.push(tarifs.length ? tarifs[tarifs.length-1] : f.frais);
+    f.tarifs = tarifs;
+    f.programme = Array.from({length:f.duree}, ()=>[]);
+  }
+  for(const c of COURS) for(const l of c.liens){
+    const f = FORMES[l.forme];
+    /* Un diplôme raccourci ramène les cours des années retirées sur la dernière année. */
+    if(l.annee > f.duree) l.annee = f.duree;
+    f.programme[l.annee-1].push(c.nom);
+  }
+  for(const f of Object.values(FORMES)) f.cours = f.programme.flat();
+}
+majProgrammes();
+const libForme = f => f.nom+" — "+(INST[f.inst] ? INST[f.inst].sigle : "institut supprimé");
+const niveau = k => (k ? (k+1)+"e" : "1re")+" année";
+
+/* Le site public lit cet enregistrement : il reflète donc le back-office. */
+function saveBO(){
+  majProgrammes();
+  store.set("orienta-bo",{inst:INST,formes:FORMES,dips:DIPS,dipDur:DUREE,debs:DEBS,cours:COURS,series:SERIES,domaines:DOMAINES});
 }
 
 /* ---------- Session ---------- */
-let SESSION = store.get("kelasi-bo-session", null);
+let SESSION = store.get("orienta-bo-session", null);
 const isAuthed = () => !!(SESSION && SESSION.login);
 const badgeAg = i => agrement(i)
   ? '<span class="agb">'+icon("check")+esc(agrement(i))+'</span>'
-  : '<span class="agb p">Agrément en cours</span>';
+  : '<span class="agb p">Non agréé</span>';
 
 /* ---------- État de l'interface ---------- */
 const S = {
   prog:{q:"",dom:"",statut:"",page:1,par:8},
   inst:{q:"",arr:"",ag:"",page:1,par:6},
-  contact:{statut:"",page:1,par:6},
-  ref:{statut:"",page:1,par:6},
+  /* refl : diplôme, débouché ou série en cours de saisie, {type, nom} (nom nul = ajout). */
+  refl:null,
+  cours:{q:"",forme:"",page:1,par:10},
+  /* coursEdit : cours en cours de saisie, {id, liens} (id nul = ajout). */
+  coursEdit:null,
   sideOpen:false,
   /* logoBrouillon : image choisie dans le formulaire d'institut en cours.
-     logoChoisi indique qu'on y a touché ; sinon le logo déjà enregistré est
-     conservé. */
+     logoChoisi indique qu'on y a touché ; sinon l'image déjà enregistrée est
+     conservée. */
   logoBrouillon:null,
   logoChoisi:false
 };
-const nbContact = k => CONTACT.filter(x=>x.statut===k).length;
-const nbRef     = k => REF.filter(x=>x.statut===k).length;
-const pendingCount = () => nbContact("nouvelle") + nbRef("nouvelle");
-
-/* Un numéro d'agrément de démonstration est saisi tel quel ; « en cours » vaut absence. */
+/* Un numéro d'agrément est saisi tel quel ; vide ou « en cours » vaut absence d'agrément. */
 const agrement = i => (i.ag && norm(i.ag).replace(/[\s.?!]/g,"")!=="encours") ? i.ag.trim() : "";
 
 /* ---------- Filtres ---------- */
@@ -468,13 +548,16 @@ function filterInst(){
 /* ---------- Coquille ---------- */
 const NAV = [
   {g:"Pilotage",items:[
-    {h:"#/tableau-de-bord",i:"gauge",t:"Tableau de bord"},
-    {h:"#/demandes/contact",i:"inbox",t:"Demandes de contact",ct:()=>nbContact("nouvelle")},
-    {h:"#/demandes/referencement",i:"users",t:"Demandes de référencement",ct:()=>nbRef("nouvelle")}
+    {h:"#/tableau-de-bord",i:"gauge",t:"Tableau de bord"}
   ]},
   {g:"Catalogue",items:[
+    {h:"#/instituts",i:"building",t:"Instituts"},
     {h:"#/formations",i:"cap",t:"Formations"},
-    {h:"#/instituts",i:"building",t:"Instituts"}
+    {h:"#/cours",i:"book",t:"Cours"},
+    {h:"#/diplomes",i:"award",t:"Diplômes"},
+    {h:"#/debouches",i:"brief",t:"Débouchés"},
+    {h:"#/series",i:"list",t:"Séries du bac"},
+    {h:"#/domaines",i:"grid",t:"Domaines d'insertion"}
   ]}
 ];
 const currentHash = () => (location.hash||"#/tableau-de-bord");
@@ -487,7 +570,7 @@ function sidebar(){
   return '<aside class="side" id="side">'
     + '<a class="brand" href="#/tableau-de-bord">'
     + '<svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M7 13.5 16 9l9 4.5-9 4.5-9-4.5Z" fill="#fff"/><path d="M11 16v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V16" stroke="#fff" stroke-width="2" fill="none"/></svg>'
-    + '<span><b>Kelasi</b><small>Espace Squad</small></span></a>'
+    + '<span><b>Orienta</b><small>Espace Squad</small></span></a>'
     + NAV.map(g=>'<div class="navgroup"><h4>'+esc(g.g)+'</h4>'
       + g.items.map(it=>{
           const n = it.ct ? it.ct() : 0;
@@ -496,7 +579,7 @@ function sidebar(){
         }).join("")
       + '</div>').join("")
     + '<div class="sidefoot">'
-    + '<div class="who"><span class="avatar">'+esc((SESSION&&SESSION.nom?SESSION.nom:"SQ").slice(0,2).toUpperCase())+'</span><span><b>'+esc(SESSION&&SESSION.nom?SESSION.nom:"Squad")+'</b><small>'+esc(SESSION&&SESSION.role?SESSION.role:"Responsable du catalogue")+'</small></span></div>'
+    + '<div class="who"><span class="avatar">'+esc((SESSION&&SESSION.nom?SESSION.nom:"SQ").slice(0,2).toUpperCase())+'</span><span><b>'+esc(SESSION&&SESSION.nom?SESSION.nom:"Squad")+'</b><small>'+esc(SESSION&&SESSION.role?SESSION.role:"SuperAdmin")+'</small></span></div>'
     + '<a class="navitem" href="#/compte">'+icon("user")+'<span>Mon compte</span></a>'
     + '<button class="navitem" type="button" data-act="logout">'+icon("logout")+'<span>Se déconnecter</span></button>'
     + '</div></aside>';
@@ -521,55 +604,61 @@ function shell(inner, crumbs, actions){
 }
 
 /* ---------- Connexion ---------- */
-function pageLogin(){
-  return '<div class="login"><div class="art">'
-    + '<a class="brand" href="#" style="border:0;padding:0;color:#fff"><svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#fff"/><path d="M7 13.5 16 9l9 4.5-9 4.5-9-4.5Z" fill="#17693F"/><path d="M11 16v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V16" stroke="#17693F" stroke-width="2" fill="none"/></svg><span><b style="color:#fff">Kelasi</b><small style="color:#B9DAC9">Espace Squad</small></span></a>'
-    + '<div><h2>Le catalogue de Brazzaville, tenu à jour.</h2><p>Formations, instituts, frais et agréments : une seule source de vérité pour les bacheliers de la capitale.</p>'
+function loginArt(){
+  return '<div class="art">'
+    + '<a class="brand" href="#" style="border:0;padding:0;color:#fff"><svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#fff"/><path d="M7 13.5 16 9l9 4.5-9 4.5-9-4.5Z" fill="#17693F"/><path d="M11 16v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V16" stroke="#17693F" stroke-width="2" fill="none"/></svg><span><b style="color:#fff">Orienta</b><small style="color:#B9DAC9">Espace Squad</small></span></a>'
+    + '<div><h2>Le catalogue de Brazzaville, tenu à jour.</h2><p>Instituts, formations, diplômes et débouchés : une seule source de vérité pour les bacheliers de la capitale.</p>'
     + '<div class="pts">'
     + '<div>'+icon("check")+'<span>'+Object.keys(FORMES).length+' formations et '+Object.keys(INST).length+' instituts référencés</span></div>'
-    + '<div>'+icon("check")+'<span>'+pendingCount()+' demande'+(pendingCount()>1?"s":"")+' en attente de traitement</span></div>'
+    + '<div>'+icon("check")+'<span>'+DIPS.length+' diplômes et '+DEBS.length+' débouchés au référentiel</span></div>'
     + '<div>'+icon("check")+'<span>Agréments affichés avec leur numéro officiel</span></div>'
     + '</div></div>'
-    + '<div class="loginfoot">Usage réservé à l\'équipe de la Squad.</div>'
-    + '</div>'
+    + '<div class="loginfoot">Usage réservé à l\'équipe de la Squad. Les comptes sont ouverts par un SuperAdmin.</div>'
+    + '</div>';
+}
+function pageLogin(){
+  return '<div class="login">'+loginArt()
     + '<div class="formside"><form class="box" id="login-form">'
     + '<h1>Connexion</h1>'
-    + '<p>Identifiez-vous pour accéder au catalogue, aux demandes et à la médiathèque.</p>'
-    + '<div class="fld"><label for="u">Identifiant</label><input id="u" autocomplete="username" required placeholder="squad"></div>'
+    + '<p>Identifiez-vous pour accéder au tableau de bord et au catalogue.</p>'
+    + '<div class="fld"><label for="u">Nom d\'utilisateur</label><input id="u" autocomplete="username" required placeholder="squad"></div>'
     + '<div class="fld"><label for="p">Mot de passe</label><input id="p" type="password" autocomplete="current-password" required></div>'
     + '<button class="btn" type="submit">Se connecter</button>'
     + '<div class="err" id="login-err" hidden></div>'
-    + '<p class="hint" style="color:var(--muted);font-size:13.5px">Démo : <b>squad</b> / <b>kelasi2026</b>. Le site public reste accessible sans compte.</p>'
+    + '<p style="font-size:13.5px;"><button class="linkbtn" type="button" data-act="forgot">Mot de passe oublié ?</button></p>'
+    + '<p class="hint" style="color:var(--muted);font-size:13.5px">Démo : <b>squad</b> / <b>orienta2026</b>. Le site public reste accessible sans compte.</p>'
     + '<p style="font-size:13.5px"><a href="index.html" style="color:var(--green);font-weight:700">Retour au site public</a></p>'
     + '</form></div></div>';
+}
+function forgotBox(){
+  document.getElementById("modal").innerHTML = '<div class="modal"><form class="mbox" id="forgot-form" role="dialog" aria-modal="true" novalidate>'
+    + '<h3>Mot de passe oublié</h3><p>Saisissez l\'adresse e-mail liée à votre compte : un lien de réinitialisation vous sera envoyé.</p>'
+    + '<div class="fld" data-f="fg-m"><label for="fg-m">Adresse e-mail</label><input id="fg-m" type="email" autocomplete="email" required></div>'
+    + '<div class="mact"><button class="btn line" type="button" data-modal="cancel">Annuler</button>'
+    + '<button class="btn" type="submit">Envoyer le lien</button></div></form></div>';
+  document.getElementById("fg-m").focus();
 }
 
 /* ---------- Tableau de bord ---------- */
 function pageDash(){
   const formes = Object.values(FORMES);
-  const publiees = formes.filter(f=>f.statut==="publiee").length;
-  const brouillons = formes.length - publiees;
+  const brouillons = formes.filter(f=>f.statut!=="publiee").length;
   const arrCouverts = new Set(Object.values(INST).map(i=>i.arr)).size;
   const sansAg = Object.values(INST).filter(i=>!agrement(i)).length;
-  const nc = nbContact("nouvelle");
-  const nr = nbRef("nouvelle");
   const budget = formes.reduce((s,f)=>s+f.frais,0)/Math.max(1,formes.length);
   const parDom = DOMAINES.map(d=>({d,n:formes.filter(f=>f.dom===d.id).length})).sort((a,b)=>b.n-a.n).slice(0,6);
   const maxDom = Math.max(1,...parDom.map(x=>x.n));
-  const recentes = [...CONTACT].filter(x=>x.statut==="nouvelle").sort((a,b)=>b.quand.localeCompare(a.quand)).slice(0,4);
-
   return shell(
-    '<div class="pagehead"><div><h1>Tableau de bord</h1><p>Vue d\'ensemble du catalogue et des demandes reçues.</p></div>'
-    + '<a class="btn" href="#/formations/nouvelle">'+icon("plus")+'Ajouter une formation</a></div>'
+    '<div class="pagehead"><div><h1>Tableau de bord</h1><p>Indicateurs clés du catalogue.</p></div>'
+    + '<a class="btn" href="#/instituts/nouveau">'+icon("plus")+'Ajouter un institut</a></div>'
     + '<div class="cards">'
-    + stat(Object.keys(INST).length,"Instituts référencés","building","")+stat(formes.length,"Formations au catalogue","cap","blue")
-    + stat(publiees,"Publications visibles","eye","")
-    + stat(arrCouverts+" / "+ARR.length,"Arrondissements couverts","pin","blue")
-    + stat(nc+nr,"Demandes en attente","inbox","sun")
-    + stat(sansAg,"Agréments à vérifier","info","red")
+    + stat(Object.keys(INST).length,"Établissements","building","")
+    + stat(formes.length,"Formations et filières","cap","blue")
+    + stat(arrCouverts+" / "+ARR.length,"Arrondissements couverts","pin","")
+    + stat(DIPS.length,"Diplômes délivrés","award","blue")
+    + stat(DEBS.length,"Débouchés","brief","")
     + '</div>'
     + '<div class="split">'
-    + '<div style="display:grid;gap:20px">'
     + '<div class="panel"><header><h2>Répartition par domaine</h2><small>'+formes.length+' formations</small></header>'
     + '<div class="pad" style="display:grid;gap:12px">'
     + parDom.map(x=>'<div style="display:grid;grid-template-columns:150px minmax(0,1fr) 34px;gap:12px;align-items:center">'
@@ -577,24 +666,18 @@ function pageDash(){
       + '<span style="height:10px;border-radius:99px;background:var(--soft);overflow:hidden"><span style="display:block;height:100%;width:'+Math.round(x.n/maxDom*100)+'%;background:'+x.d.c+'"></span></span>'
       + '<b class="num" style="text-align:right">'+x.n+'</b></div>').join("")
     + '</div></div>'
-    + '<div class="panel"><header><h2>Demandes récentes</h2><a href="#/demandes/contact" class="btn line sm">Tout voir</a></header>'
-    + (recentes.length?'<div class="rows" style="padding:14px">'+recentes.map(x=>{
-        return '<div class="rowc" style="box-shadow:none"><div class="hd"><div class="who"><b>'+esc(x.nom)+'</b><small>'+esc(libelleFormation(x.prog))+' · '+esc(jdate(x.quand))+'</small></div>'
-        + '<span class="badge new">Nouvelle</span></div><p class="msg">'+esc(x.msg)+'</p></div>';
-      }).join("")+'</div>':'<div class="pad"><p style="color:var(--muted)">Aucune demande en attente.</p></div>')
-    + '</div>'
-    + '</div>'
     + '<div style="display:grid;gap:20px">'
     + '<div class="panel"><header><h2>Points de vigilance</h2></header><div class="pad" style="display:grid;gap:14px">'
     + '<div class="kv"><div><span>Formations en brouillon</span><b>'+brouillons+'</b></div>'
-    + '<div><span>Instituts sans agrément</span><b>'+sansAg+'</b></div>'
-    + '<div><span>Frais moyens par an</span><b>'+fcfa(Math.round(budget))+'</b></div>'
-    + '<div><span>Demandes de contact en attente</span><b>'+nc+'</b></div>'
-    + '<div><span>Demandes de référencement en attente</span><b>'+nr+'</b></div></div>'
+    + '<div><span>Instituts non agréés</span><b>'+sansAg+'</b></div>'
+    + '<div><span>Frais moyens par an</span><b>'+fcfa(Math.round(budget))+'</b></div></div>'
     + '<p style="color:var(--muted);font-size:13.5px">Une formation en brouillon n\'apparaît pas sur le site public.</p></div></div>'
     + '<div class="panel"><header><h2>Ajouter</h2></header><div class="pad" style="display:grid;gap:10px">'
-    + '<a class="btn line" href="#/formations/nouvelle" style="justify-content:flex-start">'+icon("plus")+'Une formation</a>'
     + '<a class="btn line" href="#/instituts/nouveau" style="justify-content:flex-start">'+icon("plus")+'Un institut</a>'
+    + '<a class="btn line" href="#/formations/nouvelle" style="justify-content:flex-start">'+icon("plus")+'Une formation</a>'
+    + '<a class="btn line" href="#/cours" style="justify-content:flex-start">'+icon("plus")+'Un cours</a>'
+    + '<a class="btn line" href="#/diplomes" style="justify-content:flex-start">'+icon("plus")+'Un diplôme</a>'
+    + '<a class="btn line" href="#/debouches" style="justify-content:flex-start">'+icon("plus")+'Un débouché</a>'
     + '</div></div>'
     + '</div></div>',
     [{t:"Espace Squad"},{t:"Tableau de bord"}]
@@ -615,7 +698,7 @@ function pageFormes(){
     + '<a class="btn" href="#/formations/nouvelle">'+icon("plus")+'Ajouter une formation</a></div>'
     + '<div class="panel"><header>'
     + '<div class="toolbar">'
-    + '<span class="field">'+icon("search")+'<input id="fq" type="search" placeholder="Rechercher une formation, un métier, un institut" value="'+esc(s.q)+'" aria-label="Rechercher"></span>'
+    + '<span class="field">'+icon("search")+'<input id="fq" type="search" placeholder="Rechercher une formation, un débouché, un institut" value="'+esc(s.q)+'" aria-label="Rechercher"></span>'
     + '<select class="field" id="fdom" aria-label="Filtrer par domaine"><option value="">Tous les domaines</option>'
     + DOMAINES.map(d=>'<option value="'+d.id+'"'+(s.dom===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")+'</select>'
     + '<div class="seg" role="group" aria-label="Filtrer par statut">'
@@ -631,7 +714,7 @@ function pageFormes(){
             const institut = i ? '<td>'+esc(i.sigle)+'<br><small style="color:var(--muted)">'+esc(i.arr)+'</small></td>'
               : '<td><span class="badge ko">Institut supprimé</span></td>';
             return '<tr>'
-              + '<td><div class="who"><span class="thumb" style="background:'+DOM[f.dom].c+'">'+esc(DOM[f.dom].id.slice(0,3).toUpperCase())+'</span><span><b>'+esc(f.nom)+'</b><small>'+esc(f.jobs.slice(0,2).join(" · "))+'</small></span></div></td>'
+              + '<td><div class="who"><span class="thumb" style="background:'+DOM[f.dom].c+'">'+esc(DOM[f.dom].nom.slice(0,3).toUpperCase())+'</span><span><b>'+esc(f.nom)+'</b><small>'+esc(f.jobs.slice(0,2).join(" · "))+'</small></span></div></td>'
               + institut
               + '<td>'+esc(DOM[f.dom].nom)+'</td>'
               + '<td>'+esc(f.dip)+'<br><small style="color:var(--muted)">'+f.duree+' ans'+(f.soir?" · soir":"")+'</small></td>'
@@ -656,43 +739,56 @@ function pageForme(rawId){
   const f = rawId ? FORMES[rawId] : null;
   const instCible = f ? f.inst : (S.instCible && INST[S.instCible] ? S.instCible : Object.keys(INST)[0]);
   const nbFormes = Object.values(FORMES).filter(x=>x.inst===instCible).length;
+  /* Un diplôme ou un débouché retiré du référentiel reste proposé tant que la formation le porte. */
+  const dips = f && !DIPS.includes(f.dip) ? DIPS.concat([f.dip]) : DIPS;
+  const debs = DEBS.map(d=>d.nom).concat(f ? f.jobs.filter(j=>!DEBS.some(d=>d.nom===j)) : []).sort((a,b)=>a.localeCompare(b,"fr"));
   return shell(
     '<div class="pagehead"><div><a class="btn ghost sm" href="#/formations">'+icon("back")+'Retour à la liste</a>'
     + '<h1 style="margin-top:10px">'+(f?"Modifier la formation":"Ajouter une formation")+'</h1>'
-    + '<p>'+(f?"Les modifications sont visibles immédiatement sur le site public.":"Renseignez l\'intitulé, le diplôme visé et l\'institut qui porte la formation.")+'</p></div></div>'
+    + '<p>'+(f?"Les modifications sont reprises par le site public ouvert dans ce navigateur.":"Renseignez l\'intitulé, le diplôme visé et l\'institut qui porte la formation.")+'</p></div></div>'
     + '<form class="form" id="forme-form" novalidate>'
     + '<fieldset><legend>Identification</legend><div class="row two">'
-    + '<div class="fld" data-f="nom"><label for="f-nom">Intitulé</label><input id="f-nom" required value="'+esc(f?f.nom:"")+'" placeholder="ex. Comptabilité et gestion des entreprises"></div>'
-    + '<div class="fld" data-f="dip"><label for="f-dip">Diplôme visé</label><select id="f-dip">'
-    + DIPS.map(d=>'<option'+(f&&f.dip===d?" selected":"")+'>'+d+'</option>').join("")
-    + '</select><span class="hint" id="dip-hint"></span></div>'
+    + '<div class="fld" data-f="nom"><label for="f-nom">Intitulé de la filière</label><input id="f-nom" required value="'+esc(f?f.nom:"")+'" placeholder="ex. Comptabilité et gestion des entreprises"></div>'
+    + '<div class="fld" data-f="dip"><label for="f-dip">Diplôme délivré</label><select id="f-dip">'
+    + dips.map(d=>'<option value="'+esc(d)+'"'+(f&&f.dip===d?" selected":"")+'>'+esc(d)+(DUREE[d]?' — '+DUREE[d]+' an'+(DUREE[d]>1?"s":""):"")+'</option>').join("")
+    + '</select><span class="hint"><a href="#/diplomes" style="color:var(--green);font-weight:700">Gérer les diplômes</a></span></div>'
     + '</div><div class="row two">'
     + '<div class="fld" data-f="inst"><label for="f-inst">Institut</label><select id="f-inst">'
-    + Object.values(INST).map(i=>'<option value="'+i.id+'"'+(instCible===i.id?" selected":"")+'>'+esc(i.sigle)+' — '+esc(i.nom)+'</option>').join("")
+    + Object.values(INST).map(i=>'<option value="'+esc(i.id)+'"'+(instCible===i.id?" selected":"")+'>'+esc(i.sigle)+' — '+esc(i.nom)+'</option>').join("")
     + '</select><span class="hint" id="inst-hint">'+nbFormes+' formation'+(nbFormes>1?"s":"")+' déjà rattachée'+(nbFormes>1?"s":"")+' à cet institut.</span></div>'
     + '<div class="fld" data-f="dom"><label for="f-dom">Domaine</label><select id="f-dom">'
     + DOMAINES.map(d=>'<option value="'+d.id+'"'+(f&&f.dom===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")
     + '</select></div>'
+    + '</div><div class="row">'
+    + '<div class="fld" data-f="desc"><label for="f-desc">Description</label><textarea id="f-desc" placeholder="Présentation courte de la formation, affichée sur sa fiche publique">'+esc(f?f.desc:"")+'</textarea></div>'
     + '</div></fieldset>'
-    + '<fieldset><legend>Organisation</legend><div class="row three">'
-    + '<div class="fld" data-f="duree"><label for="f-duree">Durée (années)</label><select id="f-duree">'
-    + [2,3].map(d=>'<option value="'+d+'"'+((f?f.duree:DUREE_DIP.BTS)===d?" selected":"")+'>'+d+' ans</option>').join("")
-    + '</select></div>'
-    + '<div class="fld" data-f="frais"><label for="f-frais">Frais par an (FCFA)</label><input id="f-frais" type="number" min="0" step="10000" required value="'+(f?f.frais:400000)+'"></div>'
+    + '<fieldset><legend>Niveaux et tarifs</legend><div class="row two">'
+    + '<div class="fld"><label>Durée des études</label><p id="duree-txt" style="font-weight:700;padding:11px 0"></p><span class="hint">Définie par le diplôme délivré.</span></div>'
     + '<div class="fld" data-f="stage"><label for="f-stage">Stage (mois)</label><input id="f-stage" type="number" min="0" max="12" value="'+(f?f.stage:0)+'"><span class="hint">0 signifie qu\'aucun stage n\'est prévu.</span></div>'
+    + '</div><div class="row" style="margin-top:16px">'
+    + '<div class="fld" data-f="frais"><label>Frais par niveau (FCFA par an)</label><div class="tarifs" id="tarifs"></div></div>'
     + '</div>'
-    + '<div class="row two" style="margin-top:16px">'
-    + '<div class="fld" data-f="series"><label for="f-series">Séries du bac acceptées</label><input id="f-series" value="'+esc(f?f.series:"")+'" placeholder="ex. ABCDG"><span class="hint">Lettres sans séparateur. Laisser vide pour une formation post-baccalauréat.</span></div>'
-    + '<div class="fld"><label>Options</label>'
+    + '<div class="row" style="margin-top:16px"><div class="fld"><label>Options</label>'
     + '<label class="check"><input type="checkbox" id="f-soir"'+(f&&f.soir?" checked":"")+'>Cours du soir</label>'
     + '<label class="check"><input type="checkbox" id="f-tranches"'+(f&&f.tranches?" checked":"")+'>Paiement en plusieurs fois</label>'
     + '</div></div>'
-    + '<p id="coherence" class="ok" hidden></p>'
-    + '<p id="coherence-ko" class="err" hidden></p>'
     + '</fieldset>'
-    + '<fieldset><legend>Contenu</legend><div class="row two">'
-    + '<div class="fld" data-f="jobs"><label for="f-jobs">Débouchés</label><textarea id="f-jobs" placeholder="Un métier par ligne">'+esc(f?f.jobs.join("\n"):"")+'</textarea></div>'
-    + '<div class="fld" data-f="cours"><label for="f-cours">Cours dispensés</label><textarea id="f-cours" placeholder="Un cours par ligne">'+esc(f?f.cours.join("\n"):"")+'</textarea></div>'
+    + '<fieldset><legend>Conditions d\'admission</legend><div class="row two">'
+    + '<div class="fld" data-f="series"><label>Séries du bac acceptées</label><div class="sergrid" id="f-series">'
+    + (SERIES.map(x=>'<label class="check"><input type="checkbox" value="'+esc(x.nom)+'"'+(f&&f.series.includes(x.nom)?" checked":"")+'>Série '+esc(x.nom)+(x.lib?' — '+esc(x.lib):"")+'</label>').join("") || '<span class="hint">Aucune série au référentiel.</span>')
+    + '</div><span class="hint">Aucune case cochée : la série n\'est pas un critère d\'admission. <a href="#/series" style="color:var(--green);font-weight:700">Gérer les séries</a></span></div>'
+    + '<div class="fld" data-f="admission"><label for="f-admission">Autres conditions</label><input id="f-admission" value="'+esc(f?f.admission:"")+'" placeholder="ex. Étude de dossier et entretien"></div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Contenu</legend><div class="row">'
+    + '<div class="fld" data-f="jobs"><label for="deb-find">Débouchés</label><input id="deb-find" type="search" placeholder="Filtrer les débouchés">'
+    + '<div class="deblist" id="f-jobs">'+(debs.map(n=>'<label class="check"><input type="checkbox" value="'+esc(n)+'"'+(f&&f.jobs.includes(n)?" checked":"")+'>'+esc(n)+'</label>').join("") || '<span class="hint">Aucun débouché au référentiel.</span>')+'</div>'
+    + '<span class="hint"><a href="#/debouches" style="color:var(--green);font-weight:700">Gérer les débouchés</a></span></div>'
+    + '</div><div class="row" style="margin-top:16px">'
+    + '<div class="fld"><label>Programme</label>'
+    + (f ? '<div class="programme">'+f.programme.map((a,k)=>'<div class="annee"><b>'+niveau(k)+'</b>'+(a.length?'<ul>'+a.map(c=>'<li>'+esc(c)+'</li>').join("")+'</ul>':'<span class="hint" style="display:block">Aucun cours.</span>')+'</div>').join("")+'</div>'
+        + '<span class="hint"><a href="#/cours" data-act="cours-de" data-id="'+esc(f.id)+'" style="color:var(--green);font-weight:700">Gérer les cours de cette formation</a></span>'
+      : '<span class="hint">Créez d\'abord la formation : ses cours s\'ajoutent ensuite dans la rubrique Cours, année par année.</span>')
+    + '</div>'
     + '</div></fieldset>'
     + '<fieldset><legend>Publication</legend><div class="fld" data-f="statut"><label for="f-statut">Statut</label><select id="f-statut">'
     + '<option value="publiee"'+(!f||f.statut==="publiee"?" selected":"")+'>Publiée — visible sur le site public</option>'
@@ -720,7 +816,7 @@ function pageInsts(){
     + '<select class="field" id="iarr" aria-label="Filtrer par arrondissement"><option value="">Tous les arrondissements</option>'
     + ARR.map(a=>'<option'+(s.arr===a?" selected":"")+'>'+a+'</option>').join("")+'</select>'
     + '<div class="seg" role="group" aria-label="Filtrer par agrément">'
-    + [["","Tous"],["oui","Agrémés"],["non","En cours"]].map(o=>'<button type="button" data-ag="'+o[0]+'" aria-pressed="'+(s.ag===o[0])+'">'+o[1]+'</button>').join("")
+    + [["","Tous"],["oui","Agréés"],["non","Non agréés"]].map(o=>'<button type="button" data-ag="'+o[0]+'" aria-pressed="'+(s.ag===o[0])+'">'+o[1]+'</button>').join("")
     + '</div></div><small>'+rows.length+' résultat'+(rows.length>1?"s":"")+'</small></header>'
     + (slice.length
       ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>Institut</th><th>Arrondissement</th><th>Contact</th><th>Agrément</th><th class="num">Formations</th><th class="num">Inscription</th><th></th></tr></thead><tbody>'
@@ -770,7 +866,7 @@ function pageInstEdit(rawId){
     + '<div class="fld" data-f="mail"><label for="i-mail">Adresse électronique</label><input id="i-mail" type="email" value="'+esc(i?i.mail:"")+'" placeholder="contact@institut.cg"></div>'
     + '</div></fieldset>'
     + '<fieldset><legend>Agrément et frais</legend><div class="row two">'
-    + '<div class="fld" data-f="ag"><label for="i-ag">Numéro d\'agrément</label><input id="i-ag" value="'+esc(i?i.ag:"")+'" placeholder="ex. N° 047/MESRTI/2009"><span class="hint">Laisser vide si l\'agrément est en cours de vérification.</span></div>'
+    + '<div class="fld" data-f="ag"><label for="i-ag">Numéro d\'agrément</label><input id="i-ag" value="'+esc(i?i.ag:"")+'" placeholder="ex. N° 047/MESRTI/2009"><span class="hint">Laisser vide si l\'institut n\'est pas agréé : il apparaîtra sans badge.</span></div>'
     + '<div class="fld" data-f="insc"><label for="i-insc">Frais d\'inscription (FCFA)</label><input id="i-insc" type="number" min="0" step="1000" required value="'+(i?i.insc:50000)+'"></div>'
     + '</div><div class="row two" style="margin-top:16px">'
     + '<div class="fld" data-f="clot"><label for="i-clot">Clôture des inscriptions</label><input id="i-clot" type="date" value="'+esc(i?i.clot:"")+'"></div>'
@@ -778,7 +874,8 @@ function pageInstEdit(rawId){
     + '</div></fieldset>'
     + '<fieldset><legend>Présentation et image</legend>'
     + '<div class="fld" data-f="desc"><label for="i-desc">Description</label><textarea id="i-desc" placeholder="Présentation courte, affichée sur la fiche publique">'+esc(i?i.desc:"")+'</textarea></div>'
-    + '<div class="fld" style="margin-top:16px"><label id="logo-label">Logo</label>'
+    + '<div class="fld" data-f="avantages" style="margin-top:16px"><label for="i-avantages">Avantages (optionnel)</label><textarea id="i-avantages" placeholder="Un avantage par ligne : bibliothèque, bourses, restauration…">'+esc(i&&i.avantages?i.avantages.join("\n"):"")+'</textarea></div>'
+    + '<div class="fld" style="margin-top:16px"><label id="logo-label">Image de l\'institut</label>'
     + '<div class="logoedit" id="logo-edit" role="group" aria-labelledby="logo-label"></div>'
     + '<input type="file" id="i-logo" accept="image/jpeg,image/png,image/webp" hidden></div>'
     + '</fieldset>'
@@ -793,77 +890,118 @@ function pageInstEdit(rawId){
   );
 }
 
-/* ---------- Demandes de contact ---------- */
-function pageContact(){
-  const s = S.contact;
-  const rows = CONTACT.filter(x=>!s.statut || x.statut===s.statut).sort((a,b)=>b.quand.localeCompare(a.quand));
-  s.page = Math.min(s.page, pages(rows.length, s.par));
-  const slice = rows.slice((s.page-1)*s.par, s.page*s.par);
-  const cnt = nbContact;
+/* ---------- Diplômes et débouchés : référentiels (EX-08) ---------- */
+const REFL = {
+  dip:{h:"#/diplomes", titre:"Diplômes", nom:"diplôme", un:"un diplôme", le:"le diplôme", ce:"ce diplôme", aucun:"Aucun diplôme", ph:"ex. Licence", usage:n=>usageDip(n),
+    intro:"Référentiel des diplômes délivrés, avec leur durée d'études : il alimente les formations et la recherche publique.", rows:()=>DIPS.map(n=>({nom:n, duree:dureeDip(n)}))},
+  deb:{h:"#/debouches", titre:"Débouchés", nom:"débouché", un:"un débouché", le:"le débouché", ce:"ce débouché", aucun:"Aucun débouché", ph:"ex. Comptable", usage:n=>usageDeb(n),
+    intro:"Référentiel des débouchés professionnels, rattachés aux formations.", rows:()=>DEBS.slice().sort((a,b)=>a.nom.localeCompare(b.nom,"fr"))},
+  dom:{h:"#/domaines", titre:"Domaines d'insertion", nom:"domaine", un:"un domaine", le:"le domaine", ce:"ce domaine", aucun:"Aucun domaine", ph:"ex. Informatique", usage:n=>usageDom(n),
+    intro:"Référentiel des domaines d'insertion : ils classent les formations et les débouchés, et forment la barre de catégories du site public.", rows:()=>DOMAINES.slice()},
+  ser:{h:"#/series", titre:"Séries du bac", nom:"série", un:"une série", le:"la série", ce:"cette série", aucun:"Aucune série", ph:"ex. A", usage:n=>usageSer(n),
+    intro:"Référentiel des séries du baccalauréat. Elles se rattachent aux formations comme conditions d'admission et servent de filtre sur le site public.", rows:()=>SERIES.slice()}
+};
+function pageRefl(type){
+  const c = REFL[type], rows = c.rows();
+  const ed = S.refl && S.refl.type===type ? S.refl : null;
+  const cur = ed && ed.nom!==null ? rows.find(r=>r.nom===ed.nom) : null;
+  /* Colonne et champ propres à chaque référentiel. */
+  const col = {dip:"Durée des études", deb:"Domaine d'insertion", ser:"Libellé", dom:"Couleur"}[type];
+  const cell = r => type==="dom" ? '<span style="display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;background:'+esc(r.c)+'"></span> <small style="color:var(--muted)">'+DEBS.filter(x=>x.secteur===r.id).length+' débouché(s)</small>' : type==="dip" ? r.duree+' an'+(r.duree>1?"s":"") : type==="deb" ? esc(DOM[r.secteur]?DOM[r.secteur].nom:"—") : esc(r.lib||"—");
+  const champ = type==="dip" ? '<div class="fld" data-f="rduree"><label for="r-duree">Durée des études</label><select id="r-duree">'
+        + [1,2,3,4,5].map(d=>'<option value="'+d+'"'+((cur?cur.duree:2)===d?" selected":"")+'>'+d+' an'+(d>1?"s":"")+'</option>').join("")
+        + '</select><span class="hint">S\'applique à toutes les formations qui délivrent ce diplôme.</span></div>'
+    : type==="deb" ? '<div class="fld" data-f="rsect"><label for="r-sect">Domaine d\'insertion</label><select id="r-sect">'
+        + DOMAINES.map(d=>'<option value="'+d.id+'"'+(cur&&cur.secteur===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")+'</select></div>'
+    : type==="dom" ? '<div class="fld" data-f="rcoul"><label for="r-coul">Couleur</label><input id="r-coul" type="color" value="'+esc(cur?cur.c:"#1E6B4A")+'" style="height:46px;padding:4px"><span class="hint">Couleur des vignettes des formations de ce domaine.</span></div>'
+    : '<div class="fld" data-f="rlib"><label for="r-lib">Libellé</label><input id="r-lib" value="'+esc(cur?cur.lib:"")+'" placeholder="ex. Lettres"><span class="hint">Les séries se rattachent ensuite aux formations, dans leur fiche.</span></div>';
   return shell(
-    '<div class="pagehead"><div><h1>Demandes de contact</h1><p>Prises de rendez-vous et questions envoyées depuis les fiches publiques.</p></div>'
-    + '<span class="badge new">'+cnt("nouvelle")+' nouvelle'+(cnt("nouvelle")>1?"s":"")+'</span></div>'
-    + '<div class="panel"><header><div class="seg" role="group" aria-label="Filtrer par statut">'
-    + [["","Toutes"],["nouvelle","Nouvelles"],["traitee","Traitées"],["archivee","Archivées"]].map(o=>'<button type="button" data-cstatut="'+o[0]+'" aria-pressed="'+(s.statut===o[0])+'">'+o[1]+' ('+(o[0]?cnt(o[0]):CONTACT.length)+')</button>').join("")
-    + '</div><small>'+rows.length+' demande'+(rows.length>1?"s":"")+'</small></header>'
-    + (slice.length?'<div class="rows" style="padding:16px">'+slice.map(x=>{
-        const f = FORMES[x.prog];
-        return '<article class="rowc">'
-          + '<div class="hd"><div class="who"><b>'+esc(x.nom)+'</b><small>'+esc(x.mail)+' · '+esc(x.tel)+'</small></div>'
-          + badgeStat(x.statut)+'</div>'
-          + '<p class="msg">'+esc(x.msg)+'</p>'
-          + '<div class="meta">'+icon("brief")+'<span>'+libelleFormation(x.prog)+'</span>'
-          + '<span>'+icon("clock")+' '+esc(jdate(x.quand))+'</span></div>'
-          + '<div class="foot">'
-          + (x.statut==="nouvelle"?'<button class="btn sm" type="button" data-act="contact-ok" data-id="'+esc(x.id)+'">'+icon("check")+'Marquer comme traitée</button>':"")
-          + (f?'<a class="btn line sm" href="index.html#f-'+esc(f.id)+'">'+icon("eye")+'Voir la fiche publique</a>':"")
-          + (x.statut!=="archivee"?'<button class="btn ghost sm" type="button" data-act="contact-arch" data-id="'+esc(x.id)+'">Archiver</button>':"")
-          + '</div></article>';
-      }).join("")+'</div>'+pager(rows.length, s.par, s.page)
-      : '<div class="pad"><div class="empty"><h3>Aucune demande</h3><p>Les demandes envoyées depuis le site public apparaîtront ici.</p></div></div>')
+    '<div class="pagehead"><div><h1>'+c.titre+'</h1><p>'+esc(c.intro)+'</p></div>'
+    + (ed?"":'<button class="btn" type="button" data-act="refl-add" data-type="'+type+'">'+icon("plus")+'Ajouter '+c.un+'</button>')+'</div>'
+    + (ed ? '<form class="form" id="refl-form" novalidate><fieldset><legend>'+(cur?"Modifier "+c.le:"Ajouter "+c.un)+'</legend><div class="row two">'
+        + '<div class="fld" data-f="rnom"><label for="r-nom">'+(type==="ser"?"Série":"Intitulé")+'</label><input id="r-nom" required value="'+esc(cur?cur.nom:"")+'" placeholder="'+c.ph+'"></div>'
+        + champ
+        + '</div></fieldset><div class="formfoot"><button class="btn" type="submit">'+(cur?"Enregistrer les modifications":"Ajouter")+'</button>'
+        + '<button class="btn line" type="button" data-act="refl-cancel">Annuler</button></div></form>' : "")
+    + '<div class="panel"><header><h2>'+rows.length+' '+c.nom+(rows.length>1?"s":"")+'</h2></header>'
+    + (rows.length
+      ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>'+(type==="ser"?"Série":"Intitulé")+'</th><th>'+col+'</th><th class="num">Formations</th><th></th></tr></thead><tbody>'
+        + rows.map(r=>'<tr><td><b>'+esc(r.nom)+'</b></td>'
+          + '<td>'+cell(r)+'</td>'
+          + '<td class="num">'+c.usage(r.nom)+'</td>'
+          + '<td><div class="acts">'
+          + '<button class="act" type="button" data-act="refl-edit" data-type="'+type+'" data-id="'+esc(r.nom)+'" title="Modifier" aria-label="Modifier '+esc(r.nom)+'">'+icon("pencil")+'</button>'
+          + '<button class="act del" type="button" data-act="refl-del" data-type="'+type+'" data-id="'+esc(r.nom)+'" title="Supprimer" aria-label="Supprimer '+esc(r.nom)+'">'+icon("trash")+'</button>'
+          + '</div></td></tr>').join("")
+        + '</tbody></table></div>'
+      : '<div class="pad"><div class="empty"><h3>'+c.aucun+'</h3><p>Ajoutez-en pour pouvoir les rattacher aux formations.</p></div></div>')
     + '</div>',
-    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Pilotage"},{t:"Demandes de contact"}]
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Catalogue"},{t:c.titre}]
   );
 }
-/* Une demande peut viser une formation ou un institut supprimé du catalogue. */
-function libelleFormation(progId){
-  const f = FORMES[progId];
-  if(!f) return "Formation retirée du catalogue";
-  const i = INST[f.inst];
-  return f.nom + (i ? " — "+i.sigle : " — institut supprimé");
-}
-function badgeStat(k){
-  if(k==="nouvelle") return '<span class="badge new">Nouvelle</span>';
-  if(k==="traitee") return '<span class="badge ok">Traitée</span>';
-  return '<span class="badge wait">Archivée</span>';
-}
 
-/* ---------- Demandes de référencement ---------- */
-function pageRef(){
-  const s = S.ref;
-  const rows = REF.filter(x=>!s.statut || x.statut===s.statut).sort((a,b)=>b.quand.localeCompare(a.quand));
+/* ---------- Cours : catalogue partagé, rattaché aux formations ---------- */
+const formesTriees = () => Object.values(FORMES).sort((a,b)=>libForme(a).localeCompare(libForme(b),"fr"));
+const optFormes = sel => formesTriees().map(f=>'<option value="'+esc(f.id)+'"'+(sel===f.id?" selected":"")+'>'+esc(libForme(f))+' ('+esc(f.dip)+')</option>').join("");
+const optAnnees = (formeId, sel) => {
+  const f = FORMES[formeId];
+  return Array.from({length:f ? f.duree : 1}, (_,k)=>'<option value="'+(k+1)+'"'+(sel===k+1?" selected":"")+'>'+niveau(k)+'</option>').join("");
+};
+/* Une ligne « formation + année » du formulaire d'un cours. */
+const lienRow = l => '<div class="lien"><select class="lien-forme" aria-label="Formation">'+optFormes(l.forme)+'</select>'
+  + '<select class="lien-annee" aria-label="Année d\'études">'+optAnnees(l.forme, l.annee)+'</select>'
+  + '<button class="act del" type="button" data-act="lien-del" title="Retirer cette formation" aria-label="Retirer cette formation">'+icon("x")+'</button></div>';
+function pageCours(){
+  const s = S.cours, q = norm(s.q);
+  if(s.forme && !FORMES[s.forme]) s.forme = "";
+  const formes = formesTriees();
+  const lienDe = c => c.liens.find(l=>l.forme===s.forme);
+  const rows = COURS.filter(c=>(!s.forme || lienDe(c)) && (!q || norm(c.nom).includes(q)))
+    .sort((a,b)=>(s.forme ? lienDe(a).annee-lienDe(b).annee : 0) || a.nom.localeCompare(b.nom,"fr"));
   s.page = Math.min(s.page, pages(rows.length, s.par));
   const slice = rows.slice((s.page-1)*s.par, s.page*s.par);
-  const cnt = nbRef;
+  const ed = S.coursEdit;
+  const cur = ed && ed.id ? COURS.find(c=>c.id===ed.id) : null;
+  const liens = (cur ? cur.liens : ed ? ed.liens : []).filter(l=>FORMES[l.forme]);
+  const libres = s.forme ? COURS.filter(c=>!lienDe(c)).sort((a,b)=>a.nom.localeCompare(b.nom,"fr")) : [];
   return shell(
-    '<div class="pagehead"><div><h1>Demandes de référencement</h1><p>Instituts qui demandent à figurer sur Kelasi.</p></div>'
-    + '<span class="badge new">'+cnt("nouvelle")+' nouvelle'+(cnt("nouvelle")>1?"s":"")+'</span></div>'
-    + '<div class="panel"><header><div class="seg" role="group" aria-label="Filtrer par statut">'
-    + [["","Toutes"],["nouvelle","Nouvelles"],["traitee","Traitées"]].map(o=>'<button type="button" data-rstatut="'+o[0]+'" aria-pressed="'+(s.statut===o[0])+'">'+o[1]+' ('+(o[0]?cnt(o[0]):REF.length)+')</button>').join("")
-    + '</div><small>'+rows.length+' demande'+(rows.length>1?"s":"")+'</small></header>'
-    + (slice.length?'<div class="rows" style="padding:16px">'+slice.map(x=>
-        '<article class="rowc">'
-        + '<div class="hd"><div class="who"><b>'+esc(x.nom)+'</b><small>'+esc(x.tel)+' · responsable : '+esc(x.resp)+'</small></div>'+badgeStat(x.statut)+'</div>'
-        + '<div class="kv" style="max-width:520px"><div><span>Arrondissement</span><b>'+esc(x.arr)+'</b></div>'
-        + '<div><span>Numéro d\'agrément annoncé</span><b>'+(x.ag?esc(x.ag):"aucun")+'</b></div>'
-        + '<div><span>Reçue le</span><b>'+esc(jdate(x.quand))+'</b></div></div>'
-        + '<div class="foot">'
-        + (x.statut==="nouvelle"?'<button class="btn sm" type="button" data-act="ref-accept" data-id="'+esc(x.id)+'">'+icon("check")+'Accepter et créer la fiche</button>':"")
-        + '<a class="btn line sm" href="index.html#referencer">'+icon("eye")+'Voir le formulaire public</a>'
-        + '</div></article>').join("")+'</div>'+pager(rows.length, s.par, s.page)
-      : '<div class="pad"><div class="empty"><h3>Aucune demande</h3><p>Les demandes envoyées depuis la page Référencer apparaîtront ici.</p></div></div>')
+    '<div class="pagehead"><div><h1>Cours</h1><p>'+COURS.length+' cours au catalogue. Un même cours peut être rattaché à plusieurs formations, chacune avec son année d\'études.</p></div>'
+    + (ed ? "" : '<button class="btn" type="button" data-act="cours-add">'+icon("plus")+'Ajouter un cours</button>')+'</div>'
+    + (ed ? '<form class="form" id="cours-form" novalidate><fieldset><legend>'+(cur?"Modifier le cours":"Ajouter un cours")+'</legend>'
+        + '<div class="row"><div class="fld" data-f="cnom"><label for="c-nom">Intitulé du cours</label><input id="c-nom" required value="'+esc(cur?cur.nom:"")+'" placeholder="ex. Français"></div></div>'
+        + '<div class="row" style="margin-top:16px"><div class="fld" data-f="cliens"><label>Formations rattachées</label>'
+        + '<div id="c-liens">'+liens.map(lienRow).join("")+'</div>'
+        + (formes.length ? '<button class="btn line sm" type="button" data-act="lien-add">'+icon("plus")+'Rattacher à une formation</button>' : "")
+        + '<span class="hint" style="display:block">Les années proposées viennent du diplôme de chaque formation. Un cours sans formation reste au catalogue.</span></div></div>'
+        + '</fieldset><div class="formfoot"><button class="btn" type="submit">'+(cur?"Enregistrer les modifications":"Ajouter le cours")+'</button>'
+        + '<button class="btn line" type="button" data-act="cours-cancel">'+(cur?"Annuler":"Terminer")+'</button></div></form>' : "")
+    + '<div class="panel"><header><div class="toolbar">'
+    + '<span class="field">'+icon("search")+'<input id="cq" type="search" placeholder="Rechercher un cours" value="'+esc(s.q)+'" aria-label="Rechercher"></span>'
+    + '<select class="field" id="cforme" aria-label="Filtrer par formation"><option value="">Toutes les formations</option>'
+    + formes.map(f=>'<option value="'+esc(f.id)+'"'+(s.forme===f.id?" selected":"")+'>'+esc(libForme(f))+'</option>').join("")+'</select>'
+    + '</div><small>'+rows.length+' résultat'+(rows.length>1?"s":"")+'</small></header>'
+    /* Formation filtrée : on peut lui rattacher directement un cours déjà au catalogue. */
+    + (s.forme && libres.length ? '<div class="attach"><b style="font-size:14px">Rattacher un cours existant</b>'
+        + '<select id="att-cours" aria-label="Cours à rattacher">'+libres.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.nom)+'</option>').join("")+'</select>'
+        + '<select id="att-annee" aria-label="Année d\'études" style="flex:0 1 150px">'+optAnnees(s.forme, 1)+'</select>'
+        + '<button class="btn sm" type="button" data-act="att-ok">'+icon("plus")+'Rattacher</button></div>' : "")
+    + (slice.length
+      ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>Cours</th><th>'+(s.forme?"Année":"Formations rattachées")+'</th><th></th></tr></thead><tbody>'
+        + slice.map(c=>{
+            const noms = c.liens.map(l=>libForme(FORMES[l.forme]));
+            return '<tr><td><b>'+esc(c.nom)+'</b></td>'
+              + (s.forme ? '<td>'+niveau(lienDe(c).annee-1)+(c.liens.length>1?'<br><small style="color:var(--muted)">aussi dans '+(c.liens.length-1)+' autre'+(c.liens.length>2?"s":"")+' formation'+(c.liens.length>2?"s":"")+'</small>':"")+'</td>'
+                : '<td>'+(noms.length ? '<span class="badge '+(noms.length>1?"ok":"wait")+'">'+noms.length+' formation'+(noms.length>1?"s":"")+'</span><br><small style="color:var(--muted)">'+esc(noms.slice(0,2).join(" · "))+(noms.length>2?" …":"")+'</small>' : '<span class="badge wait">Aucune</span>')+'</td>')
+              + '<td><div class="acts">'
+              + (s.forme ? '<button class="act" type="button" data-act="cours-detach" data-id="'+esc(c.id)+'" title="Retirer de cette formation" aria-label="Retirer '+esc(c.nom)+' de cette formation">'+icon("x")+'</button>' : "")
+              + '<button class="act" type="button" data-act="cours-edit" data-id="'+esc(c.id)+'" title="Modifier" aria-label="Modifier '+esc(c.nom)+'">'+icon("pencil")+'</button>'
+              + '<button class="act del" type="button" data-act="cours-del" data-id="'+esc(c.id)+'" title="Supprimer du catalogue" aria-label="Supprimer '+esc(c.nom)+'">'+icon("trash")+'</button>'
+              + '</div></td></tr>';
+          }).join("")
+        + '</tbody></table></div>'+pager(rows.length, s.par, s.page)
+      : '<div class="pad"><div class="empty"><h3>Aucun cours</h3><p>'+(s.forme&&!q?"Cette formation n\'a pas encore de cours : rattachez-en un ou ajoutez-en un nouveau.":"Modifiez la recherche ou le filtre.")+'</p></div></div>')
     + '</div>',
-    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Pilotage"},{t:"Demandes de référencement"}]
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Catalogue"},{t:"Cours"}]
   );
 }
 
@@ -883,7 +1021,7 @@ function pageCompte(){
     + '<p style="color:var(--muted);font-size:14px">Le thème sombre s\'applique automatiquement à la nuit. Votre choix est mémorisé sur cet appareil.</p>'
     + '<button class="btn line" type="button" data-act="theme">'+icon("moon")+'Basculer le thème</button></div></div>'
     + '<div class="panel"><header><h2>Mot de passe</h2></header><div class="pad" style="display:grid;gap:12px">'
-    + '<p style="color:var(--muted);font-size:14px">La modification du mot de passe et des accès se fera depuis l\'outil de gestion du projet, une fois les comptes reliés à l\'API.</p>'
+    + '<p style="color:var(--muted);font-size:14px">Pour changer de mot de passe, déconnectez-vous puis utilisez « Mot de passe oublié » sur l\'écran de connexion : un lien de réinitialisation est envoyé par e-mail.</p>'
     + '</div></div>'
     + '<div class="panel"><header><h2>Session</h2></header><div class="pad" style="display:grid;gap:12px">'
     + '<button class="btn line" type="button" data-act="logout" style="justify-content:flex-start">'+icon("logout")+'Se déconnecter</button>'
@@ -912,6 +1050,8 @@ function pager(total, par, page){
 function render(){
   const h = currentHash();
   let out;
+  if(S.refl && h!==REFL[S.refl.type].h) S.refl = null;
+  if(S.coursEdit && h!=="#/cours") S.coursEdit = null;
   if(!isAuthed()) out = pageLogin();
   else if(h==="#/connexion") out = pageLogin();
   else if(h==="#/tableau-de-bord") out = pageDash();
@@ -921,14 +1061,17 @@ function render(){
   else if(h==="#/instituts") out = pageInsts();
   else if(h==="#/instituts/nouveau") out = pageInstEdit(null);
   else if(h.indexOf("#/instituts/")===0) out = pageInstEdit(h.slice(12));
-  else if(h==="#/demandes/contact") out = pageContact();
-  else if(h==="#/demandes/referencement") out = pageRef();
+  else if(h==="#/cours") out = pageCours();
+  else if(h==="#/diplomes") out = pageRefl("dip");
+  else if(h==="#/debouches") out = pageRefl("deb");
+  else if(h==="#/series") out = pageRefl("ser");
+  else if(h==="#/domaines") out = pageRefl("dom");
   else if(h==="#/compte") out = pageCompte();
   else out = pageDash();
   document.getElementById("app").innerHTML = out;
-  document.title = (isAuthed()?"Espace Squad":"Connexion")+" — Kelasi Brazzaville";
+  document.title = (isAuthed()?"Espace Squad":"Connexion")+" — Orienta Brazzaville";
   S.sideOpen = false;
-  /* Sur une fiche, le logo déjà enregistré est celui proposé par défaut.
+  /* Sur une fiche, l'image déjà enregistrée est celle proposée par défaut.
      Ailleurs, le brouillon est abandonné. */
   if(isAuthed() && /^#\/instituts\/[^/]+$/.test(h)){
     const i = INST[h.slice(12)];
@@ -946,40 +1089,31 @@ function bindLive(){
   if(q) q.addEventListener("input", deb(()=>{ S.prog.q=q.value; S.prog.page=1; render(); const el=document.getElementById("fq"); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length);} },260));
   const iq = document.getElementById("iq");
   if(iq) iq.addEventListener("input", deb(()=>{ S.inst.q=iq.value; S.inst.page=1; render(); const el=document.getElementById("iq"); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length);} },260));
-  const dip = document.getElementById("f-dip"), duree = document.getElementById("f-duree"),
-        series = document.getElementById("f-series"),
-        cohe = document.getElementById("coherence"), coheKo = document.getElementById("coherence-ko"),
-        hint = document.getElementById("dip-hint");
-  if(dip && duree && series && cohe && coheKo && hint){
-    /* Règle métier : la durée est imposée par le diplôme, et un Master est post-baccalauréat. */
-    const sync = ()=>{
-      const attendu = DUREE_DIP[dip.value];
-      hint.textContent = "Un "+dip.value+" dure "+attendu+" ans à Brazzaville.";
-      Array.from(duree.options).forEach(o=>{ o.disabled = (+o.value !== attendu); });
-      if(+duree.value !== attendu) duree.value = String(attendu);
-      const brut = series.value.toUpperCase();
-      /* Une lettre hors A-G est signalée, jamais corrigée en silence. */
-      const horsAlphabet = brut.replace(/[A-G]/g,"").replace(/\s/g,"");
-      const saisies = brut.replace(/[^A-G]/g,"").split("");
-      const doublons = saisies.filter((c,k) => saisies.indexOf(c) !== k);
-      const postBac = dip.value === "Master";
-      const pb = postBac && saisies.length>0;
-      let ko = "";
-      if(horsAlphabet) ko = "Série inconnue : "+horsAlphabet.split("").join(", ")+". Les séries vont de A à G.";
-      else if(doublons.length) ko = "Série répétée : "+doublons[0]+".";
-      else if(postBac && pb) ko = "Un Master est post-baccalauréat : laissez les séries du bac vides.";
-      else if(!postBac && !saisies.length) ko = "Indiquez les séries du bac acceptées, ou choisissez un Master.";
-      cohe.hidden = !!ko; coheKo.hidden = !ko;
-      if(ko) coheKo.textContent = ko;
-      else cohe.textContent = postBac
-        ? "Formation post-baccalauréat : ouverte aux titulaires d'une licence ou d'un BTS."
-        : "Accessible après le baccalauréat, séries "+saisies.join(", ")+".";
+  /* Un montant par année d'études ; la durée vient du diplôme choisi. */
+  const dipSel = document.getElementById("f-dip"), tarifs = document.getElementById("tarifs");
+  if(dipSel && tarifs){
+    const f = FORMES[formeId()];
+    const draw = ()=>{
+      const n = dureeDip(dipSel.value, f ? f.duree : 1);
+      document.getElementById("duree-txt").textContent = n+" an"+(n>1?"s":"");
+      const saisis = Array.from(tarifs.querySelectorAll("input")).map(x=>x.value);
+      tarifs.innerHTML = Array.from({length:n}, (_,k)=>{
+        const v = saisis[k]!==undefined ? saisis[k]
+          : f && f.tarifs && f.tarifs[k]!=null ? f.tarifs[k]
+          : saisis.length ? saisis[saisis.length-1] : (f ? f.frais : 400000);
+        return '<label>'+niveau(k)+'<input type="number" min="0" step="10000" value="'+esc(v)+'" aria-label="Frais '+niveau(k)+'"></label>';
+      }).join("");
     };
-    dip.addEventListener("change", sync);
-    duree.addEventListener("change", sync);
-    series.addEventListener("input", sync);
-    sync();
+    dipSel.addEventListener("change", draw);
+    draw();
   }
+  const cq = document.getElementById("cq");
+  if(cq) cq.addEventListener("input", deb(()=>{ S.cours.q=cq.value; S.cours.page=1; render(); const el=document.getElementById("cq"); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length);} },260));
+  const debFind = document.getElementById("deb-find");
+  if(debFind) debFind.addEventListener("input", ()=>{
+    const q = norm(debFind.value);
+    document.querySelectorAll("#f-jobs .check").forEach(l=>{ l.style.display = q && !norm(l.textContent).includes(q) ? "none" : ""; });
+  });
   const logoFile = document.getElementById("i-logo");
   if(logoFile) logoFile.addEventListener("change", ()=>{ if(logoFile.files[0]) lireLogo(logoFile.files[0]); });
   const instSel = document.getElementById("f-inst"), instHint = document.getElementById("inst-hint");
@@ -1000,7 +1134,7 @@ function deb(fn, ms){
     debTimers.set(this, setTimeout(fn, ms||200));
   };
 }
-/* Aperçu du logo dans le formulaire d'un institut. */
+/* Aperçu de l'image dans le formulaire d'un institut. */
 function logoApercu(){
   const box = document.getElementById("logo-edit");
   if(!box) return;
@@ -1008,24 +1142,36 @@ function logoApercu(){
   const sigle = i ? i.sigle : "";
   const a = S.logoBrouillon;
   box.innerHTML = '<div class="ap" style="background:'+(a?"#fff":(i?i.c:"#5E6B64"))+'">'
-    + (a ? '<img src="'+esc(a)+'" alt="Aperçu du logo'+(sigle?" de "+esc(sigle):"")+'">' : esc(sigle||"LOGO"))
+    + (a ? '<img src="'+esc(a)+'" alt="Aperçu de l\'image'+(sigle?" de "+esc(sigle):"")+'">' : esc(sigle||"IMAGE"))
     + '</div>'
     + '<div class="cmd"><div style="display:flex;gap:8px;flex-wrap:wrap">'
     + '<button type="button" class="btn line sm" data-act="logo-choose">'+icon("upload")+(a?"Changer l\'image":"Choisir une image")+'</button>'
     + (a ? '<button type="button" class="btn ghost sm" data-act="logo-none">Retirer</button>' : "")
-    + '</div><span class="hint">JPEG, PNG ou WebP, 2 Mo maximum. L\'aperçu reste le temps de la session : le fichier sera déposé sur le serveur via l\'API.</span></div>';
+    + '</div><span class="hint">JPEG, PNG ou WebP, 2 Mo maximum. L\'image est redimensionnée puis affichée sur la fiche publique de l\'institut.</span></div>';
 }
 
-/* Le fichier est lu localement ; rien n'est envoyé au serveur dans cette maquette. */
+/* Le fichier est lu localement puis réduit : il doit tenir dans le stockage du
+   navigateur avec le reste de la démonstration. */
 function lireLogo(f){
   if(!/^image\/(jpeg|png|webp)$/.test(f.type)){ toast("Format non accepté : utilisez JPEG, PNG ou WebP.", true); return; }
   if(f.size > 2*1024*1024){ toast("Image trop lourde : 2 Mo maximum.", true); return; }
   const r = new FileReader();
   r.onload = ()=>{
-    S.logoBrouillon = r.result;
-    S.logoChoisi = true;
-    logoApercu();
-    toast("Logo prêt. Enregistrez la fiche pour l\'appliquer.");
+    const im = new Image();
+    im.onload = ()=>{
+      const k = Math.min(1, 1000/Math.max(im.width, im.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(im,0,0,c.width,c.height);
+      S.logoBrouillon = c.toDataURL("image/jpeg",0.82);
+      S.logoChoisi = true;
+      logoApercu();
+      toast("Image prête. Enregistrez la fiche pour l\'appliquer.");
+    };
+    im.onerror = ()=>toast("Image illisible : essayez un autre fichier.", true);
+    im.src = r.result;
   };
   r.readAsDataURL(f);
 }
@@ -1087,17 +1233,23 @@ document.addEventListener("click", function(e){
       render();
       return;
     }
-    if(p.indexOf("ref:")===0){
-      const x = REF.find(v=>String(v.id)===p.slice(4));
-      if(!x) return;
-      const key = "i"+Date.now();
-      INST[key] = {id:key, nom:x.nom, sigle:x.nom.split(/\s+/).map(w=>w[0]).join("").slice(0,4).toUpperCase(),
-        arr:x.arr, adr:"", tel:x.tel, wa:x.tel.replace(/\D/g,""), mail:"", ag:x.ag, insc:0, clot:"", rentree:"",
-        c:DOMAINES[Object.keys(INST).length % DOMAINES.length].c, desc:"", logo:null};
-      x.statut = "traitee";
+    if(p.indexOf("cours:")===0){
+      const k = COURS.findIndex(c=>c.id===p.slice(6));
+      if(k<0) return;
+      const nom = COURS[k].nom;
+      COURS.splice(k,1);
+      if(S.coursEdit && S.coursEdit.id===p.slice(6)) S.coursEdit = null;
       saveBO();
-      toast("Fiche créée pour « "+x.nom+" ». Complétez-la dans Instituts.");
-      location.hash = "#/instituts/"+key;
+      toast("Cours « "+nom+" » supprimé du catalogue.");
+      render();
+      return;
+    }
+    if(p[3]===":" && REFL[p.slice(0,3)]){
+      const type = p.slice(0,3), nom = p.slice(4);
+      if(type==="dip"){ const k = DIPS.indexOf(nom); if(k>=0) DIPS.splice(k,1); delete DUREE[nom]; }
+      else { const liste = type==="deb" ? DEBS : type==="ser" ? SERIES : DOMAINES; const k = liste.findIndex(x=>x.nom===nom); if(k>=0) liste.splice(k,1); majDom(); }
+      saveBO();
+      toast("« "+nom+" » supprimé du référentiel.");
       render();
       return;
     }
@@ -1110,10 +1262,10 @@ document.addEventListener("click", function(e){
     if(a==="theme"){
       const dark = document.documentElement.getAttribute("data-theme")==="dark";
       document.documentElement.setAttribute("data-theme", dark?"light":"dark");
-      store.set("kelasi-theme", dark?"light":"dark");
+      store.set("orienta-theme", dark?"light":"dark");
       return;
     }
-    if(a==="logout"){ store.del("kelasi-bo-session"); SESSION=null; location.hash="#/connexion"; render(); toast("Session fermée."); return; }
+    if(a==="logout"){ store.del("orienta-bo-session"); SESSION=null; location.hash="#/connexion"; render(); toast("Session fermée."); return; }
     if(a==="side"){ S.sideOpen = !S.sideOpen; const s=document.getElementById("side"); if(s) s.classList.toggle("open", S.sideOpen); return; }
     if(a==="reset-f"){ S.prog = {q:"",dom:"",statut:"",page:1,par:8}; render(); return; }
     if(a==="reset-i"){ S.inst = {q:"",arr:"",ag:"",page:1,par:6}; render(); return; }
@@ -1132,20 +1284,56 @@ document.addEventListener("click", function(e){
       if(i) confirmBox("Supprimer cet institut ?","« "+i.nom+" » sera retiré"+(n?" ainsi que "+n+" de ses formations" : "")+". Cette action est définitive.", "inst:"+i.id);
       return;
     }
-    if(a==="contact-ok"){
-      const x = CONTACT.find(v=>String(v.id)===nav.dataset.id);
-      if(x){ x.statut="traitee"; saveBO(); toast("Demande marquée comme traitée."); render(); }
+    if(a==="forgot"){ forgotBox(); return; }
+    /* Lien posé sur une fiche formation : la liste des cours s'ouvre filtrée sur elle. */
+    if(a==="cours-de"){ S.cours = {q:"",forme:nav.dataset.id,page:1,par:10}; }
+    if(a==="cours-add"){ S.coursEdit = {id:null, liens:S.cours.forme ? [{forme:S.cours.forme, annee:1}] : []}; render(); const el=document.getElementById("c-nom"); if(el) el.focus(); return; }
+    if(a==="cours-edit"){ S.coursEdit = {id:nav.dataset.id, liens:[]}; render(); window.scrollTo(0,0); return; }
+    if(a==="cours-cancel"){ S.coursEdit = null; render(); return; }
+    if(a==="lien-add"){
+      const pris = Array.from(document.querySelectorAll(".lien-forme")).map(x=>x.value);
+      const libre = formesTriees().find(f=>!pris.includes(f.id));
+      if(!libre){ toast("Ce cours est déjà rattaché à toutes les formations.", true); return; }
+      document.getElementById("c-liens").insertAdjacentHTML("beforeend", lienRow({forme:libre.id, annee:1}));
       return;
     }
-    if(a==="contact-arch"){
-      const x = CONTACT.find(v=>String(v.id)===nav.dataset.id);
-      /* Archiver une demande déjà archivée ne doit pas la faire remonter. */
-      if(x){ x.statut="archivee"; saveBO(); toast("Demande archivée."); render(); }
+    if(a==="lien-del"){ nav.closest(".lien").remove(); return; }
+    if(a==="att-ok"){
+      const c = COURS.find(x=>x.id===document.getElementById("att-cours").value), f = FORMES[S.cours.forme];
+      if(!c || !f) return;
+      c.liens.push({forme:f.id, annee:+document.getElementById("att-annee").value});
+      saveBO();
+      toast("« "+c.nom+" » rattaché à « "+f.nom+" ».");
+      render();
       return;
     }
-    if(a==="ref-accept"){
-      const x = REF.find(v=>String(v.id)===nav.dataset.id);
-      if(x) confirmBox("Accepter cette demande ?","Une fiche sera créée pour « "+x.nom+" » avec les informations déclarées. Vous pourrez la compléter ensuite.", "ref:"+x.id);
+    if(a==="cours-detach"){
+      const c = COURS.find(x=>x.id===nav.dataset.id);
+      if(!c) return;
+      c.liens = c.liens.filter(l=>l.forme!==S.cours.forme);
+      saveBO();
+      toast("« "+c.nom+" » retiré de cette formation. Il reste au catalogue.");
+      render();
+      return;
+    }
+    if(a==="cours-del"){
+      const c = COURS.find(x=>x.id===nav.dataset.id);
+      const n = c ? c.liens.length : 0;
+      if(c) confirmBox("Supprimer ce cours ?","« "+c.nom+" » sera supprimé du catalogue"+(n?" et retiré du programme de "+n+" formation"+(n>1?"s":""):"")+". Cette action est définitive.", "cours:"+c.id);
+      return;
+    }
+    if(a==="refl-add"){ S.refl = {type:nav.dataset.type, nom:null}; render(); const el=document.getElementById("r-nom"); if(el) el.focus(); return; }
+    if(a==="refl-edit"){ S.refl = {type:nav.dataset.type, nom:nav.dataset.id}; render(); window.scrollTo(0,0); return; }
+    if(a==="refl-cancel"){ S.refl = null; render(); return; }
+    if(a==="refl-del"){
+      const type = nav.dataset.type, nom = nav.dataset.id, c = REFL[type];
+      const n = c.usage(nom);
+      /* Un intitulé encore porté par une formation ne peut pas disparaître du référentiel. */
+      if(n){ toast("« "+nom+" » est utilisé par "+n+" formation"+(n>1?"s":"")+" : modifiez-"+(n>1?"les":"la")+" d'abord.", true); return; }
+      /* Un domaine classe aussi des débouchés : ils doivent d'abord changer de domaine. */
+      const nd = type==="dom" ? DEBS.filter(x=>x.secteur===DOMAINES.find(v=>v.nom===nom).id).length : 0;
+      if(nd){ toast("« "+nom+" » classe encore "+nd+" débouché"+(nd>1?"s":"")+" : changez leur domaine d'abord.", true); return; }
+      confirmBox("Supprimer "+c.ce+" ?","« "+nom+" » sera retiré du référentiel. Cette action est définitive.", type+":"+nom);
       return;
     }
     if(a==="logo-choose"){ const f = document.getElementById("i-logo"); if(f) f.click(); return; }
@@ -1156,15 +1344,11 @@ document.addEventListener("click", function(e){
   if(sg){ S.prog.statut = sg.dataset.statut; S.prog.page=1; render(); return; }
   const ag = t.closest("[data-ag]");
   if(ag){ S.inst.ag = ag.dataset.ag; S.inst.page=1; render(); return; }
-  const cs = t.closest("[data-cstatut]");
-  if(cs){ S.contact.statut = cs.dataset.cstatut; S.contact.page=1; render(); return; }
-  const rs = t.closest("[data-rstatut]");
-  if(rs){ S.ref.statut = rs.dataset.rstatut; S.ref.page=1; render(); return; }
 
   const pg = t.closest("[data-page]");
   if(pg && !pg.disabled){
     const h = currentHash();
-    const s = h.indexOf("#/demandes/contact")===0 ? S.contact : h.indexOf("#/demandes/referencement")===0 ? S.ref : h.indexOf("#/instituts")===0 ? S.inst : S.prog;
+    const s = h.indexOf("#/instituts")===0 ? S.inst : h.indexOf("#/cours")===0 ? S.cours : S.prog;
     s.page = +pg.dataset.page; render(); return;
   }
 
@@ -1176,6 +1360,13 @@ document.addEventListener("change", function(e){
   const t = e.target;
   if(t.id==="fdom"){ S.prog.dom = t.value; S.prog.page=1; render(); return; }
   if(t.id==="iarr"){ S.inst.arr = t.value; S.inst.page=1; render(); return; }
+  if(t.id==="cforme"){ S.cours.forme = t.value; S.cours.page=1; render(); return; }
+  /* Dans le formulaire d'un cours, les années suivent la formation choisie sur la ligne. */
+  if(t.classList.contains("lien-forme")){
+    const a = t.parentNode.querySelector(".lien-annee");
+    a.innerHTML = optAnnees(t.value, Math.min(+a.value, FORMES[t.value].duree));
+    return;
+  }
 });
 
 document.addEventListener("submit", function(e){
@@ -1183,20 +1374,93 @@ document.addEventListener("submit", function(e){
     e.preventDefault();
     const u = document.getElementById("u").value.trim();
     const p = document.getElementById("p").value;
-    if(u==="squad" && p==="kelasi2026"){
-      SESSION = {login:"squad", nom:"Flamme Du Ciel", role:"Responsable du catalogue", quand:new Date().toISOString()};
-      store.set("kelasi-bo-session", SESSION);
+    if(u==="squad" && p==="orienta2026"){
+      SESSION = {login:"squad", nom:"Squad", role:"SuperAdmin", quand:new Date().toISOString()};
+      store.set("orienta-bo-session", SESSION);
       location.hash = "#/tableau-de-bord";
       render();
       toast("Bienvenue dans l'espace Squad.");
     } else {
       const box = document.getElementById("login-err");
       box.hidden = false;
-      box.textContent = "Identifiants incorrects. Démo : squad / kelasi2026.";
+      box.textContent = "Identifiants incorrects. Démo : squad / orienta2026.";
       document.getElementById("p").value = "";
       document.getElementById("p").focus();
       toast("Connexion refusée : identifiants incorrects.", true);
     }
+    return;
+  }
+
+  if(e.target.id==="forgot-form"){
+    e.preventDefault();
+    clearFailures();
+    const m = document.getElementById("fg-m").value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){ fail("fg-m","Cette adresse e-mail est incomplète."); return; }
+    closeModal();
+    toast("Démonstration : un lien de réinitialisation sera envoyé à "+m+".");
+    return;
+  }
+
+  if(e.target.id==="refl-form"){
+    e.preventDefault();
+    clearFailures();
+    if(!S.refl) return;
+    const type = S.refl.type, ancien = S.refl.nom;
+    const nom = document.getElementById("r-nom").value.trim();
+    if(!nom){ fail("rnom","Ce champ est obligatoire."); return; }
+    if(REFL[type].rows().some(r => r.nom!==ancien && norm(r.nom)===norm(nom))){ fail("rnom","« "+nom+" » existe déjà."); return; }
+    /* Un renommage suit dans toutes les formations qui portent l'ancien intitulé. */
+    if(type==="dip"){
+      if(ancien===null) DIPS.push(nom);
+      else { DIPS[DIPS.indexOf(ancien)] = nom; delete DUREE[ancien]; for(const f of Object.values(FORMES)) if(f.dip===ancien) f.dip = nom; }
+      /* La durée suit dans les formations concernées à l'enregistrement (majProgrammes). */
+      DUREE[nom] = +document.getElementById("r-duree").value;
+    } else if(type==="deb"){
+      const secteur = document.getElementById("r-sect").value;
+      if(ancien===null) DEBS.push({nom, secteur});
+      else {
+        Object.assign(DEBS.find(d=>d.nom===ancien), {nom, secteur});
+        for(const f of Object.values(FORMES)) f.jobs = f.jobs.map(j => j===ancien ? nom : j);
+      }
+    } else if(type==="dom"){
+      const c = document.getElementById("r-coul").value;
+      if(ancien===null) DOMAINES.push({id:"d"+Date.now(), nom, c});
+      else Object.assign(DOMAINES.find(x=>x.nom===ancien), {nom, c});
+      majDom();
+    } else {
+      const lib = document.getElementById("r-lib").value.trim();
+      if(ancien===null) SERIES.push({nom, lib});
+      else {
+        Object.assign(SERIES.find(x=>x.nom===ancien), {nom, lib});
+        for(const f of Object.values(FORMES)) f.series = f.series.map(x => x===ancien ? nom : x);
+      }
+    }
+    saveBO();
+    S.refl = null;
+    toast(ancien===null ? "« "+nom+" » ajouté au référentiel." : "« "+nom+" » mis à jour.");
+    render();
+    return;
+  }
+
+  if(e.target.id==="cours-form"){
+    e.preventDefault();
+    clearFailures();
+    if(!S.coursEdit) return;
+    const id = S.coursEdit.id;
+    const nom = document.getElementById("c-nom").value.trim();
+    const liens = Array.from(document.querySelectorAll("#c-liens .lien")).map(r=>({forme:r.querySelector(".lien-forme").value, annee:+r.querySelector(".lien-annee").value}));
+    if(!nom){ fail("cnom","L'intitulé est obligatoire."); return; }
+    if(COURS.some(c => c.id!==id && norm(c.nom)===norm(nom))){ fail("cnom","Ce cours existe déjà au catalogue : modifiez-le pour le rattacher à d'autres formations."); return; }
+    const double = liens.find((l,k)=>liens.findIndex(x=>x.forme===l.forme)!==k);
+    if(double){ fail("cliens","« "+FORMES[double.forme].nom+" » est rattachée deux fois."); return; }
+    if(id) Object.assign(COURS.find(c=>c.id===id), {nom, liens});
+    else COURS.push({id:"c"+Date.now(), nom, liens});
+    saveBO();
+    /* En ajout, le formulaire reste ouvert sur les mêmes formations pour enchaîner. */
+    S.coursEdit = id ? null : {id:null, liens};
+    toast(id ? "Cours mis à jour." : "« "+nom+" » ajouté"+(liens.length?" et rattaché à "+liens.length+" formation"+(liens.length>1?"s":""):" au catalogue")+".");
+    render();
+    const el = document.getElementById("c-nom"); if(el) el.focus();
     return;
   }
 
@@ -1205,42 +1469,36 @@ document.addEventListener("submit", function(e){
     clearFailures();
     const id = formeId();
     const g = n => document.getElementById(n).value.trim();
-    const dip = g("f-dip"), duree = +g("f-duree");
-    const nom = g("f-nom");
-    /* On ne garde que les lettres de série, sans espace ni séparateur. */
-    const series = g("f-series").toUpperCase().replace(/[^A-G]/g,"");
+    const nom = g("f-nom"), inst = g("f-inst");
+    const series = Array.from(document.querySelectorAll("#f-series input:checked")).map(x=>x.value);
+    const tarifs = Array.from(document.querySelectorAll("#tarifs input")).map(x=>+x.value||0);
     const data = {
-      nom, dip, duree, series,
-      inst:g("f-inst"), dom:g("f-dom"),
-      frais:+g("f-frais")||0, stage:+g("f-stage")||0,
+      nom, inst, dip:g("f-dip"), dom:g("f-dom"), desc:g("f-desc"),
+      duree:dureeDip(g("f-dip"), FORMES[id] ? FORMES[id].duree : 1), tarifs, frais:tarifs[0]||0, stage:+g("f-stage")||0,
+      series, admission:g("f-admission"),
       soir:document.getElementById("f-soir").checked,
       tranches:document.getElementById("f-tranches").checked,
-      jobs:lines(g("f-jobs")), cours:lines(g("f-cours")),
+      jobs:Array.from(document.querySelectorAll("#f-jobs input:checked")).map(x=>x.value),
       statut:g("f-statut")
     };
     /* Chaque message est affiché : on collecte les erreurs au lieu de les écraser. */
     const erreurs = [];
     const ko = (champ, msg) => { erreurs.push(fail(champ, msg)); };
     if(!nom) ko("nom","L'intitulé est obligatoire.");
-    if(nom && FORMES[id] && nom.toLowerCase() !== FORMES[id].nom.toLowerCase()
-       && Object.values(FORMES).some(f => f.id !== id && norm(f.nom) === norm(nom))) ko("nom","Une formation porte déjà cet intitulé.");
-    if(duree !== DUREE_DIP[dip]) ko("duree","Un "+dip+" dure "+DUREE_DIP[dip]+" ans.");
-    const doublon = series.split("").filter((c,k,a) => a.indexOf(c) !== k);
-    if(doublon.length) ko("series","Série répétée : "+doublon[0]+".");
-    if(dip==="Master" && series) ko("series","Un Master est post-baccalauréat : laissez les séries vides.");
-    if(dip!=="Master" && !series) ko("series","Indiquez les séries du bac acceptées.");
-    if(!data.frais) ko("frais","Indiquez les frais annuels.");
-    if(data.frais>5000000) ko("frais","Ce montant semble erroné, vérifiez la saisie.");
-    if(data.frais<100000) ko("frais","Ce montant semble trop bas pour une formation annuelle.");
-    if(!data.jobs.length) ko("jobs","Indiquez au moins un débouché.");
-    if(!data.cours.length) ko("cours","Indiquez au moins un cours.");
+    /* Une même filière peut exister dans plusieurs instituts, pas deux fois dans le même. */
+    if(nom && Object.values(FORMES).some(f => f.id !== id && f.inst === inst && norm(f.nom) === norm(nom))) ko("nom","Cet institut propose déjà une formation avec cet intitulé.");
+    if(!INST[inst]) ko("inst","Choisissez un institut.");
+    if(!data.dip) ko("dip","Choisissez un diplôme.");
+    if(tarifs.some(v => v<=0)) ko("frais","Indiquez les frais de chaque niveau.");
+    if(!data.jobs.length) ko("jobs","Cochez au moins un débouché.");
     if(erreurs.length){ toast(erreurs.length+" erreur"+(erreurs.length>1?"s":"")+" dans le formulaire.", true); const bad=document.querySelector(".fld.bad"); if(bad && bad.scrollIntoView) bad.scrollIntoView({block:"center"}); return; }
 
     const key = id ? id : "f"+Date.now();
     FORMES[key] = Object.assign({id:key}, data);
     saveBO();
-    toast(id?"Formation mise à jour.":"Formation ajoutée au catalogue.");
-    location.hash = "#/formations";
+    /* Une formation neuve n'a pas encore de programme : on enchaîne sur ses cours. */
+    if(id){ toast("Formation mise à jour."); location.hash = "#/formations"; }
+    else { toast("Formation ajoutée. Ajoutez maintenant ses cours."); S.cours = {q:"",forme:key,page:1,par:10}; S.coursEdit = {id:null, liens:[{forme:key, annee:1}]}; location.hash = "#/cours"; }
     render();
     return;
   }
@@ -1253,7 +1511,8 @@ document.addEventListener("submit", function(e){
     const data = {
       nom:g("i-nom"), sigle:g("i-sigle").toUpperCase(), arr:g("i-arr"), adr:g("i-adr"),
       tel:g("i-tel"), wa:g("i-wa").replace(/\D/g,""), mail:g("i-mail"), ag:g("i-ag"),
-      insc:+g("i-insc")||0, clot:g("i-clot"), rentree:g("i-rentree"), desc:g("i-desc")
+      insc:+g("i-insc")||0, clot:g("i-clot"), rentree:g("i-rentree"), desc:g("i-desc"),
+      avantages:lines(g("i-avantages"))
     };
     const erreurs = [];
     const ko = (champ, msg) => { erreurs.push(fail(champ, msg)); };
@@ -1274,7 +1533,7 @@ document.addEventListener("submit", function(e){
     const key = id ? id : "i"+Date.now();
     const existing = INST[key];
     data.c = existing ? existing.c : DOMAINES[Object.keys(INST).length % DOMAINES.length].c;
-    /* Sans nouvelle image choisie, on conserve le logo déjà en place. */
+    /* Sans nouvelle image choisie, on conserve celle déjà en place. */
     data.logo = S.logoChoisi ? (S.logoBrouillon || null) : (existing ? existing.logo || null : null);
     S.logoChoisi = false;
     INST[key] = Object.assign({}, existing||{}, data, {id:key});
@@ -1289,15 +1548,16 @@ document.addEventListener("submit", function(e){
 
 /* ---------- Réinitialisation ---------- */
 function resetAll(){
-  store.del("kelasi-bo"); store.del("kelasi-bo-session");
-  store.del("kelasi-theme");
+  store.del("orienta-bo"); store.del("orienta-bo-session");
+  store.del("orienta-theme");
   SESSION = null;
   S.logoBrouillon = null;
   S.logoChoisi = false;
   S.prog = {q:"",dom:"",statut:"",page:1,par:8};
   S.inst = {q:"",arr:"",ag:"",page:1,par:6};
-  S.contact = {statut:"",page:1,par:6};
-  S.ref = {statut:"",page:1,par:6};
+  S.refl = null;
+  S.cours = {q:"",forme:"",page:1,par:10};
+  S.coursEdit = null;
   document.documentElement.setAttribute("data-theme","light");
   /* On repasse d'abord à l'écran de connexion, puis on recharge : le rechargement
      restaure le jeu de démonstration d'origine. */
@@ -1307,7 +1567,7 @@ function resetAll(){
 }
 
 /* ---------- Thème au démarrage ---------- */
-(function(){ const th = store.get("kelasi-theme",null); if(th) document.documentElement.setAttribute("data-theme",th); })();
+(function(){ const th = store.get("orienta-theme",null); if(th) document.documentElement.setAttribute("data-theme",th); })();
 
 window.addEventListener("hashchange", render);
 render();

@@ -1,18 +1,18 @@
 -- ============================================================================
--- KELASI BRAZZAVILLE — Données de démonstration (seed)
+-- ORIENTA BRAZZAVILLE — Données de démonstration (seed)
 -- ============================================================================
--- Exécuter avec : psql -U <user> -d kelasi -f backend/scripts/seed.sql
--- Insère les 10 domaines, 8 instituts et 26 formations de démonstration,
--- ainsi que leurs métiers, cours et découpages par année.
+-- Exécuter avec : psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/scripts/seed.sql
+-- Insère le même jeu de démonstration que les maquettes (template/) :
+-- 10 domaines, 4 diplômes, 7 séries du bac, 8 instituts, 26 formations,
+-- 65 débouchés et 165 cours, avec les tarifs par niveau, les séries admises et
+-- le programme par année de chaque formation.
 --
 -- Nomenclature alignée sur backend/scripts/migrate.sql (noms anglais).
 --
--- ATTENTION — ce seed est à exécuter UNE SEULE FOIS, sur une base freshly
--- migrée. Les tables institutes / programs / courses n'ont pas de contrainte
--- UNIQUE qui permette un INSERT idempotent : relancer le fichier dupliquerait
--- les données (les domaines, métiers et l'utilisateur, eux, sont protégés par
--- ON CONFLICT DO NOTHING). Un garde-fou ci-dessous fait échouer le script
--- proprement plutôt que de polluer la base.
+-- ATTENTION — ce seed est à exécuter UNE SEULE FOIS, sur une base fraîchement
+-- migrée. Un garde-fou ci-dessous le fait échouer proprement si la base
+-- contient déjà des instituts, plutôt que de mélanger démonstration et données
+-- réelles.
 -- ============================================================================
 
 BEGIN;
@@ -26,7 +26,7 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- Domaines (10)
+-- Domaines d'insertion (10)
 -- ---------------------------------------------------------------------------
 INSERT INTO domains (id, name, color) VALUES
     ('gestion', 'Gestion & Finance', '#1E6B4A'),
@@ -42,61 +42,92 @@ INSERT INTO domains (id, name, color) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
+-- Diplômes (4) — la durée des études est portée par le diplôme.
+-- ---------------------------------------------------------------------------
+INSERT INTO degrees (name, duration) VALUES
+    ('BTS', 2),
+    ('Licence', 3),
+    ('Licence pro', 3),
+    ('Master', 2)
+ON CONFLICT (name) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Séries du baccalauréat (7)
+-- ---------------------------------------------------------------------------
+INSERT INTO bac_series (code, label) VALUES
+    ('A', 'Lettres'),
+    ('B', 'Économie'),
+    ('C', 'Maths-Physique'),
+    ('D', 'Sciences'),
+    ('E', 'Technique'),
+    ('F', 'Technique industrielle'),
+    ('G', 'Tertiaire')
+ON CONFLICT (code) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
 -- Instituts (8)
--- `district` utilise les slugs sans accents du domaine public (voir docs/openapi.yaml).
+-- `district` : un des 9 arrondissements de Brazzaville, écrit comme dans les
+-- maquettes (contrainte CHECK de migrate.sql). Un numéro d'agrément NULL
+-- signifie « non agréé » : l'institut apparaît sans badge.
 -- ---------------------------------------------------------------------------
 INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, email, color, description,
-                         registration_fee, registration_deadline, start_date,
-                         accreditation_status, accreditation_number) VALUES
+                         registration_fee, registration_deadline, start_date, accreditation_number) VALUES
     ('Institut Supérieur de Gestion du Fleuve', 'ISGF', 'Poto-Poto', 'Avenue de la Paix, Poto-Poto',
      '+242 06 612 40 18', '242066124018', 'contact@isgf.cg', '#1E6B4A',
      'Spécialisé dans la gestion, la comptabilité et la banque depuis 2009. Cours en journée et en soirée.',
-     50000, '15 oct.', '3 nov. 2026', 'agre', 'N° 047/MESRTI/2009'),
+     50000, '2026-10-15', '2026-11-03', 'N° 047/MESRTI/2009'),
 
     ('École Supérieure d''Informatique du Mayombe', 'ESIM', 'Moungali', 'Rue Mbaka, Moungali',
      '+242 05 530 22 71', '242055302271', 'info@esim.cg', '#2B51A3',
      'Un poste par étudiant en salle machine et un projet réel avec une entreprise locale chaque année.',
-     60000, '4 oct.', '27 oct. 2026', 'agre', 'N° 112/MESRTI/2011'),
+     60000, '2026-10-04', '2026-10-27', 'N° 112/MESRTI/2011'),
 
     ('Institut Polytechnique Les Manguiers', 'IPM', 'Bacongo', 'Avenue Matsoua, Bacongo',
      '+242 06 877 15 03', '242068771503', 'contact@ipm.cg', '#9A5412',
      'Formations techniques avec ateliers équipés : électricité, bâtiment, pétrole et sécurité industrielle.',
-     45000, '20 oct.', '3 nov. 2026', 'agre', 'N° 089/MESRTI/2008'),
+     45000, '2026-10-20', '2026-11-03', 'N° 089/MESRTI/2008'),
 
-    ('Institut de Santé du Djoué', 'ISD', 'Makelekele', 'Route du Djoué, Makélékélé',
+    ('Institut de Santé du Djoué', 'ISD', 'Makélékélé', 'Route du Djoué, Makélékélé',
      '+242 06 409 88 52', '242064098852', 'contact@isd.cg', '#B03352',
      'Métiers paramédicaux, avec stages encadrés dans des centres de santé de Brazzaville.',
-     75000, '27 sept.', '20 oct. 2026', 'agre', 'N° 156/MESRTI/2012'),
+     75000, '2026-09-27', '2026-10-20', 'N° 156/MESRTI/2012'),
 
-    ('Institut Horizon de Talangaï', 'IHT', 'Talangai', 'Avenue de l''Intendance, Talangaï',
+    ('Institut Horizon de Talangaï', 'IHT', 'Talangaï', 'Avenue de l''Intendance, Talangaï',
      '+242 05 744 31 60', '242057443160', 'contact@iht.cg', '#6D40A6',
      'Communication, journalisme et marketing digital. Studio radio et atelier vidéo sur place.',
-     40000, '31 oct.', '10 nov. 2026', 'agre', 'N° 203/MESRTI/2015'),
+     40000, '2026-10-31', '2026-11-10', 'N° 203/MESRTI/2015'),
 
-    ('École de Commerce et Logistique de la Corniche', 'ECLC', 'Ouenze', 'Boulevard de la Corniche, Ouenzé',
+    ('École de Commerce et Logistique de la Corniche', 'ECLC', 'Ouenzé', 'Boulevard de la Corniche, Ouenzé',
      '+242 06 255 67 09', '242062556709', 'contact@eclc.cg', '#0D6F7C',
      'Commerce international, transit et logistique, en lien avec le port fluvial et le corridor vers Pointe-Noire.',
-     50000, '15 oct.', '3 nov. 2026', 'agre', 'N° 178/MESRTI/2014'),
+     50000, '2026-10-15', '2026-11-03', 'N° 178/MESRTI/2014'),
 
-    ('Institut Juridique Lumière', 'IJL', 'Djoue', 'Route du Pool, Djoué',
+    ('Institut Juridique Lumière', 'IJL', 'Djoué', 'Route du Pool, Djoué',
      '+242 06 318 72 44', '242063187244', 'contact@ijl.cg', '#7A2E2E',
      'Droit, administration et secrétariat. Nombreuses formations en cours du soir pour ceux qui travaillent.',
-     40000, '25 oct.', '3 nov. 2026', 'agre', 'N° 131/MESRTI/2010'),
+     40000, '2026-10-25', '2026-11-03', 'N° 131/MESRTI/2010'),
 
     ('Institut des Sciences Appliquées de Mfilou', 'ISAM', 'Mfilou', 'Route de Kinkala, Mfilou',
      '+242 05 690 13 27', '242056901327', 'contact@isam.cg', '#4C7A1E',
      'Agronomie, environnement et tourisme, avec une ferme-école et un hôtel d''application.',
-     35000, '10 oct.', '27 oct. 2026', 'en_cours', NULL);
+     35000, '2026-10-10', '2026-10-27', NULL);
 
 -- ---------------------------------------------------------------------------
 -- Formations (26)
--- Les instituts sont référencés par leur nom pour éviter de dépendre des ids.
+-- La liste est posée dans une table temporaire : elle alimente ensuite les
+-- formations, leurs tarifs par niveau et leurs séries admises. `pos` garde
+-- l'ordre de la liste. Dans ce jeu, chaque intitulé de formation est unique :
+-- les sections suivantes s'en servent comme clé.
+--   duration   : rappel de la durée du diplôme, vérifié plus bas.
+--   tuition    : frais annuels, identiques pour chaque niveau dans ce jeu.
+--   bac_series : lettres des séries admises ; NULL = pas de critère de série.
 -- ---------------------------------------------------------------------------
-INSERT INTO programs (institute_id, domain_id, name, degree, duration, tuition,
-                       bac_series, evening, internship_months, installments)
-SELECT i.id, v.domain_id, v.name, v.degree, v.duration, v.tuition,
-       v.bac_series, v.evening, v.internship_months, v.installments
-FROM (VALUES
+CREATE TEMP TABLE seed_programs (
+    pos SERIAL, institute TEXT, domain_id TEXT, name TEXT, degree TEXT, duration INT, tuition INT,
+    bac_series TEXT, evening BOOLEAN, internship_months INT, installments BOOLEAN
+) ON COMMIT DROP;
+
+INSERT INTO seed_programs (institute, domain_id, name, degree, duration, tuition, bac_series, evening, internship_months, installments) VALUES
     -- ISGF (gestion)
     ('Institut Supérieur de Gestion du Fleuve', 'gestion', 'Comptabilité et gestion des entreprises', 'BTS',        2, 420000, 'BCDG',   TRUE,  3, TRUE),
     ('Institut Supérieur de Gestion du Fleuve', 'gestion', 'Banque et assurance',                    'Licence pro', 3, 520000, 'BCD',    FALSE, 4, TRUE),
@@ -130,56 +161,50 @@ FROM (VALUES
     -- ISAM (agro, hotel)
     ('Institut des Sciences Appliquées de Mfilou', 'agro', 'Agronomie et agro-business',          'BTS',     2, 390000, 'CD',     FALSE, 4, TRUE),
     ('Institut des Sciences Appliquées de Mfilou', 'agro', 'Environnement, eaux et forêts',      'Licence', 3, 470000, 'CD',     FALSE, 3, TRUE),
-    ('Institut des Sciences Appliquées de Mfilou', 'hotel', 'Hôtellerie et tourisme',               'BTS',     2, 410000, 'ABCDG',  FALSE, 4, TRUE)
-) AS v(institute, domain_id, name, degree, duration, tuition, bac_series, evening, internship_months, installments)
-JOIN institutes i ON i.name = v.institute;
+    ('Institut des Sciences Appliquées de Mfilou', 'hotel', 'Hôtellerie et tourisme',               'BTS',     2, 410000, 'ABCDG',  FALSE, 4, TRUE);
+
+-- Garde-fou : la durée notée ci-dessus doit être celle du diplôme.
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM seed_programs v LEFT JOIN degrees d ON d.name = v.degree WHERE d.duration IS DISTINCT FROM v.duration) THEN
+        RAISE EXCEPTION 'Seed incohérent : une formation annonce une durée différente de celle de son diplôme.';
+    END IF;
+END $$;
+
+INSERT INTO programs (institute_id, domain_id, degree_id, name, evening, internship_months, installments, status)
+SELECT i.id, v.domain_id, d.id, v.name, v.evening, v.internship_months, v.installments, 'published'
+FROM seed_programs v
+JOIN institutes i ON i.name = v.institute
+JOIN degrees d ON d.name = v.degree
+ORDER BY v.pos;
 
 -- ---------------------------------------------------------------------------
--- Métiers (débouchés) — sans doublon : careers.name est UNIQUE.
+-- Tarifs par niveau — un montant par année d'études du diplôme.
 -- ---------------------------------------------------------------------------
-INSERT INTO careers (name) VALUES
-    -- gestion
-    ('Aide-comptable'), ('Assistant de gestion'), ('Caissier'),
-    ('Chargé de clientèle bancaire'), ('Conseiller en assurance'), ('Analyste crédit'),
-    ('Assistant RH'), ('Gestionnaire de paie'), ('Chargé de recrutement'),
-    ('Auditeur'), ('Contrôleur de gestion'), ('Comptable'),
-    -- informatique
-    ('Développeur web'), ('Développeur mobile'), ('Intégrateur web'),
-    ('Technicien réseau'), ('Administrateur système'), ('Technicien télécom'),
-    ('Ingénieur logiciel'), ('Chef de projet informatique'),
-    ('Technicien de maintenance'), ('Support informatique'),
-    -- btp / petrole
-    ('Électricien bâtiment'), ('Installateur solaire'),
-    ('Conducteur de travaux'), ('Métreur'), ('Dessinateur projeteur'),
-    ('Opérateur de production'), ('Technicien de forage'), ('Agent HSE'),
-    ('Responsable sécurité'), ('Chargé environnement'),
-    -- santé
-    ('Infirmier'), ('Agent de santé communautaire'), ('Technicien de laboratoire'),
-    ('Sage-femme'), ('Agent de santé maternelle'),
-    ('Préparateur en pharmacie'), ('Délégué médical'),
-    -- communication
-    ('Journaliste'), ('Animateur radio'), ('Chargé de communication'),
-    ('Community manager'), ('Assistant marketing'), ('Graphiste'),
-    -- logistique / commerce
-    ('Agent de transit'), ('Déclarant en douane'), ('Gestionnaire d''entrepôt'),
-    ('Commercial export'), ('Assistant import-export'),
-    -- droit
-    ('Juriste d''entreprise'), ('Assistant juridique'), ('Clerc de notaire'),
-    ('Agent administratif'), ('Secrétaire de direction'), ('Assistant de collectivité'),
-    ('Assistant administratif'),
-    -- agro / hotel
-    ('Technicien agricole'), ('Entrepreneur agricole'), ('Conseiller agricole'),
-    ('Agent des eaux et forêts'), ('Technicien en aménagement'),
-    ('Réceptionniste'), ('Guide touristique'), ('Gestionnaire hôtelier')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO program_fees (program_id, year, amount)
+SELECT p.id, g.year, v.tuition
+FROM seed_programs v
+JOIN programs p ON p.name = v.name
+JOIN degrees d ON d.id = p.degree_id
+CROSS JOIN generate_series(1, d.duration) AS g(year);
 
 -- ---------------------------------------------------------------------------
--- Relations programmes ↔ métiers
+-- Séries du bac admises par formation — une ligne par lettre.
 -- ---------------------------------------------------------------------------
-INSERT INTO program_careers (program_id, career_id)
-SELECT p.id, c.id
-FROM programs p
-JOIN (VALUES
+INSERT INTO program_bac_series (program_id, series_id)
+SELECT p.id, s.id
+FROM seed_programs v
+JOIN programs p ON p.name = v.name
+CROSS JOIN LATERAL regexp_split_to_table(v.bac_series, '') AS letter
+JOIN bac_series s ON s.code = letter;
+
+-- ---------------------------------------------------------------------------
+-- Débouchés (65) et relations formations ↔ débouchés
+-- Un débouché est classé dans le domaine de la première formation qui le porte.
+-- ---------------------------------------------------------------------------
+CREATE TEMP TABLE seed_program_careers ON COMMIT DROP AS
+SELECT m.program_name, career_name
+FROM (VALUES
     ('Comptabilité et gestion des entreprises',  ARRAY['Aide-comptable', 'Assistant de gestion', 'Caissier']),
     ('Banque et assurance',                     ARRAY['Chargé de clientèle bancaire', 'Conseiller en assurance', 'Analyste crédit']),
     ('Gestion des ressources humaines',        ARRAY['Assistant RH', 'Gestionnaire de paie', 'Chargé de recrutement']),
@@ -206,18 +231,31 @@ JOIN (VALUES
     ('Agronomie et agro-business',             ARRAY['Technicien agricole', 'Entrepreneur agricole', 'Conseiller agricole']),
     ('Environnement, eaux et forêts',         ARRAY['Agent des eaux et forêts', 'Chargé environnement', 'Technicien en aménagement']),
     ('Hôtellerie et tourisme',                  ARRAY['Réceptionniste', 'Guide touristique', 'Gestionnaire hôtelier'])
-) AS m(program_name, careers) ON m.program_name = p.name
-CROSS JOIN LATERAL UNNEST(m.careers) AS career_name
-JOIN careers c ON c.name = career_name
+) AS m(program_name, careers)
+CROSS JOIN LATERAL UNNEST(m.careers) AS career_name;
+
+INSERT INTO careers (name, domain_id)
+SELECT DISTINCT ON (pc.career_name) pc.career_name, v.domain_id
+FROM seed_program_careers pc
+JOIN seed_programs v ON v.name = pc.program_name
+ORDER BY pc.career_name, v.pos
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO program_careers (program_id, career_id)
+SELECT p.id, c.id
+FROM seed_program_careers pc
+JOIN programs p ON p.name = pc.program_name
+JOIN careers c ON c.name = pc.career_name
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Cours par programme
+-- Cours (165) et programme par année
+-- Les cours forment un catalogue partagé : « Comptabilité » et « Droit civil »
+-- sont rattachés chacun à deux formations.
 -- ---------------------------------------------------------------------------
-INSERT INTO courses (program_id, name)
-SELECT p.id, course_name
-FROM programs p
-JOIN (VALUES
+CREATE TEMP TABLE seed_program_courses ON COMMIT DROP AS
+SELECT c.program_name, u.course_name, u.ord
+FROM (VALUES
     ('Comptabilité et gestion des entreprises', ARRAY['Comptabilité générale', 'Mathématiques financières', 'Droit des affaires', 'Excel et Word', 'Comptabilité analytique', 'Fiscalité congolaise', 'Logiciel Sage Compta']),
     ('Banque et assurance',                     ARRAY['Économie générale', 'Comptabilité', 'Statistiques', 'Techniques bancaires', 'Droit bancaire CEMAC', 'Marketing des services', 'Analyse du risque crédit', 'Assurance IARD']),
     ('Gestion des ressources humaines',        ARRAY['Introduction au management', 'Psychologie du travail', 'Droit civil', 'Droit du travail congolais', 'Paie et administration du personnel', 'Communication interne', 'Recrutement et formation', 'GPEC']),
@@ -244,46 +282,32 @@ JOIN (VALUES
     ('Agronomie et agro-business',             ARRAY['Biologie végétale', 'Sciences du sol', 'Élevage', 'Maraîchage', 'Gestion d''une exploitation', 'Commercialisation des produits']),
     ('Environnement, eaux et forêts',         ARRAY['Écologie', 'Botanique forestière', 'Cartographie SIG', 'Gestion des forêts', 'Faune sauvage', 'Études d''impact']),
     ('Hôtellerie et tourisme',                  ARRAY['Accueil et réception', 'Service en salle', 'Anglais du tourisme', 'Patrimoine du Congo', 'Gestion hôtelière', 'Organisation de circuits'])
-) AS c(program_name, courses) ON c.program_name = p.name
-CROSS JOIN LATERAL UNNEST(c.courses) AS course_name;
+) AS c(program_name, courses)
+CROSS JOIN LATERAL UNNEST(c.courses) WITH ORDINALITY AS u(course_name, ord);
+
+INSERT INTO courses (name)
+SELECT DISTINCT course_name FROM seed_program_courses
+ON CONFLICT (name) DO NOTHING;
+
+-- Répartition par année, comme dans les maquettes : les cours sont découpés
+-- dans l'ordre en blocs égaux, un bloc par année (7 cours sur 2 ans = 4 puis 3).
+INSERT INTO program_courses (program_id, course_id, year, position)
+SELECT p.id, c.id, ((pc.ord - 1) / CEIL(n.total::numeric / d.duration)::int) + 1, pc.ord
+FROM seed_program_courses pc
+JOIN programs p ON p.name = pc.program_name
+JOIN degrees d ON d.id = p.degree_id
+JOIN courses c ON c.name = pc.course_name
+JOIN (SELECT program_name, COUNT(*) AS total FROM seed_program_courses GROUP BY program_name) n
+  ON n.program_name = pc.program_name;
 
 -- ---------------------------------------------------------------------------
--- Années du programme — une ligne par année, étiquette adaptée au diplôme.
--- ---------------------------------------------------------------------------
-INSERT INTO program_years (program_id, level, "order")
-SELECT p.id,
-       CASE p.degree
-           WHEN 'Master'  THEN 'M' || g.n
-           WHEN 'BTS'     THEN g.n || 'e année'
-           ELSE 'L' || g.n
-       END,
-       g.n
-FROM programs p
-CROSS JOIN generate_series(1, p.duration) AS g(n);
-
--- ---------------------------------------------------------------------------
--- Répartition des cours dans les années — un programme a `duration` années,
--- on répartit ses cours en round-robin : année = (rang - 1) % duration + 1.
--- ---------------------------------------------------------------------------
-INSERT INTO year_courses (year_id, course_id, "order")
-SELECT y.id, ranked.id, ROW_NUMBER() OVER (PARTITION BY y.id ORDER BY ranked.rn)
-FROM (
-    SELECT id, program_id,
-           ROW_NUMBER() OVER (PARTITION BY program_id ORDER BY id) AS rn
-    FROM courses
-) ranked
-JOIN programs p ON p.id = ranked.program_id
-JOIN program_years y ON y.program_id = p.id
-WHERE y."order" = ((ranked.rn - 1) % p.duration) + 1
-ON CONFLICT DO NOTHING;
-
--- ---------------------------------------------------------------------------
--- Utilisateur Squad par défaut (mot de passe : kelasi2026 — À CHANGER)
+-- Compte Squad par défaut (mot de passe : orienta2026 — À CHANGER)
 -- Le hash ci-dessous est un bcrypt réel, généré pour ce mot de passe.
 -- Ne jamais exécuter ce seed en production : changez d'abord le mot de passe.
+-- `email` reste vide : à renseigner pour que « mot de passe oublié » fonctionne.
 -- ---------------------------------------------------------------------------
 INSERT INTO users (username, password_hash, name, role)
-VALUES ('squad', '$2b$10$thghllGrQKoqWArksnORXuD2fkv8c987MJ3zrjDptxZ2DSMOnuQ4q', 'Membre Squad', 'squad')
+VALUES ('squad', '$2b$10$6x9Auqu6/4/0L7O341ZcS./yDm2B/wU.K/mWKFDu8wmB1RtQScNdC', 'Squad', 'superadmin')
 ON CONFLICT (username) DO NOTHING;
 
 COMMIT;
