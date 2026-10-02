@@ -1,0 +1,73 @@
+# Environnement de développement complet : base, API et les deux interfaces.
+#
+#   docker compose up --build        # tout démarrer
+#   docker compose down              # tout arrêter (les données restent)
+#   docker compose down -v           # tout arrêter et effacer base et images
+#
+# Adresses une fois démarré :
+#   API          http://localhost:4000   (état : /health)
+#   Site public  http://localhost:3000
+#   Back-office  http://localhost:3001
+#
+# La base démarre vide : l'API crée les tables à son démarrage (migrate.sql).
+# Pour charger le jeu de démonstration, une seule fois :
+#   docker compose exec backend sh -c 'psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f scripts/seed.sql'
+#
+# Ce fichier sert au développement : les mots de passe qu'il contient ne doivent
+# jamais servir en production (voir deploy.md).
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orienta
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d orienta"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/orienta
+      JWT_SECRET: secret-de-developpement
+      CORS_ORIGIN: http://localhost:3000,http://localhost:3001
+      PORT: "4000"
+    ports:
+      - "4000:4000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  back-office:
+    build:
+      context: ./back-office
+      args:
+        VITE_API_URL: http://localhost:4000
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
+  uploads:

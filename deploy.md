@@ -79,6 +79,11 @@ migration s'arrête avec un message explicite et **le conteneur ne démarre pas*
 il faut alors lancer une fois, à la main, `psql $DATABASE_URL -f scripts/reset.sql`
 — il efface le catalogue mais conserve les comptes — puis redéployer.
 
+**Images des instituts.** L'API enregistre les images déposées dans `/app/uploads`
+et les sert sous `/uploads`. Dans Dokploy, monte un **volume persistant** sur
+`/app/uploads` (onglet *Volumes* de l'application backend) : sans lui, les images
+disparaissent à chaque redéploiement.
+
 Une fois déployé, attribue un domaine à cette application dans Dokploy (ex.
 `api.orienta.exemple.com`) et vérifie `https://<domaine>/health`. La réponse doit porter `"status": "ok"` et
 `"database": {"status": "up", …}` :
