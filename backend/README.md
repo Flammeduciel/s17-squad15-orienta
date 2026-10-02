@@ -33,16 +33,16 @@ backend/
     ├── config/        # Variables d'environnement (env.js), connexion PostgreSQL (db.js)
     ├── routes/        # Déclaration des routes, un fichier par ressource
     ├── controllers/   # Une fonction par route : lit la requête, appelle le modèle, répond
-    ├── models/        # Requêtes SQL, un fichier par table ou groupe de tables
-    ├── middlewares/   # Erreurs, CORS, validation ; bientôt l'authentification et le dépôt de fichier
+    ├── models/        # Requêtes SQL, un fichier par table ou groupe de tables (users.js)
+    ├── middlewares/   # Erreurs, CORS, validation, session (auth.js) ; bientôt le dépôt de fichier
     ├── validators/    # Schémas de validation : common.js, puis un fichier par ressource
-    ├── services/      # Ce qui sort de l'API : envoi d'e-mail, stockage des images
+    ├── services/      # Mots de passe et jetons (auth.js), envoi d'e-mail (mail.js) ; bientôt les images
     └── utils/         # Fonctions sans dépendance (httpError.js)
 ```
 
 La route `/health` sert d'exemple complet : `routes/health.js` déclare la route,
-`controllers/health.js` y répond. `models/` et `services/` n'ont pas encore de
-code : un court README y dit ce qu'on y mettra.
+`controllers/health.js` y répond. L'authentification (`/auth/…`) montre le
+chemin complet avec validation, modèle et service.
 
 ## Ce que le socle fournit
 
@@ -65,10 +65,10 @@ router.get('/programs/:id', validate({ params: idParams }), getProgram);
 // dans le contrôleur : req.valid.params.id est déjà un nombre
 ```
 
-**Base de données.** `config/db.js` exporte le pool PostgreSQL : un modèle fait
-`const { pool } = require('../config/db')` puis `pool.query(sql, valeurs)`,
-toujours avec des paramètres `$1`, `$2`… jamais en collant une valeur dans le
-SQL.
+**Base de données.** Un modèle fait `const { query } = require('../config/db')`
+puis `query(sql, valeurs)`, toujours avec des paramètres `$1`, `$2`… jamais en
+collant une valeur dans le SQL. `models/users.js` sert d'exemple. Sans base
+configurée, `query` répond 503 `BASE_INDISPONIBLE`.
 
 **CORS.** Pour l'instant, toutes les origines sont acceptées : chaque
 développeur doit pouvoir appeler l'API depuis son poste pour tester ses pages.
@@ -79,6 +79,12 @@ La version restreinte à `CORS_ORIGIN` est écrite, commentée, dans
 `@returns`, `@example`) : l'éditeur affiche cette aide au survol et à la saisie.
 Toute nouvelle fonction suit la même forme.
 
+**Authentification.** Toute route sous `/admin` exige une session : c'est
+déclaré une fois dans `app.js`, les blocs suivants n'ont rien à ajouter. Le
+compte connecté est dans `req.user` (`id`, `username`, `email`, `name`,
+`role`). Pour protéger une route hors `/admin`, ajouter le middleware
+`requireAuth` de `middlewares/auth.js`.
+
 **Images.** Le dossier `uploads/` est servi sous `/uploads` : une image déposée
 dans `uploads/institutes/photo.jpg` est lisible à `/uploads/institutes/photo.jpg`.
 
@@ -87,7 +93,7 @@ Un fichier par ressource dans `routes/`, `controllers/`, `models/` et
 
 | Ressource | Nom de fichier | Bloc |
 |---|---|---|
-| Authentification | `auth` | BK2 |
+| Authentification | `auth` (+ `models/users`, `services/auth`, `services/mail`) | BK2, fait |
 | Domaines, diplômes, séries du bac, débouchés | `domains`, `degrees`, `bacSeries`, `careers` | BK3 |
 | Instituts, arrondissements, images | `institutes`, `districts`, `images` | BK4 |
 | Formations, indicateurs | `programs`, `indicators` | BK5 |

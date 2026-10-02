@@ -39,6 +39,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/orienta
       JWT_SECRET: secret-de-developpement
       CORS_ORIGIN: http://localhost:3000,http://localhost:3001
+      BACKOFFICE_URL: http://localhost:3001
       PORT: "4000"
     ports:
       - "4000:4000"
