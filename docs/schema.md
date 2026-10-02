@@ -1,4 +1,8 @@
-# Kelasi Brazzaville — Database Schema
+# Orienta Brazzaville — Database Schema
+
+The schema follows the back-office: every list the Squad manages there is a table
+here. The executable version is `backend/scripts/migrate.sql`; `docs/schema.sql`
+is its plain-DDL reference copy.
 
 ## Entity-Relationship Diagram (Mermaid)
 
@@ -7,7 +11,8 @@ erDiagram
     users {
         SERIAL id PK
         VARCHAR username UK
-        VARCHAR password_hash
+        VARCHAR email UK
+        TEXT password_hash
         VARCHAR name
         VARCHAR role
         TIMESTAMP created_at
@@ -15,14 +20,26 @@ erDiagram
 
     domains {
         VARCHAR id PK
-        VARCHAR name
+        VARCHAR name UK
         VARCHAR color
+    }
+
+    degrees {
+        SERIAL id PK
+        VARCHAR name UK
+        SMALLINT duration
+    }
+
+    bac_series {
+        SERIAL id PK
+        VARCHAR code UK
+        VARCHAR label
     }
 
     institutes {
         SERIAL id PK
-        VARCHAR name
-        VARCHAR short_name
+        VARCHAR name UK
+        VARCHAR short_name UK
         VARCHAR district
         VARCHAR address
         VARCHAR phone
@@ -31,11 +48,12 @@ erDiagram
         VARCHAR color
         TEXT image_url
         TEXT description
+        TEXT_ARRAY benefits
         INTEGER registration_fee
-        VARCHAR registration_deadline
-        VARCHAR start_date
-        VARCHAR accreditation_status
+        DATE registration_deadline
+        DATE start_date
         VARCHAR accreditation_number
+        BOOLEAN accredited
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
@@ -44,21 +62,33 @@ erDiagram
         SERIAL id PK
         INTEGER institute_id FK
         VARCHAR domain_id FK
+        INTEGER degree_id FK
         VARCHAR name
-        VARCHAR degree
-        INTEGER duration
-        INTEGER tuition
-        VARCHAR bac_series
+        TEXT description
+        TEXT admission_requirements
         BOOLEAN evening
         INTEGER internship_months
         BOOLEAN installments
+        VARCHAR status
         TIMESTAMP created_at
         TIMESTAMP updated_at
+    }
+
+    program_fees {
+        INTEGER program_id FK
+        SMALLINT year
+        INTEGER amount
+    }
+
+    program_bac_series {
+        INTEGER program_id FK
+        INTEGER series_id FK
     }
 
     careers {
         SERIAL id PK
         VARCHAR name UK
+        VARCHAR domain_id FK
     }
 
     program_careers {
@@ -68,21 +98,14 @@ erDiagram
 
     courses {
         SERIAL id PK
-        INTEGER program_id FK
-        VARCHAR name
+        VARCHAR name UK
     }
 
-    program_years {
-        SERIAL id PK
+    program_courses {
         INTEGER program_id FK
-        VARCHAR level
-        INTEGER order
-    }
-
-    year_courses {
-        INTEGER year_id FK
         INTEGER course_id FK
-        INTEGER order
+        SMALLINT year
+        INTEGER position
     }
 
     contact_requests {
@@ -94,49 +117,67 @@ erDiagram
         TIMESTAMP created_at
     }
 
-    referral_requests {
-        SERIAL id PK
-        VARCHAR institute_name
-        VARCHAR district
-        VARCHAR phone
-        VARCHAR contact_person
-        VARCHAR accreditation_number
-        TIMESTAMP created_at
-    }
-
     institutes ||--o{ programs : "offers"
     domains ||--o{ programs : "categorizes"
+    degrees ||--o{ programs : "is awarded by"
+    domains ||--o{ careers : "categorizes"
+    programs ||--o{ program_fees : "costs per year"
+    programs ||--o{ program_bac_series : "admits"
+    bac_series ||--o{ program_bac_series : "is admitted in"
     programs ||--o{ program_careers : "leads to"
     careers ||--o{ program_careers : "is a"
-    programs ||--o{ courses : "teaches"
-    programs ||--o{ program_years : "divided into"
-    program_years ||--o{ year_courses : "contains"
-    courses ||--o{ year_courses : "scheduled in"
+    programs ||--o{ program_courses : "teaches"
+    courses ||--o{ program_courses : "is taught in"
     programs ||--o{ contact_requests : "receives"
 ```
 
 ## Table Descriptions
 
 ### `users`
-Squad members who can access the back-office.
+Squad members who can access the back-office (EX-15, EX-16, EX-17).
 
 | Column | Type | Description |
 |---|---|---|
 | id | SERIAL PK | Unique identifier |
 | username | VARCHAR(50) UNIQUE | Login identifier |
-| password_hash | VARCHAR | Bcrypt hash |
+| email | VARCHAR(150) UNIQUE | Receives the password reset link. Required by the API at creation; nullable for older accounts |
+| password_hash | TEXT | Bcrypt hash |
 | name | VARCHAR(100) | Display name |
-| role | VARCHAR(20) | Role (default: `squad`) |
+| role | VARCHAR(20) | Role (default: `superadmin`) |
 | created_at | TIMESTAMP | Account creation date |
 
 ### `domains`
-The 10 training domains (Gestion, Info, Santé, BTP, etc.).
+Domains of insertion (Gestion, Informatique, Santé…). They classify programs and
+careers, and form the category bar of the public site.
 
 | Column | Type | Description |
 |---|---|---|
-| id | VARCHAR(20) PK | Slug (ex: `gestion`, `info`, `sante`) |
-| name | VARCHAR(100) | Display name |
-| color | VARCHAR(7) | Hex color for the cover |
+| id | VARCHAR(20) PK | Stable slug (ex: `gestion`, `info`, `sante`); renaming a domain never changes it |
+| name | VARCHAR(100) UNIQUE | Display name |
+| color | VARCHAR(7) | Hex color for the program covers |
+
+A domain still used by a program or a career cannot be deleted.
+
+### `degrees`
+Degrees awarded (BTS, Licence, Licence pro, Master…).
+
+| Column | Type | Description |
+|---|---|---|
+| id | SERIAL PK | Unique identifier |
+| name | VARCHAR(50) UNIQUE | Degree name |
+| duration | SMALLINT | Length of studies in years (1 to 5) |
+
+The length of studies belongs to the degree: every program awarding it lasts
+`duration` years. A degree still used by a program cannot be deleted.
+
+### `bac_series`
+Series of the baccalauréat (A, B, C, D…), used as admission criteria.
+
+| Column | Type | Description |
+|---|---|---|
+| id | SERIAL PK | Unique identifier |
+| code | VARCHAR(10) UNIQUE | Series code (ex: `A`, `C`) |
+| label | VARCHAR(100) | Label (ex: `Lettres`) |
 
 ### `institutes`
 Private higher education institutes in Brazzaville.
@@ -144,9 +185,9 @@ Private higher education institutes in Brazzaville.
 | Column | Type | Description |
 |---|---|---|
 | id | SERIAL PK | Unique identifier |
-| name | VARCHAR(200) | Full name |
-| short_name | VARCHAR(20) | Acronym (ex: ISGF, ESIM) |
-| district | VARCHAR(50) | One of the 9 Brazzaville districts |
+| name | VARCHAR(200) UNIQUE | Full name |
+| short_name | VARCHAR(20) UNIQUE | Acronym (ex: ISGF, ESIM) |
+| district | VARCHAR(50) | One of the 9 Brazzaville districts, written with accents (`Makélékélé`, `Talangaï`…) — CHECK constraint |
 | address | VARCHAR(300) | Physical address |
 | phone | VARCHAR(20) | Phone number |
 | whatsapp | VARCHAR(20) | WhatsApp number (international, no +) |
@@ -154,43 +195,69 @@ Private higher education institutes in Brazzaville.
 | color | VARCHAR(7) | Cover color (hex) |
 | image_url | TEXT | Institute image (null → color cover) |
 | description | TEXT | Presentation text |
+| benefits | TEXT[] | Optional advantages (library, grants…), one per element |
 | registration_fee | INTEGER | Registration fee in FCFA |
-| registration_deadline | VARCHAR(50) | Enrollment deadline |
-| start_date | VARCHAR(50) | School year start |
-| accreditation_status | VARCHAR(10) | `agre` or `en_cours` |
-| accreditation_number | VARCHAR(100) | Official accreditation number (null if en_cours) |
+| registration_deadline | DATE | Enrollment deadline |
+| start_date | DATE | School year start (not before the deadline) |
+| accreditation_number | VARCHAR(100) | Official accreditation number; null = not accredited |
+| accredited | BOOLEAN (generated) | True when `accreditation_number` is set — drives the blue badge (EX-05 / EX-14) |
 | created_at | TIMESTAMP | Creation date |
 | updated_at | TIMESTAMP | Last update date |
 
 ### `programs`
-Training programs offered by institutes.
+Training programs offered by institutes. A program belongs to one institute; two
+institutes may offer a program with the same name.
 
 | Column | Type | Description |
 |---|---|---|
 | id | SERIAL PK | Unique identifier |
-| institute_id | INTEGER FK → institutes | Owning institute |
-| domain_id | VARCHAR(20) FK → domains | Training domain |
-| name | VARCHAR(200) | Program name |
-| degree | VARCHAR(20) | `BTS`, `Licence`, `Licence pro`, `Master` |
-| duration | INTEGER | Duration in years (2 or 3) |
-| tuition | INTEGER | Annual tuition in FCFA |
-| bac_series | VARCHAR(10) | Accepted bac series (ex: `ABCDG`, null if post-Licence) |
+| institute_id | INTEGER FK → institutes | Owning institute (programs are deleted with it) |
+| domain_id | VARCHAR(20) FK → domains | Domain of insertion |
+| degree_id | INTEGER FK → degrees | Degree awarded; gives the length of studies |
+| name | VARCHAR(200) | Program name, unique within the institute |
+| description | TEXT | Short presentation shown on the public page |
+| admission_requirements | TEXT | Admission conditions other than the bac series |
 | evening | BOOLEAN | Evening classes available |
-| internship_months | INTEGER | Internship duration (0 = none) |
+| internship_months | INTEGER | Internship duration, 0 to 12 (0 = none) |
 | installments | BOOLEAN | Payment in installments |
+| status | VARCHAR(10) | `published` (visible on the public site) or `draft` |
 | created_at | TIMESTAMP | Creation date |
 | updated_at | TIMESTAMP | Last update date |
 
+### `program_fees`
+Yearly tuition per year of study ("tarifs par niveau").
+
+| Column | Type | Description |
+|---|---|---|
+| program_id | INTEGER FK → programs | Program |
+| year | SMALLINT | Year of study, from 1 |
+| amount | INTEGER | Tuition for that year, in FCFA |
+
+The API keeps `year` within the degree duration.
+
+### `program_bac_series`
+Bac series admitted by a program. No row for a program means the series is not an
+admission criterion.
+
+| Column | Type | Description |
+|---|---|---|
+| program_id | INTEGER FK → programs | Program |
+| series_id | INTEGER FK → bac_series | Admitted series |
+
+A series still attached to a program cannot be deleted.
+
 ### `careers`
-Career outcomes / job opportunities.
+Career outcomes ("débouchés").
 
 | Column | Type | Description |
 |---|---|---|
 | id | SERIAL PK | Unique identifier |
 | name | VARCHAR(100) UNIQUE | Career name |
+| domain_id | VARCHAR(20) FK → domains | Domain of insertion |
 
 ### `program_careers`
-Many-to-many relationship between programs and careers.
+Many-to-many relationship between programs and careers. A career still attached
+to a program cannot be deleted.
 
 | Column | Type | Description |
 |---|---|---|
@@ -198,35 +265,28 @@ Many-to-many relationship between programs and careers.
 | career_id | INTEGER FK → careers | Career |
 
 ### `courses`
-Courses / subjects taught in each program.
+Shared catalogue of courses: one course (Français, Mathématiques…) can be
+attached to several programs.
 
 | Column | Type | Description |
 |---|---|---|
 | id | SERIAL PK | Unique identifier |
-| program_id | INTEGER FK → programs | Parent program |
-| name | VARCHAR(200) | Course name |
+| name | VARCHAR(200) UNIQUE | Course name |
 
-### `program_years`
-Program breakdown by year (L1, L2, L3, M1, M2, etc.).
-
-| Column | Type | Description |
-|---|---|---|
-| id | SERIAL PK | Unique identifier |
-| program_id | INTEGER FK → programs | Parent program |
-| level | VARCHAR(20) | Year label (L1, L2, L3, 1re année, M1, M2) |
-| order | INTEGER | Display order |
-
-### `year_courses`
-Many-to-many relationship between program years and courses (ordered).
+### `program_courses`
+Curriculum of a program, year by year. A course is attached once to a program.
+Deleting a course removes it from every program.
 
 | Column | Type | Description |
 |---|---|---|
-| year_id | INTEGER FK → program_years | Program year |
+| program_id | INTEGER FK → programs | Program |
 | course_id | INTEGER FK → courses | Course |
-| order | INTEGER | Display order |
+| year | SMALLINT | Year of study, from 1 (kept within the degree duration by the API) |
+| position | INTEGER | Display order within the program |
 
 ### `contact_requests`
-Contact form submissions (student → institute).
+Questions sent from a public program page and relayed by e-mail to the institute
+(EX-06). The back-office has no inbox for them.
 
 | Column | Type | Description |
 |---|---|---|
@@ -237,19 +297,6 @@ Contact form submissions (student → institute).
 | message | TEXT | Question / message |
 | created_at | TIMESTAMP | Submission date |
 
-### `referral_requests`
-Institute referral requests (public form).
-
-| Column | Type | Description |
-|---|---|---|
-| id | SERIAL PK | Unique identifier |
-| institute_name | VARCHAR(200) | Institute name |
-| district | VARCHAR(50) | District |
-| phone | VARCHAR(20) | Phone number |
-| contact_person | VARCHAR(100) | Responsible person |
-| accreditation_number | VARCHAR(100) | Accreditation number (optional) |
-| created_at | TIMESTAMP | Submission date |
-
 ## Indexes
 
 | Table | Column | Purpose |
@@ -257,21 +304,23 @@ Institute referral requests (public form).
 | institutes | district | Filter by district |
 | programs | institute_id | Filter by institute |
 | programs | domain_id | Filter by domain |
-| programs | degree | Filter by degree |
-| programs | duration | Filter by duration |
-| programs | tuition | Filter by budget |
-| courses | program_id | Filter by program |
-| program_years | program_id | Filter by program |
+| programs | degree_id | Filter by degree |
+| programs | status | Public site reads published programs only |
+| program_fees | amount | Filter by budget |
+| program_bac_series | series_id | Filter by bac series |
+| careers | domain_id | Filter by domain |
+| program_careers | career_id | Filter by career |
+| program_courses | course_id | Programs of a course |
 
 ## Views
 
 ### `indicators`
-KPI for the Squad dashboard.
+The 5 KPI of the Squad dashboard (EX-07).
 
 | Column | Description |
 |---|---|
 | nb_institutes | Total number of institutes |
+| nb_programs | Total number of programs |
 | nb_districts_covered | Number of districts covered (out of 9) |
-| nb_domains | Number of distinct training domains |
-| nb_degrees | Number of distinct degree types |
+| nb_degrees | Number of degrees |
 | nb_careers | Total number of careers |
