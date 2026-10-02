@@ -49,7 +49,7 @@ cd backend
 npm install
 npm run dev
 ```
-→ API sur http://localhost:4000/api
+→ API sur http://localhost:4000
 
 ### Frontend
 ```bash
