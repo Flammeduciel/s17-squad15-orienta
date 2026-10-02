@@ -1,0 +1,58 @@
+/**
+ * assets/css/badges.css
+ * ---------------------------------------------------------------------------
+ * Étiquettes : badge d'agrément et statuts.
+ */
+
+.agb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.agb svg {
+  width: 13px;
+  height: 13px;
+}
+
+.agb.p {
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.badge.new {
+  background: var(--sun);
+  color: #3A2B00;
+}
+
+.badge.ok {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.badge.wait {
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.badge.ko {
+  background: var(--heart);
+  color: #fff;
+}

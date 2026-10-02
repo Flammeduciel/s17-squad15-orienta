@@ -1,0 +1,215 @@
+/**
+ * assets/css/cards.css
+ * ---------------------------------------------------------------------------
+ * Grille et cartes : carte de formation ou d'institut, couverture, mini-cartes, débouchés, état vide.
+ */
+
+.job small {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.cover .big-sigle {
+  position: relative;
+  font: 800 34px var(--display);
+  letter-spacing: .03em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+  gap: 28px 22px;
+}
+
+.fcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  min-width: 0;
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 20/19;
+  max-width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.cover .pat {
+  position: absolute;
+  inset: 0;
+  opacity: .18;
+  background-image: radial-gradient(circle at 1px 1px,#fff 1.5px,transparent 0);
+  background-size: 18px 18px;
+}
+
+.cover .blob {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  right: -18%;
+  bottom: -22%;
+}
+
+.cover svg.big {
+  width: 34%;
+  height: 34%;
+  position: relative;
+  opacity: .95;
+}
+
+.cover .dip {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  background: #fff;
+  color: #14201B;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 99px;
+}
+
+.cover .inst {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  font: 800 15px var(--display);
+  letter-spacing: .04em;
+  opacity: .9;
+}
+
+.fcard:hover .cover {
+  filter: brightness(1.06);
+}
+
+.fcard .t {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.fcard h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.fcard .dur {
+  flex: none;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.fcard .meta {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: -6px;
+}
+
+.fcard .jobs {
+  font-size: 14px;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fcard .jobs b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.fcard .price {
+  font-size: 15px;
+}
+
+.fcard .price b {
+  font-weight: 800;
+}
+
+.empty {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+}
+
+.empty h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.empty p {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.jobgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(210px,1fr));
+  gap: 10px;
+}
+
+.job {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 15px;
+  text-align: left;
+}
+
+.job:hover {
+  border-color: var(--ink);
+}
+
+.job svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--green);
+}
+
+.minigrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.mini {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  text-decoration: none;
+}
+
+.mini:hover {
+  border-color: var(--ink);
+}
+
+.mini small {
+  color: var(--muted);
+}

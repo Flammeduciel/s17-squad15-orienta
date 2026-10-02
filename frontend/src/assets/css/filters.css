@@ -1,0 +1,67 @@
+/**
+ * assets/css/filters.css
+ * ---------------------------------------------------------------------------
+ * Panneau de filtres et barre de résultats (compteur, tri, ouverture des filtres sur mobile).
+ */
+
+.filters {
+  align-self: start;
+  position: sticky;
+  top: calc(env(safe-area-inset-top,0px) + 92px);
+  max-height: calc(100vh - 110px);
+  overflow: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+}
+
+.fhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.fhead h2 {
+  font-size: 20px;
+  font-family: var(--display);
+}
+
+.fgroup {
+  border-bottom: 1px solid var(--line);
+  padding-block: 18px;
+}
+
+.fgroup h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.fgroup .hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin: -8px 0 10px;
+}
+
+.sheet-foot {
+  display: none;
+}
+
+.rbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.rbar h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.rbar .r {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
