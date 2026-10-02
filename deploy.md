@@ -1,6 +1,6 @@
 # Déploiement sur Dokploy
 
-Kelasi se déploie comme **trois applications Dokploy séparées** (frontend,
+Orienta se déploie comme **trois applications Dokploy séparées** (frontend,
 back-office, backend), toutes trois construites depuis ce même dépôt Git via
 leur propre `Dockerfile`, plus **un service PostgreSQL** géré par Dokploy (pas
 de conteneur Postgres dans ce dépôt).
@@ -57,13 +57,14 @@ Créer une nouvelle **Application** dans Dokploy :
 | -------------- | ------ | ---------------------------------------------------------------------------------------------- |
 | `DATABASE_URL` | Oui    | La chaîne de connexion du service PostgreSQL (étape 1)                                         |
 | `JWT_SECRET`   | Oui    | Une chaîne aléatoire longue et secrète — jamais la valeur par défaut de développement           |
-| `CORS_ORIGIN`  | Oui    | Les URLs publiques autorisées à appeler l'API, séparées par des virgules, **sans slash final** — ex. `https://kelasi.exemple.com,https://back-office.kelasi.exemple.com` |
+| `CORS_ORIGIN`  | Oui    | Les URLs publiques autorisées à appeler l'API, séparées par des virgules, **sans slash final** — ex. `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
 | `PORT`         | Non    | `4000` (déjà la valeur par défaut)                                                              |
 
 Au démarrage du conteneur, `backend/scripts/start.sh` s'exécute automatiquement :
 il applique les migrations SQL (`psql -f migrate.sql`) puis démarre le serveur.
-Les tables sont créées/mises à jour toutes seules au premier déploiement, rien
-à faire à la main. En revanche, **le seed n'est jamais exécuté automatiquement**
+Les tables sont créées toutes seules au premier déploiement, rien à faire à la
+main. Le script est idempotent : le rejouer sur une base déjà à jour ne change
+rien. En revanche, **le seed n'est jamais exécuté automatiquement**
 (il contient des données de démonstration) — voir « Créer le premier compte
 administrateur » plus bas.
 
@@ -71,8 +72,15 @@ Le schéma complet (tables, colonnes, index, vue `indicators`) est documenté da
 `docs/schema.md` (diagramme Mermaid) et `docs/schema.sql`. Le `migrate.sql` embarqué
 dans l'image en est l'application exécutable.
 
+**Base créée avec le premier schéma (Kelasi).** Ce schéma ne peut pas être
+transformé sur place. Si ses tables sont vides, `migrate.sql` les reconstruit
+tout seul. Si elles contiennent des données (par exemple l'ancien seed), la
+migration s'arrête avec un message explicite et **le conteneur ne démarre pas** :
+il faut alors lancer une fois, à la main, `psql $DATABASE_URL -f scripts/reset.sql`
+— il efface le catalogue mais conserve les comptes — puis redéployer.
+
 Une fois déployé, attribue un domaine à cette application dans Dokploy (ex.
-`api.kelasi.exemple.com`) et vérifie `https://<domaine>/health` → doit répondre
+`api.orienta.exemple.com`) et vérifie `https://<domaine>/health` → doit répondre
 `{"status":"ok"}`.
 
 ## 3. Déployer le frontend
@@ -89,7 +97,7 @@ Créer une deuxième **Application** dans Dokploy :
 
 | Argument               | Valeur                                                              |
 | ---------------------- | ------------------------------------------------------------------- |
-| `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.kelasi.exemple.com`     |
+| `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.orienta.exemple.com`     |
 
 Aucune variable requise dans "Environment Settings" pour le frontend.
 
@@ -103,7 +111,7 @@ Aucune variable requise dans "Environment Settings" pour le frontend.
 > visiteurs. Toujours la passer en argument de build, et **redéployer avec un
 > rebuild** (pas juste un restart) après l'avoir ajoutée ou changée.
 
-Attribue un domaine au frontend (ex. `kelasi.exemple.com`), puis retourne sur
+Attribue un domaine au frontend (ex. `orienta.exemple.com`), puis retourne sur
 l'application **backend** et vérifie que `CORS_ORIGIN` inclut bien ce domaine
 exact (avec `https://`, sans slash final) — sinon les requêtes CORS échoueront
 silencieusement.
@@ -122,10 +130,10 @@ Créer une troisième **Application** dans Dokploy :
 
 | Argument               | Valeur                                                              |
 | ---------------------- | ------------------------------------------------------------------- |
-| `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.kelasi.exemple.com`     |
+| `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.orienta.exemple.com`     |
 
 Attribue un domaine **distinct** au back-office (ex.
-`back-office.kelasi.exemple.com`) — jamais le même que le frontend public.
+`back-office.orienta.exemple.com`) — jamais le même que le frontend public.
 
 Retourne ensuite sur l'application **backend** et ajoute ce domaine à
 `CORS_ORIGIN` (toujours `https://`, sans slash final, séparé du précédent par
@@ -135,17 +143,18 @@ et à envoyer le token `Authorization: Bearer`.
 ## Créer le premier compte administrateur en production
 
 Le seed (`backend/scripts/seed.sql`) crée un compte admin de démonstration
-(`squad` / `kelasi2026`) — pratique en local, **à ne jamais exécuter tel quel en
+(`squad` / `orienta2026`) — pratique en local, **à ne jamais exécuter tel quel en
 production** (mot de passe public dans ce dépôt). Deux options pour le premier
 admin réel :
 
-1. Créer un compte via `POST /auth/login` (ou directement en base), puis
-   insérer un utilisateur avec un hash bcrypt dans la table `users` via le
-   terminal PostgreSQL de Dokploy.
+1. Insérer un utilisateur (identifiant, e-mail, hash bcrypt du mot de passe)
+   dans la table `users` via le terminal PostgreSQL de Dokploy. Il n'existe pas
+   de route d'inscription : c'est voulu, le back-office est réservé à la Squad.
 2. Ou exécuter le seed une fois en changeant le mot de passe dans `seed.sql`
    avant de le lancer manuellement dans le conteneur backend
    (`psql $DATABASE_URL -f scripts/seed.sql`), puis changer ce mot de passe
-   immédiatement depuis le compte une fois connecté.
+   immédiatement avec « Mot de passe oublié » (renseigner d'abord l'e-mail du
+   compte dans `users`, le seed le laisse vide).
 
 Les données de démonstration (instituts, formations) créées par le seed sont,
 elles, un bon point de départ — à ajuster ensuite depuis le back-office plutôt
@@ -170,14 +179,14 @@ qu'à re-seeder.
 | -------------- | ------ | ----------------------------------------------------------------- |
 | `DATABASE_URL` | Oui    | `postgresql://user:pass@host:5432/db`                          |
 | `JWT_SECRET`   | Oui    | une chaîne aléatoire longue                                     |
-| `CORS_ORIGIN`  | Oui    | `https://kelasi.exemple.com,https://back-office.kelasi.exemple.com` |
+| `CORS_ORIGIN`  | Oui    | `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
 | `PORT`         | Non    | `4000` (valeur par défaut)                                      |
 
 **Frontend et back-office** (identique pour les deux)
 
 | Variable               | Requis | Type           | Exemple                                  |
 | ---------------------- | ------ | ---------------- | ------------------------------------------- |
-| `VITE_API_URL`        | Oui    | Build Argument | `https://api.kelasi.exemple.com`         |
+| `VITE_API_URL`        | Oui    | Build Argument | `https://api.orienta.exemple.com`         |
 
 ## Dépannage
 
@@ -201,7 +210,7 @@ qu'à re-seeder.
 Sans Dokploy, pour vérifier qu'une image se construit correctement :
 
 ```bash
-docker build -t kelasi-backend ./backend
-docker build --build-arg VITE_API_URL=http://localhost:4000 -t kelasi-frontend ./frontend
-docker build --build-arg VITE_API_URL=http://localhost:4000 -t kelasi-back-office ./back-office
+docker build -t orienta-backend ./backend
+docker build --build-arg VITE_API_URL=http://localhost:4000 -t orienta-frontend ./frontend
+docker build --build-arg VITE_API_URL=http://localhost:4000 -t orienta-back-office ./back-office
 ```
