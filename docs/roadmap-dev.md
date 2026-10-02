@@ -1,206 +1,225 @@
-# Roadmap de développement — Kelasi Brazzaville
+# Roadmap de développement — Orienta Brazzaville
 
-Pages à produire, répartition entre les six développeurs, ordre d'exécution et
-règles de contribution.
+Ce qu'il faut construire, qui le construit, et ce qui dépend de quoi.
 
 ---
 
 ## 1. Principe
 
-Le produit compte **17 pages** : 8 sur le site public, 9 dans le back-office,
-et **7 chantiers backend** dont dépend la moitié des pages. Le travail est
-réparti en quatre vagues.
+Le travail se découpe en trois ensembles :
 
-**Vague 1 — le socle.** Six briques dont dépend tout le reste : l'API REST,
-l'environnement de développement, le design system, la couche partagée par les
-deux interfaces, et le squelette du back-office. Attribuées au lead technique,
-car chacune bloque tous les autres et qu'aucune n'est une fonctionnalité.
+- **Le backend**, en **6 blocs**, porté par **Flamme** et **Gilles**.
+- **Le socle des interfaces**, en **3 briques**, dont dépendent toutes les pages.
+- **Les 19 pages** — 7 sur le site public, 12 dans le back-office — réparties
+  entre **Elie**, **Arsène**, **Fresnel** et **Samuel**. Chacun a des pages des
+  deux côtés et suit un même sujet de bout en bout.
 
-**Vague 2 — le site public.** Les 8 pages du site, réparties en quatre lots.
+Chaque bloc, chaque brique et chaque page est une branche. Deux branches ne
+touchent jamais les mêmes fichiers, donc les développeurs ne se gênent pas.
 
-**Vague 3 — le back-office.** Les 9 pages d'administration, réparties en quatre
-lots.
+Cette roadmap ne couvre que l'implémentation. Les tests automatisés,
+l'observabilité, les optimisations de performance et la reprise des données
+réelles sont planifiés après, dans un second temps.
 
-**Vague 4 — les fondations backend.** Les chantiers qui n'ont pas de page
-visible mais bloquent la production : lecture des demandes, tests, déploiement,
-observabilité, durcissement. Répartis entre les développeurs qui ont le plus de
-charge page.
+### Ce qui a changé depuis la première version
 
-Chaque page et chaque chantier est une branche. Deux branches ne touchent jamais
-les mêmes fichiers, donc les développeurs ne se gênent pas.
+Les maquettes (`template/`) ont été réalignées sur le catalogue d'exigences, puis
+le contrat (`docs/openapi.yaml`, version 2.0.0) et le schéma de base ont suivi.
 
-### Ce qui manque au contrat
+- **Trois pages retirées.** « Référencer un institut » (P8), « Demandes de
+  contact » (P12) et « Demandes de référencement » (P13) n'ont aucune exigence
+  derrière elles : la Squad collecte elle-même les informations des instituts,
+  et une question posée depuis une fiche part par e-mail vers l'institut.
+- **Cinq pages ajoutées au back-office** (P19 à P23) : cours, diplômes,
+  débouchés, séries du bac et domaines d'insertion.
+- **L'accueil part des instituts**, plus des métiers : recherche « institut,
+  filière ou diplôme » et quatre accès — instituts, formations, diplômes,
+  débouchés (EX-09).
+- **La durée appartient au diplôme**, les frais sont saisis par niveau, et les
+  cours forment un catalogue partagé entre formations.
+- **Pas d'inscription dans le back-office.** EX-15 la demande encore dans le
+  catalogue d'exigences ; le Product Discovery (§10) la signalait déjà comme un
+  problème de sécurité. À faire corriger par le BA.
+- **Le backend est confié à deux développeurs**, Flamme et Gilles, et découpé en
+  blocs. Les pages de Gilles et celles du lead technique sont redistribuées.
 
-Deux écrans de la vague 3 n'ont aucune route derrière eux. C'est à corriger en
-vague 1, pas en cours de route :
-
-- **Les demandes reçues ne sont pas lisibles.** `POST /contact` et
-  `POST /referrals` écrivent en base, mais rien ne permet de les consulter. Les
-  pages P12 et P13 n'ont donc aucune source. Il manque deux routes de lecture
-  sous `/admin`, ainsi que la colonne de statut qui permet de les marquer comme
-  traitées.
-- **Aucune route ne permet de créer un compte depuis une demande de
-  référencement.** La page P13 le promet dans son critère de recette. Il faut
-  une route d'acceptation qui crée l'institut et le compte, ou la promesse est
-  retirée de la page.
-
-Ces deux points sont traités en vague 1 par le lead technique, avec mise à jour
-de `docs/openapi.yaml`.
-
----
-
-## 2. Vague 1 — Socle
-
-| Branche | Titre | Contenu |
-|---------|-------|---------|
-| `feat/backend-api-rest` | API REST | Les dix-sept routes du contrat `docs/openapi.yaml`. Validation, limitation de débit, authentification par jeton. |
-| `feat/backend-lecture-demandes` | Lecture des demandes | Les deux routes manquantes sous `/admin` pour consulter les demandes de contact et de référencement, la colonne de statut, et la route d'acceptation qui crée l'institut et son compte. Corrige `docs/openapi.yaml` avant d'écrire le code. |
-| `chore/ops-stack-de-developpement` | Environnement de développement | `docker-compose.yml` orchestrant PostgreSQL, l'API et les deux interfaces. Un `.env.example` documenté, un jeu de démonstration, un compte de test. |
-| `frontend-init-design` | Design system | Le CSS du prototype extrait en sept couches et branché dans les deux interfaces. Source unique de style : aucune CSS écrite à la main dans une application. |
-| `feat/shared-socle-frontends` | Socle partagé des interfaces | Configuration Vite commune, client HTTP, gestion des erreurs, contextes d'authentification et de thème, composants transverses. |
-| `feat/back-office-squelette-auth` | Squelette du back-office | Pages P1 et P10 ci-dessous, plus la disposition générale et la navigation latérale. Fournit le cadre dans lequel s'écrivent les huit autres pages d'administration. |
-
-L'ordre importe : `feat/backend-api-rest` puis
-`feat/backend-lecture-demandes`, car les pages P12 et P13 ne peuvent pas
-commencer avant.
+Les numéros P8, P12, P13 et P18 ne sont pas réattribués.
 
 ---
 
-## 3. Vague 2 — Site public
+## 2. Backend — 6 blocs
+
+Les routes citées sont celles de `docs/openapi.yaml`. La base est déjà décrite
+par `backend/scripts/migrate.sql` et remplie par `backend/scripts/seed.sql`.
+
+| # | Bloc | Développeur | Branche | Contenu | Dépend de |
+|---|------|-------------|---------|---------|-----------|
+| BK1 | Socle de l'API | **Flamme** | `feat/backend-socle-api` | Structure Express, connexion PostgreSQL, validation des entrées, format d'erreur commun (`Error`), CORS, service des images déposées. | — |
+| BK2 | Authentification | **Flamme** | `feat/backend-auth` | `POST /auth/login`, `POST /auth/logout`, `POST /auth/password-reset` et sa confirmation, protection de toutes les routes `/admin` par jeton. | BK1 |
+| BK3 | Référentiels | **Gilles** | `feat/backend-referentiels` | Domaines, diplômes, séries du bac, débouchés : lecture publique (`/domains`, `/degrees`, `/bac-series`, `/careers`) et CRUD `/admin/…`. Suppression refusée (409) tant que l'élément est utilisé. Changer la durée d'un diplôme ajuste ses formations. | BK1 pour la lecture, BK2 pour le CRUD |
+| BK4 | Instituts | **Gilles** | `feat/backend-instituts` | `GET /institutes` (liste et filtres propres à l'institut), `GET /institutes/{id}`, `GET /districts`, CRUD `/admin/institutes`, dépôt d'image `/admin/images`. | BK1 pour la lecture, BK2 pour le CRUD |
+| BK5 | Formations | **Flamme** | `feat/backend-formations` | `GET /programs` (recherche multi-critères) et `GET /programs/{id}`, CRUD `/admin/programs` avec frais par niveau, séries et débouchés, statut publié ou brouillon. Ajoute à `GET /institutes` les filtres qui portent sur les formations. `GET /admin/indicators` (les 5 KPI). | BK3, BK4 |
+| BK6 | Cours et contact | **Gilles** | `feat/backend-cours-contact` | Catalogue `/admin/courses`, rattachement d'un cours à une formation par année (`/admin/programs/{id}/courses/{course_id}`), programme par année dans la fiche formation, `POST /contact` (envoi à l'institut et accusé de réception). | BK5 |
+
+BK3 et BK4 avancent en parallèle de BK2 : leurs routes de lecture n'ont pas
+besoin de l'authentification, seul leur CRUD l'attend.
+
+---
+
+## 3. Socle des interfaces — 3 briques
+
+| # | Brique | Développeur | Branche | Contenu | Dépend de |
+|---|--------|-------------|---------|---------|-----------|
+| S4 | Design system | **Flamme** | `frontend-init-design` | Le CSS du prototype extrait en couches et branché dans les deux interfaces. **Livré.** | — |
+| S5 | Couche commune des interfaces | **Arsène** | `feat/shared-socle-frontends` | Configuration Vite commune, client HTTP, gestion des erreurs, contextes de session et de thème, composants transverses. | S4 |
+| S6 | Squelette du back-office | **Samuel** | `feat/back-office-squelette-auth` | Disposition générale, navigation latérale, garde de session. Livré avec les pages P1 et P10. | S4, S5 |
+
+L'environnement de développement (`docker-compose.yml` avec PostgreSQL, l'API et
+les deux interfaces, `.env.example`) est préparé par **Flamme** avec BK1.
+
+---
+
+## 4. Site public — 7 pages
 
 | # | Page | Route | Développeur | Branche | Critère de recette |
 |---|------|-------|-------------|---------|---------------------|
-| P2 | Catalogue | `/` | **Gilles BITEMO** | `feat/frontend-catalogue` | Les formations s'affichent par carte, avec recherche textuelle et les six filtres (métier, diplôme, durée, budget, série du bac, arrondissement, organisation). Un état vide propose de réinitialiser les filtres. |
-| P3 | Favoris | `/favoris` | **Gilles BITEMO** | `feat/frontend-favoris` | La liste des formations mises de côté s'affiche, se persiste d'une visite à l'autre et se recharge depuis l'API. |
-| P4 | Fiche formation | `/formations/:id` | **Elie NGANGA** | `feat/frontend-fiche-formation` | Toutes les informations du contrat s'affichent : frais, durée, diplôme, séries, cours du soir, stage, paiement en tranches, cours, débouchés. Les métiers vers lesquels elle mène sont cliquables, les autres formations de l'institut listées, un bouton contact et WhatsApp fonctionnent. |
-| P5 | Métiers | `/metiers/:slug` | **Elie NGANGA** | `feat/frontend-metiers` | Un métier sélectionné depuis une fiche formation filtre le catalogue et affiche les formations qui y mènent. Le métier est lisible dans l'adresse. |
-| P6 | Fiche institut | `/instituts/:id` | **Arsène AKIANA** | `feat/frontend-fiche-institut` | Présentation, coordonnées, statut d'agrément, frais d'inscription, date de rentrée, liste des formations publiées, formulaire de contact pré-rempli. |
-| P7 | À propos | `/a-propos` | **Gilles BITEMO** | `feat/frontend-a-propos` | Le problème décrit, ce que fait Kelasi, le public visé et l'engagement sur l'information s'affichent. |
-| P8 | Référencer un institut | `/referencer` | **Samuel AKOMBO** | `feat/frontend-referencer` | Le formulaire de référencement se remplit, se valide et enregistre la demande ; un accusé de réception s'affiche. |
-| P9 | Contact et rendez-vous | `/contact` | **Samuel AKOMBO** | `feat/frontend-contact` | La prise de rendez-vous transmet la demande et affiche sa confirmation. Utilisée aussi en version réduite dans la fiche institut. |
+| P2 | Accueil et recherche | `/` | **Arsène AKIANA** | `feat/frontend-accueil` | L'accueil présente la recherche « institut, filière ou diplôme » et quatre accès : instituts, formations, diplômes, débouchés. La liste des instituts s'affiche par défaut ; chaque accès change la grille. Les filtres (arrondissement, débouché, diplôme, durée, budget, série du bac, organisation) s'appliquent aux quatre vues. Une recherche sans résultat affiche « Résultat introuvable » et propose d'effacer les filtres. |
+| P3 | Favoris | `/favoris` | **Samuel AKOMBO** | `feat/frontend-favoris` | La liste des formations mises de côté s'affiche, se persiste d'une visite à l'autre et se recharge depuis l'API. |
+| P4 | Fiche formation | `/formations/:id` | **Elie NGANGA** | `feat/frontend-fiche-formation` | Toutes les informations du contrat s'affichent : diplôme et durée, frais par niveau, séries admises et autres conditions d'admission, cours du soir, stage, paiement en tranches, programme année par année, débouchés. Les débouchés sont cliquables, les autres formations de l'institut listées, WhatsApp et le téléphone fonctionnent. |
+| P5 | Débouchés | `/debouches/:id` | **Elie NGANGA** | `feat/frontend-debouches` | Un débouché sélectionné depuis une fiche ou depuis l'accueil filtre les formations qui y mènent. Le débouché est lisible dans l'adresse. |
+| P6 | Fiche institut | `/instituts/:id` | **Arsène AKIANA** | `feat/frontend-fiche-institut` | Image, présentation, coordonnées, badge bleu et numéro si l'institut est agréé (nom seul sinon), frais d'inscription, clôture et rentrée, avantages, diplômes délivrés, débouchés, tarifs par niveau et conditions d'admission de chaque formation publiée. Contact par WhatsApp pré-rempli, e-mail et appel. |
+| P7 | À propos | `/a-propos` | **Fresnel OBA VERCHY** | `feat/frontend-a-propos` | Le problème décrit, ce que fait Orienta, le public visé et l'engagement sur l'information s'affichent. |
+| P9 | Question à un institut | formulaire de la fiche formation | **Samuel AKOMBO** | `feat/frontend-contact` | Le formulaire (nom, e-mail, question) envoie la demande à `POST /contact` et affiche l'accusé de réception. Il porte déjà la formation depuis laquelle il est ouvert. |
 
 ---
 
-## 4. Vague 3 — Back-office
+## 5. Back-office — 12 pages
 
 | # | Page | Route | Développeur | Branche | Critère de recette |
 |---|------|-------|-------------|---------|---------------------|
-| P1 | Connexion | `/connexion` | **Lead technique** | `feat/back-office-squelette-auth` | L'identifiant et le mot de passe valides ouvrent la session ; les identifiants erronés affichent une erreur explicite. La session se maintient d'une visite à l'autre et la page est inaccessible sans elle. |
-| P10 | Compte | `/compte` | **Lead technique** | `feat/back-office-squelette-auth` | Le compte connecté s'affiche et la déconnexion ferme la session puis revient à la connexion. |
-| P11 | Tableau de bord | `/admin` | **Fresnel OBA VERCHY** | `feat/back-office-dashboard` | Les indicateurs de `GET /admin/indicators` s'affichent : formations, instituts, arrondissements couverts, dossiers de contact et de référencement en attente. |
-| P12 | Demandes de contact | `/admin/demandes/contact` | **Fresnel OBA VERCHY** | `feat/back-office-demandes-contact` | Les demandes se listent, se filtrent par statut, s'ouvrent au détail et se marquent comme traitées. |
-| P13 | Demandes de référencement | `/admin/demandes/referencement` | **Fresnel OBA VERCHY** | `feat/back-office-demandes-referencement` | Les demandes de référencement se listent et s'ouvrent au détail. Une demande validée crée le compte de l'institut. |
-| P14 | Liste des formations | `/admin/formations` | **Elie NGANGA** | `feat/back-office-formations-liste` | Le tableau liste toutes les formations, se filtre par institut et par domaine, et se pagine. Chaque ligne offre l'édition et la suppression. |
-| P15 | Formulaire formation | `/admin/formations/nouvelle`<br>`/admin/formations/:id` | **Elie NGANGA** | `feat/back-office-formations-formulaire` | Création et édition : toutes les informations du contrat, la cohérence degré et durée contrôlée, les séries du bac validées, les cours et débouchés saisis ligne par ligne. |
-| P16 | Liste des instituts | `/admin/instituts` | **Arsène AKIANA** | `feat/back-office-instituts-liste` | Le tableau liste les instituts avec leur statut d'agrément, se filtre par arrondissement et par statut. |
-| P17 | Formulaire institut | `/admin/instituts/nouveau`<br>`/admin/instituts/:id` | **Arsène AKIANA** | `feat/back-office-instituts-formulaire` | Création et édition : identité, arrondissement, coordonnées, numéro d'agrément, frais, rentrée, description. Le logo se dépose depuis le formulaire même (JPEG, PNG ou WebP, 2 Mo maximum) : il s'affiche en aperçu, se remplace et se retire. Un institut sans logo garde le bloc coloré à son sigle. |
+| P1 | Connexion | `/connexion` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | Le nom d'utilisateur et le mot de passe valides ouvrent la session ; les identifiants erronés affichent une erreur explicite. « Mot de passe oublié » demande l'e-mail du compte et envoie un lien de réinitialisation. Aucune inscription. La session se maintient d'une visite à l'autre et la page est inaccessible sans elle. |
+| P10 | Compte | `/compte` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | Le compte connecté s'affiche et la déconnexion ferme la session puis revient à la connexion. |
+| P11 | Tableau de bord | `/admin` | **Fresnel OBA VERCHY** | `feat/back-office-dashboard` | Les 5 indicateurs de `GET /admin/indicators` s'affichent : établissements, formations et filières, arrondissements couverts, diplômes délivrés, débouchés. |
+| P14 | Liste des formations | `/admin/formations` | **Elie NGANGA** | `feat/back-office-formations-liste` | Le tableau liste toutes les formations, brouillons compris, se recherche, se filtre par domaine et par statut, et se pagine. Chaque ligne offre l'édition et la suppression avec confirmation. |
+| P15 | Formulaire formation | `/admin/formations/nouvelle`<br>`/admin/formations/:id` | **Elie NGANGA** | `feat/back-office-formations-formulaire` | Création et édition : le diplôme choisi donne la durée, les frais se saisissent par niveau, les séries du bac et les débouchés se cochent dans leurs référentiels, le statut est publié ou brouillon. Le programme s'affiche année par année et renvoie vers la page Cours. Une formation créée enchaîne sur l'ajout de ses cours. |
+| P16 | Liste des instituts | `/admin/instituts` | **Arsène AKIANA** | `feat/back-office-instituts-liste` | Le tableau liste les instituts avec leur agrément (numéro ou « Non agréé »), se filtre par arrondissement et par agrément. La suppression annonce le nombre de formations emportées et demande confirmation. |
+| P17 | Formulaire institut | `/admin/instituts/nouveau`<br>`/admin/instituts/:id` | **Arsène AKIANA** | `feat/back-office-instituts-formulaire` | Création et édition : identité, arrondissement, coordonnées, numéro d'agrément, frais, clôture et rentrée, description, avantages. L'image de l'institut se dépose depuis le formulaire même (JPEG, PNG ou WebP, 2 Mo maximum) : elle s'affiche en aperçu, se remplace et se retire. Un institut sans image garde le bloc coloré à son sigle. |
+| P19 | Cours | `/admin/cours` | **Samuel AKOMBO** | `feat/back-office-cours` | Le catalogue de cours se liste, se recherche et se filtre par formation. Un cours se crée avec ses rattachements (formation et année d'études) ; un même cours se rattache à plusieurs formations. Depuis une formation filtrée, un cours existant se rattache ou se retire sans quitter la page. |
+| P20 | Diplômes | `/admin/diplomes` | **Fresnel OBA VERCHY** | `feat/back-office-referentiels` | Ajout, modification, suppression d'un diplôme avec sa durée d'études (1 à 5 ans). La suppression est refusée tant qu'une formation le délivre. |
+| P21 | Débouchés | `/admin/debouches` | **Fresnel OBA VERCHY** | `feat/back-office-referentiels` | Ajout, modification, suppression d'un débouché avec son domaine d'insertion. La suppression est refusée tant qu'une formation le porte. |
+| P22 | Séries du bac | `/admin/series` | **Fresnel OBA VERCHY** | `feat/back-office-referentiels` | Ajout, modification, suppression d'une série (code et libellé). La suppression est refusée tant qu'une formation l'admet. |
+| P23 | Domaines d'insertion | `/admin/domaines` | **Fresnel OBA VERCHY** | `feat/back-office-referentiels` | Ajout, modification, suppression d'un domaine avec sa couleur. La suppression est refusée tant qu'une formation ou un débouché y est rattaché. |
 
 ---
 
-## 5. Vague 4 — Chantiers backend
+## 6. Qui fait quoi
 
-Aucun de ces chantiers n'a de page visible, mais chacun bloque la mise en
-production ou la fiabilité.
+| Développeur | Sujet | Backend / socle | Site public | Back-office |
+|-------------|-------|-----------------|-------------|-------------|
+| **Flamme** (lead technique) | Backend | BK1, BK2, BK5, S4 | — | — |
+| **Gilles BITEMO** | Backend | BK3, BK4, BK6 | — | — |
+| **Elie NGANGA** | Formations | — | P4, P5 | P14, P15 |
+| **Arsène AKIANA** | Instituts | S5 | P2, P6 | P16, P17 |
+| **Fresnel OBA VERCHY** | Pilotage et référentiels | — | P7 | P11, P20, P21, P22, P23 |
+| **Samuel AKOMBO** | Accès et cours | S6 | P3, P9 | P1, P10, P19 |
 
-| # | Chantier | Branche | Développeur | Contenu | Critère de recette |
-|---|----------|---------|-------------|---------|---------------------|
-| B1 | Tests automatisés | `feat/backend-tests` | **Gilles BITEMO** | Tests d'intégration sur les dix-sept routes : consultation, filtres du catalogue, authentification, contrôle d'accès aux routes d'administration, upload d'image. Base de données de test isolée. | La suite passe en une commande et échoue si une route change de comportement. |
-| B2 | Déploiement et images | `chore/ops-deploiement` | **Arsène AKIANA** | Fichiers de déploiement des trois applications, variables d'environnement de production, procédure de migration et de retour arrière. | Une installation neuve suit la procédure documentée sans intervention manuelle. |
-| B3 | Observabilité | `feat/backend-observabilite` | **Fresnel OBA VERCHY** | Journalisation structurée avec un identifiant de requête, route de santé approfondie, mesure du temps de réponse, en-têtes de sécurité, politique d'origines restrictive. | Une requête échouée se retrouve par son identifiant dans les journaux ; la route de santé indique l'état de la base. |
-| B4 | Performance et données | `feat/backend-performance` | **Elie NGANGA** | Index sur les colonnes filtrées du catalogue et sur les dates des demandes, pagination par curseur sur les longues listes, correction des requêtes qui chargent des tables entières. | Le catalogue reste rapide avec dix mille formations ; aucune liste d'administration ne renvoie plus la totalité de la table. |
-| B5 | Qualité et documentation | `docs/architecture-et-api` | **Samuel AKOMBO** | Documentation de l'architecture, guide de contribution, et vérification que le code et `docs/openapi.yaml` ne divergent pas. | Un nouveau développeur installe le projet et comprend son fonctionnement sans accompagnement humain. |
-| B6 | Reprise des données réelles | `chore/backend-donnees-reelles` | **Lead technique** | Remplacement du jeu de démonstration par les formations, instituts, frais et contacts réels de Brazzaville, avec contrôle de cohérence degré et durée. | Un bachelier trouve les instituts réels de son arrondissement, avec des frais et des contacts vérifiés. |
-| B7 | Sécurité du compte administrateur | `feat/backend-securite-compte` | **Lead technique** | Rotation des secrets, expiration et renouvellement du jeton, limitation des tentatives de connexion, journalisation des connexions, réinitialisation de mot de passe. | Un mot de passe compromis ne permet pas l'accès ; un jeton expiré est refusé sans planter le client. |
+Le lead technique relit en plus l'ensemble des pull requests.
 
-### Pourquoi ces affectations
-
-Les chantiers sont distribués pour équilibrer la charge, pas pour regrouper par
-compétence : chacun est indépendant des autres et ne touche pas les mêmes
-fichiers.
-
-**Gilles** prend les tests, car son lot de pages est le plus court et parce que
-la suite de tests est ce qui rend les lots des autres vérifiables avant fusion.
-C'est le seul chantier dont le résultat bénéficie à toute l'équipe.
-
-**Arsène** prend le déploiement, chantier sans lien avec le code applicatif et
-donc sans risque de conflit avec les autres lots.
-
-**Fresnel** prend l'observabilité, qui prolonge son lot de pilotage : la route
-de santé alimente son tableau de bord.
-
-**Elie** prend la performance, qui concerne majoritairement le catalogue des
-formations — son fil métier.
-
-**Samuel** prend la documentation, cohérente avec son rôle de liaison entre le
-public et l'administration.
-
-**Le lead technique** prend les deux chantiers qui ne se délèguent pas : les
-données réelles, qui exigent de vérifier les frais et contacts auprès des
-instituts, et la sécurité des comptes, qui engage sa responsabilité.
-
----
-
-## 6. Charge par développeur
-
-| Développeur | Pages | Chantiers | Total |
-|-------------|-------|-----------|-------|
-| **Gilles BITEMO** | P2, P3, P7 | B1 | 4 |
-| **Elie NGANGA** | P4, P5, P14, P15 | B4 | 5 |
-| **Arsène AKIANA** | P6, P16, P17 | B2 | 4 |
-| **Fresnel OBA VERCHY** | P11, P12, P13 | B3 | 4 |
-| **Samuel AKOMBO** | P8, P9 | B5 | 3 |
-| **Lead technique** | P1, P10 | B6, B7 | 4 |
-
-S'y ajoute pour le lead technique le socle complet — six branches — et la revue
-de l'ensemble des pull requests.
-
-Le lot de Samuel passe à trois éléments depuis que le logo est déposé depuis le
-formulaire institut (P17) au lieu d'une médiathèque à part. Deux rééquilibrages
-possibles, à trancher : lui confier P10 (compte), aujourd'hui dans la branche du
-squelette du lead technique, ou un des deux chantiers du lead. À défaut, il
-reste disponible pour épauler les lots les plus longs, P14 et P15 d'Elie.
-
----
-
-## 7. Pourquoi ces affectations de pages
-
-Chaque développeur suit un fil métier de bout en bout — le site public et le
-back-office qui le concerne : les mêmes données, les mêmes termes, la même
-logique de formulaire.
-
-**Gilles** prend le catalogue, dont il fixe le modèle de rendu réutilisé par
-toutes les autres pages publiques : carte de formation, filtres, liste vide,
-squelette de chargement. Sa page est donc la première à écrire. Les favoris en
-dépendent directement.
+**Flamme** prend les blocs dont tout dépend (socle, authentification) et le plus
+lourd, la recherche des formations. **Gilles** prend les trois blocs qui se
+ressemblent : des listes à lire et à administrer.
 
 **Elie** porte la formation, de la fiche publique au formulaire d'administration.
-C'est le fil le plus long — un formulaire à quinze champs — mais il le partage
-avec personne : aucun autre développeur ne touche aux formations.
+**Arsène** fait de même pour les instituts, et écrit l'accueil, qui les liste par
+défaut ; c'est la première page publique, d'où la couche commune (S5).
+**Fresnel** a cinq pages de back-office, mais ses quatre référentiels sont le
+même écran décliné quatre fois, dans une seule branche. **Samuel** ouvre le
+back-office (squelette, connexion, compte) et porte le catalogue de cours.
 
-**Arsène** suit le même raisonnement sur les instituts, avec une page publique
-en plus que la fiche.
+---
 
-**Fresnel** n'a rien sur le site public parce que les indicateurs et les demandes
-n'existent que pour l'équipe. Ses trois pages partagent la même mécanique de
-tableau avec filtres et statuts, d'où deux branches seulement : la liste des
-statuts est factorisée.
+## 7. Dépendances
 
-**Samuel** relie le public et l'administration : les deux formulaires publics qui
-alimentent les demandes de Fresnel. Le logo des instituts n'est plus une page à
-part : il se dépose depuis le formulaire d'Arsène, sans écran dédié ni branche
-supplémentaire.
+« A dépend de B » veut dire : A ne peut pas être terminé tant que B n'est pas
+livré. Une page peut être **écrite** contre le contrat `docs/openapi.yaml` avant
+que son bloc backend soit prêt ; elle ne peut pas être **recettée** sans lui.
 
-**Le lead technique** ne produit pas de fonctionnalité : il livre le socle, relit
-chaque pull request, et prend les deux pages triviales — connexion et compte —
-dont dépendent les huit autres pages d'administration.
+### 7.1 Backend
 
-### Ordre d'exécution imposé
+| Ceci | dépend de | parce que |
+|------|-----------|-----------|
+| BK2 Authentification | BK1 | Utilise la structure de l'API et la connexion à la base. |
+| BK3 Référentiels | BK1 | Idem, pour les routes de lecture. |
+| BK3 Référentiels (CRUD) | BK2 | Les routes `/admin` exigent un jeton. |
+| BK4 Instituts | BK1 | Idem, pour les routes de lecture. |
+| BK4 Instituts (CRUD, image) | BK2 | Les routes `/admin` exigent un jeton. |
+| BK5 Formations | BK3 | Une formation référence un diplôme, un domaine, des séries et des débouchés. |
+| BK5 Formations | BK4 | Une formation appartient à un institut. |
+| BK6 Cours et contact | BK5 | Un cours se rattache à une formation ; une question vise une formation. |
 
-1. Le socle complet avant toute page.
-2. Le catalogue (P2) avant les pages qui le réutilisent comme modèle.
-3. Les formulaires d'administration avant les listes correspondantes.
+### 7.2 Socle des interfaces
 
-Le dépôt d'image suit le formulaire institut (P17) : il n'a plus d'ordre propre.
+| Ceci | dépend de | parce que |
+|------|-----------|-----------|
+| S5 Couche commune | S4 (livré) | Les composants transverses utilisent le design system. |
+| S6 Squelette du back-office | S5 | Utilise le client HTTP et le contexte de session. |
+| **Toutes les pages** | S5 | Aucune page n'appelle l'API sans la couche commune. |
+| **Toutes les pages du back-office** | S6 et P1 | Elles s'affichent dans le squelette, derrière la connexion. |
+
+### 7.3 Site public
+
+| Ceci | dépend de | parce que |
+|------|-----------|-----------|
+| P2 Accueil et recherche | BK4 | Liste les instituts. |
+| P2 Accueil et recherche | BK3 | Les filtres et les vues Diplômes et Débouchés lisent les référentiels. |
+| P2 Accueil et recherche | BK5 | Vue Formations, et filtres qui portent sur les formations. |
+| P3 Favoris | P2 | Réutilise la carte de formation de l'accueil. |
+| P3 Favoris | BK5 | Recharge les formations depuis l'API. |
+| P4 Fiche formation | BK5 | Affiche la fiche d'une formation. |
+| P4 Fiche formation | BK6 | Le programme par année vient des cours rattachés. |
+| P5 Débouchés | P2 | Réutilise la grille et les filtres de l'accueil. |
+| P5 Débouchés | P4 | On y arrive depuis les débouchés d'une fiche formation. |
+| P5 Débouchés | BK3, BK5 | Lit le débouché, puis les formations qui y mènent. |
+| P6 Fiche institut | BK4 | Affiche la fiche d'un institut. |
+| P6 Fiche institut | BK5 | Liste ses formations, leurs tarifs et leurs conditions d'admission. |
+| P6 Fiche institut | P2 | Réutilise la carte de formation. |
+| P7 À propos | — | Page statique : seulement le socle. |
+| P9 Question à un institut | P4 | Le formulaire s'intègre à la fiche formation. |
+| P9 Question à un institut | BK6 | Appelle `POST /contact`. |
+
+### 7.4 Back-office
+
+| Ceci | dépend de | parce que |
+|------|-----------|-----------|
+| P1 Connexion | BK2 | Appelle la connexion et le mot de passe oublié. |
+| P10 Compte | P1 | Affiche la session ouverte et la ferme. |
+| P11 Tableau de bord | BK5 | Lit les 5 KPI. |
+| P14 Liste des formations | BK5 | Liste, filtre et supprime les formations. |
+| P15 Formulaire formation | P14 | Réutilise les contrôles de la liste et y revient. |
+| P15 Formulaire formation | BK5 | Crée et modifie une formation. |
+| P15 Formulaire formation | BK3, BK4 | Propose les diplômes, domaines, séries, débouchés et instituts. |
+| P16 Liste des instituts | BK4 | Liste, filtre et supprime les instituts. |
+| P17 Formulaire institut | P16 | Réutilise les contrôles de la liste et y revient. |
+| P17 Formulaire institut | BK4 | Crée et modifie un institut, dépose son image. |
+| P19 Cours | BK6 | Gère le catalogue et les rattachements. |
+| P19 Cours | P15 | P15 y renvoie après la création d'une formation. |
+| P20 à P23 Référentiels | BK3 | CRUD des diplômes, débouchés, séries et domaines. |
+
+P15 n'attend pas les pages P20 à P23 : les référentiels sont déjà remplis par le
+jeu de démonstration.
+
+### 7.5 Ordre de démarrage
+
+| Étape | Backend | Interfaces |
+|-------|---------|------------|
+| 1 | BK1 (Flamme) | S5 (Arsène) ; P7 dès que S5 est livré (Fresnel) |
+| 2 | BK2 (Flamme) ; BK3 et BK4 (Gilles) | S6 avec P1 et P10 (Samuel) |
+| 3 | BK5 (Flamme) | P16, P17, P6 (Arsène) ; P20 à P23 (Fresnel) |
+| 4 | BK6 (Gilles) | P2 (Arsène) ; P14, P15, P4 (Elie) ; P11 (Fresnel) ; P3 (Samuel) |
+| 5 | — | P5 (Elie) ; P19, P9 (Samuel) |
+
+En attendant leur étape, Elie et Samuel écrivent leurs pages contre le contrat,
+avec le jeu de démonstration des maquettes.
 
 ---
 
@@ -230,14 +249,15 @@ Le lead technique relit chaque pull request. Elle est acceptée si :
 2. Le code respecte `docs/openapi.yaml`. Toute divergence se corrige dans le
    contrat, par pull request dédié — jamais par une dérogation dans le code.
 3. Le message de commit suit Conventional Commits, rédigé en français.
-4. La pull request porte sur une seule page. Une pull request qui en couvre
-   deux est refusée.
+4. La pull request porte sur un seul bloc ou une seule page. Une pull request qui
+   en couvre deux est refusée, sauf les quatre référentiels (P20 à P23) et le
+   squelette avec P1 et P10, livrés chacun dans une seule branche.
 
 ---
 
 ## 10. Règles permanentes
 
-- Une branche par page, jamais de commit direct sur `develop`.
+- Une branche par bloc ou par page, jamais de commit direct sur `develop`.
 - Aucun envoi sur le dépôt distant sans accord explicite du lead technique.
 - Toute modification du design system passe par `frontend-init-design`, jamais
   depuis un lot métier.
