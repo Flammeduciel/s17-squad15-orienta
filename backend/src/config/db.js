@@ -1,10 +1,11 @@
 const { Pool } = require('pg');
 const { databaseUrl } = require('./env');
+const httpError = require('../utils/httpError');
 
 /**
  * Pool de connexions PostgreSQL, partagé par toute l'application.
  * Vaut `null` sans `DATABASE_URL` : l'API démarre quand même, et `/health` le
- * signale. Les modèles importent ce pool pour exécuter leurs requêtes.
+ * signale. Les modèles n'utilisent pas le pool directement mais `query()`.
  *
  * @type {import('pg').Pool|null}
  */
@@ -49,4 +50,25 @@ async function checkDatabase() {
   }
 }
 
-module.exports = { pool, checkDatabase };
+/**
+ * Exécute une requête SQL paramétrée. C'est par elle que passent les modèles.
+ *
+ * Les valeurs vont toujours dans `params` (`$1`, `$2`…), jamais collées dans le
+ * texte SQL : PostgreSQL les échappe et l'injection SQL devient impossible.
+ *
+ * @param {string} sql Requête, avec `$1`, `$2`… à la place des valeurs.
+ * @param {unknown[]} [params] Valeurs, dans l'ordre des `$n`.
+ * @returns {Promise<import('pg').QueryResult>}
+ * @throws {Error} 503 `BASE_INDISPONIBLE` si aucune base n'est configurée.
+ *
+ * @example
+ * const { rows } = await query('SELECT * FROM users WHERE username = $1', [username]);
+ */
+async function query(sql, params = []) {
+  if (!pool) {
+    throw httpError(503, 'BASE_INDISPONIBLE', "La base de données n'est pas configurée.");
+  }
+  return pool.query(sql, params);
+}
+
+module.exports = { pool, checkDatabase, query };

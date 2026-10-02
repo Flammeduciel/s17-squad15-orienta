@@ -1,6 +1,8 @@
 const express = require('express');
 const corsMiddleware = require('./middlewares/cors');
 const healthRoutes = require('./routes/health');
+const authRoutes = require('./routes/auth');
+const { requireAuth } = require('./middlewares/auth');
 const { notFound, errorHandler } = require('./middlewares/errors');
 const { uploadDir } = require('./config/env');
 
@@ -35,6 +37,11 @@ app.get('/', (req, res) => {
 
 // Chaque ressource ajoute ici son fichier de routes, avant `notFound`.
 app.use(healthRoutes);
+app.use(authRoutes);
+
+// Tout ce qui commence par /admin exige une session Squad : les routes
+// d'administration des blocs suivants sont protégées sans rien ajouter.
+app.use('/admin', requireAuth);
 
 app.use(notFound);
 app.use(errorHandler);

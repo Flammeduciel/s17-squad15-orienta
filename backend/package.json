@@ -16,8 +16,11 @@
     "db:reset": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f scripts/reset.sql"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.13",
     "pg": "^8.23.1",
     "zod": "^4.6.5"
   }
