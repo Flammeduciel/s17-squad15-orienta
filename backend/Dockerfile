@@ -35,6 +35,7 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
 COPY server.js ./
+COPY src ./src
 COPY scripts ./scripts
 
 RUN chmod +x ./scripts/start.sh && chown -R backend:nodejs /app
