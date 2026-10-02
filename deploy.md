@@ -80,8 +80,26 @@ il faut alors lancer une fois, à la main, `psql $DATABASE_URL -f scripts/reset.
 — il efface le catalogue mais conserve les comptes — puis redéployer.
 
 Une fois déployé, attribue un domaine à cette application dans Dokploy (ex.
-`api.orienta.exemple.com`) et vérifie `https://<domaine>/health` → doit répondre
-`{"status":"ok"}`.
+`api.orienta.exemple.com`) et vérifie `https://<domaine>/health`. La réponse doit porter `"status": "ok"` et
+`"database": {"status": "up", …}` :
+
+```json
+{
+  "status": "ok",
+  "service": "orienta-api",
+  "version": "1.0.0",
+  "environment": "production",
+  "uptime_seconds": 42,
+  "timestamp": "2026-10-02T22:27:03.644Z",
+  "database": { "status": "up", "latency_ms": 15 }
+}
+```
+
+- `database.status` vaut `not_configured` si `DATABASE_URL` est absente : l'API
+  répond 200, mais elle n'a pas de base.
+- Si la base est configurée et ne répond pas, `/health` renvoie **503** avec
+  `"status": "degraded"` et `"database": {"status": "down"}`. Dokploy considère
+  alors le conteneur comme défaillant. La cause est dans les journaux du backend.
 
 ## 3. Déployer le frontend
 
