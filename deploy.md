@@ -14,8 +14,8 @@ doit jamais atterrir dessus, et son accès est de toute façon gardé côté bac
 flowchart TD
     NAV[Navigateur<br/>public] -->|HTTPS| FE["frontend<br/>React + Vite (nginx)<br/>port 3000"]
     ADM[Navigateur<br/>Squad] -->|HTTPS| BO["back-office<br/>React + Vite (nginx)<br/>port 3000"]
-    FE -->|fetch /api| BE["backend<br/>Node + Express<br/>port 4000"]
-    BO -->|fetch /api<br/>+ Bearer JWT| BE
+    FE -->|fetch| BE["backend<br/>Node + Express<br/>port 4000"]
+    BO -->|fetch<br/>+ Bearer JWT| BE
     BE -->|SQL + start.sh<br/>psql -f migrate.sql| DB[("PostgreSQL<br/>service Dokploy")]
 ```
 

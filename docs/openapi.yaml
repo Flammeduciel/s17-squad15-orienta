@@ -43,10 +43,10 @@ info:
     avec un code machine (`code`) et un message lisible (`message`).
 
 servers:
-  - url: http://localhost:4000/api
+  - url: http://localhost:4000
     description: Développement local
-  - url: https://orienta.cg/api
-    description: Production (prévu)
+  - url: https://api-orienta.flamme.work
+    description: Production
 
 tags:
   - name: Public
