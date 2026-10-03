@@ -1,0 +1,78 @@
+/**
+ * assets/css/login.css
+ * ---------------------------------------------------------------------------
+ * Écran de connexion.
+ */
+
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+}
+
+.login .art {
+  background: var(--green);
+  color: #fff;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.login .art h2 {
+  font: 800 clamp(26px,3vw,38px)/1.1 var(--display);
+}
+
+.login .art p {
+  color: #D8EDE1;
+  margin-top: 12px;
+  font-size: 17px;
+  max-width: 46ch;
+}
+
+.login .art .pts {
+  display: grid;
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.login .art .pts div {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  font-size: 15px;
+}
+
+.login .art .pts svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--sun);
+}
+
+.login .formside {
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+}
+
+.login .box {
+  width: 100%;
+  max-width: 400px;
+  display: grid;
+  gap: 16px;
+}
+
+.login .box h1 {
+  font: 800 30px/1.1 var(--display);
+}
+
+.login .box > p {
+  color: var(--muted);
+}
+
+.loginfoot {
+  color: #B9DAC9;
+  font-size: 14px;
+}

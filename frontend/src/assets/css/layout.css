@@ -1,0 +1,81 @@
+/**
+ * assets/css/layout.css
+ * ---------------------------------------------------------------------------
+ * Structure commune des pages : en-tête, pied de page, grille filtres + résultats, sections, voile.
+ */
+
+.top {
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.top .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 72px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  font: 800 24px/1 var(--display);
+  color: var(--green);
+}
+
+.logo svg {
+  width: 32px;
+  height: 32px;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 290px minmax(0,1fr);
+  gap: 36px;
+  padding-block: 28px 64px;
+}
+
+.sec {
+  margin-top: 36px;
+}
+
+.sec h2 {
+  font: 800 22px var(--display);
+  margin-bottom: 14px;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  background: var(--soft);
+  padding-block: 26px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+footer .wrap {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 40;
+}

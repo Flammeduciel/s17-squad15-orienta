@@ -1,0 +1,269 @@
+/**
+ * assets/css/detail.css
+ * ---------------------------------------------------------------------------
+ * Fiches formation et institut : titre, couverture, points forts, programme par année, encart de contact.
+ */
+
+.detail {
+  padding-block: 24px 80px;
+}
+
+.dtitle {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dtitle h1 {
+  font: 800 clamp(28px,3.8vw,40px)/1.08 var(--display);
+  letter-spacing: -.01em;
+}
+
+.dtitle .sub {
+  color: var(--muted);
+  margin-top: 8px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dtitle .sub b {
+  color: var(--ink);
+}
+
+.dcover {
+  margin-top: 22px;
+  height: 300px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.dcover .big-sigle {
+  font: 800 clamp(40px,7vw,72px) var(--display);
+  color: #fff;
+  letter-spacing: .03em;
+}
+
+.dcover svg.big {
+  width: 120px;
+  height: 120px;
+}
+
+.dgrid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 380px;
+  gap: 64px;
+  margin-top: 36px;
+  align-items: start;
+}
+
+.dmain {
+  min-width: 0;
+}
+
+.dmain section {
+  padding-block: 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dmain section:first-child {
+  padding-top: 0;
+}
+
+.dmain h2 {
+  font: 800 22px var(--display);
+  margin-bottom: 18px;
+}
+
+.dmain a.ilnk {
+  color: var(--green);
+  text-decoration: underline;
+  font-weight: 700;
+}
+
+.highlights {
+  display: grid;
+  gap: 18px;
+}
+
+.hl {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.hl svg {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-top: 2px;
+}
+
+.hl b {
+  display: block;
+}
+
+.hl span {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.years {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 14px;
+}
+
+.year {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.year h3 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.year ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.checklist li {
+  display: flex;
+  gap: 12px;
+}
+
+.checklist li:before {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1.5px solid var(--green);
+  margin-top: 2px;
+}
+
+.instbox {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.instlogo {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font: 800 17px var(--display);
+}
+
+.instbox p {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.book {
+  position: sticky;
+  top: calc(env(safe-area-inset-top,0px) + 24px);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  background: var(--card);
+  display: grid;
+  gap: 14px;
+}
+
+.book .p {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.book .p b {
+  font: 800 26px var(--display);
+  color: var(--ink);
+}
+
+.lines {
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.lines div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lines .tot {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  font-weight: 800;
+}
+
+.dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dates div {
+  padding: 10px 12px;
+}
+
+.dates div+div {
+  border-left: 1px solid var(--line);
+}
+
+.dates small {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.phone {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.phone span {
+  font-weight: 700;
+  user-select: all;
+}
+
+.mbar {
+  display: none;
+}

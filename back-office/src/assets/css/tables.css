@@ -1,0 +1,216 @@
+/**
+ * assets/css/tables.css
+ * ---------------------------------------------------------------------------
+ * Listes : barre d'outils, filtres segmentés, tableau, pagination, état vide, barre de rattachement.
+ */
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 99px;
+  padding: 8px 15px;
+  min-width: 210px;
+}
+
+.field svg {
+  width: 17px;
+  height: 17px;
+  color: var(--muted);
+  flex: none;
+}
+
+.field input {
+  border: 0;
+  background: none;
+  outline: none;
+  color: var(--ink);
+  font: 500 15px var(--body);
+  width: 100%;
+  padding: 0;
+}
+
+.field select {
+  border: 0;
+  background: none;
+  outline: none;
+  color: var(--ink);
+  font: 500 15px var(--body);
+  padding: 0 2px;
+  cursor: pointer;
+}
+
+.seg {
+  display: flex;
+  gap: 4px;
+  background: var(--soft);
+  border-radius: 99px;
+  padding: 4px;
+}
+
+.seg button {
+  border: 0;
+  background: none;
+  padding: 7px 13px;
+  border-radius: 99px;
+  cursor: pointer;
+  font: 600 13.5px var(--body);
+  color: var(--muted);
+}
+
+.seg button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+}
+
+.tblwrap {
+  overflow: auto;
+}
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.tbl th {
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+  white-space: nowrap;
+}
+
+.tbl td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.tbl tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.tbl tbody tr:hover {
+  background: var(--soft);
+}
+
+.tbl .who {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 220px;
+}
+
+.tbl .thumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font: 800 12px var(--display);
+  flex: none;
+  overflow: hidden;
+}
+
+.tbl .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tbl .who b {
+  font-size: 14.5px;
+  display: block;
+  line-height: 1.25;
+}
+
+.tbl .who small {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tbl .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tbl .acts {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 13px 18px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pager .p {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.empty {
+  text-align: center;
+  padding: 56px 20px;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+}
+
+.empty h3 {
+  font: 800 20px var(--display);
+  margin-bottom: 8px;
+}
+
+.empty p {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.attach {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.attach select {
+  min-width: 0;
+  flex: 1 1 180px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: 500 14px var(--body);
+}

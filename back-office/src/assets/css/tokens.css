@@ -1,0 +1,69 @@
+/**
+ * assets/css/tokens.css
+ * ---------------------------------------------------------------------------
+ * Variables du design system : couleurs, typographies, ombre, en thème clair et sombre.
+ * Aucun sélecteur de composant ici. Le thème sombre suit le système
+ * (`prefers-color-scheme`) ou se force par `data-theme` sur `<html>`.
+ */
+
+:root {
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+}
+
+:root {
+  --bg: #FFFFFF;
+  --soft: #F3F5F2;
+  --card: #FFFFFF;
+  --ink: #14201B;
+  --muted: #5E6B64;
+  --line: #E1E5E0;
+  --green: #17693F;
+  --green-soft: #E3F0E8;
+  --sun: #F0B415;
+  --heart: #E0405A;
+  --blue: #1D4ED8;
+  --blue-soft: #E8F0FE;
+  --wa: #1DA851;
+  --shadow: 0 6px 24px rgba(16,35,27,.10);
+  --display: "Avenir Next","Segoe UI Semibold",ui-sans-serif,system-ui,sans-serif;
+  --body: system-ui,-apple-system,"Segoe UI","Helvetica Neue",sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1512;
+    --soft: #18211C;
+    --card: #141C18;
+    --ink: #E9F0EB;
+    --muted: #9DABA3;
+    --line: #26322B;
+    --green: #4FBF86;
+    --green-soft: #1B3326;
+    --sun: #F2C233;
+    --heart: #FF6B82;
+    --shadow: 0 6px 24px rgba(0,0,0,.45);
+    --blue: #93B4F5;
+    --blue-soft: #1B2A44;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0F1512;
+  --soft: #18211C;
+  --card: #141C18;
+  --ink: #E9F0EB;
+  --muted: #9DABA3;
+  --line: #26322B;
+  --green: #4FBF86;
+  --green-soft: #1B3326;
+  --sun: #F2C233;
+  --heart: #FF6B82;
+  --shadow: 0 6px 24px rgba(0,0,0,.45);
+  --blue: #93B4F5;
+  --blue-soft: #1B2A44;
+  color-scheme: dark;
+}

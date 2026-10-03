@@ -1,0 +1,1576 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Espace Squad — Orienta Brazzaville</title>
+<meta name="description" content="Back-office de Orienta Brazzaville : tableau de bord, instituts, formations, diplômes et débouchés.">
+<style>
+:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+img{max-width:100%}
+[hidden]{display:none!important}
+:root{
+  --bg:#FFFFFF; --soft:#F3F5F2; --card:#FFFFFF; --ink:#14201B; --muted:#5E6B64; --line:#E1E5E0;
+  --green:#17693F; --green-soft:#E3F0E8; --sun:#F0B415; --heart:#E0405A;
+  --blue:#1D4ED8; --blue-soft:#E8F0FE;
+  --wa:#1DA851;
+  --shadow:0 6px 24px rgba(16,35,27,.10);
+  --display:"Avenir Next","Segoe UI Semibold",ui-sans-serif,system-ui,sans-serif;
+  --body:system-ui,-apple-system,"Segoe UI","Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1512; --soft:#18211C; --card:#141C18; --ink:#E9F0EB; --muted:#9DABA3; --line:#26322B;
+  --green:#4FBF86; --green-soft:#1B3326; --sun:#F2C233; --heart:#FF6B82; --shadow:0 6px 24px rgba(0,0,0,.45);
+  --blue:#93B4F5; --blue-soft:#1B2A44; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --soft:#18211C; --card:#141C18; --ink:#E9F0EB; --muted:#9DABA3; --line:#26322B;
+  --green:#4FBF86; --green-soft:#1B3326; --sun:#F2C233; --heart:#FF6B82; --shadow:0 6px 24px rgba(0,0,0,.45);
+  --blue:#93B4F5; --blue-soft:#1B2A44; color-scheme:dark}
+
+*{box-sizing:border-box}
+a{color:inherit}
+h1,h2,h3,h4{margin:0;line-height:1.12;text-wrap:balance}
+p{margin:0}
+button{font-family:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:6px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---------- Coquille ---------- */
+.shell{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+.side{background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);text-decoration:none}
+.brand .mk{width:34px;height:34px;flex:none}
+.brand b{font:800 20px/1.1 var(--display);color:var(--green);display:block}
+.brand small{display:block;font:600 11.5px/1.3 var(--body);color:var(--muted);margin-top:2px;letter-spacing:.02em}
+.navgroup{padding:18px 12px 2px}
+.navgroup h4{margin:0 0 8px 10px;font:800 11px/1 var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.navitem{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:0;background:none;padding:10px 12px;border-radius:10px;cursor:pointer;font:600 15px/1.3 var(--body);text-decoration:none;color:var(--ink)}
+.navitem svg{flex:none;width:19px;height:19px;color:var(--muted)}
+.navitem:hover{background:var(--soft)}
+.navitem[aria-current="page"]{background:var(--green-soft);color:var(--green)}
+.navitem[aria-current="page"] svg{color:var(--green)}
+.navitem .ct{margin-left:auto;background:var(--heart);color:#fff;font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:99px;display:inline-grid;place-items:center;padding:0 6px}
+.sidefoot{margin-top:auto;border-top:1px solid var(--line);padding:14px 12px;display:grid;gap:6px}
+.sidefoot .who{display:flex;align-items:center;gap:10px;padding:4px 8px 10px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font:800 14px var(--display);flex:none}
+.sidefoot .who b{font-size:14px;display:block;line-height:1.2}
+.sidefoot .who small{color:var(--muted);font-size:12px}
+.sidefoot .navitem{font-size:14px;padding:9px 12px}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:13px 28px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.crumbs{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--muted);flex-wrap:wrap}
+.crumbs a{text-decoration:none}
+.crumbs a:hover{color:var(--ink)}
+.crumbs b{color:var(--ink)}
+.crumbs .sep{opacity:.5}
+.baractions{display:flex;align-items:center;gap:6px}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:9px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font:600 14px var(--body)}
+.iconbtn:hover{background:var(--soft)}
+.iconbtn svg{width:18px;height:18px}
+.burger{display:none}
+
+.page{padding:26px 28px 90px;display:grid;gap:22px;align-content:start;max-width:1400px}
+.pagehead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.pagehead h1{font:800 clamp(24px,3vw,32px)/1.1 var(--display);letter-spacing:-.01em}
+.pagehead p{color:var(--muted);margin-top:6px;max-width:70ch}
+
+/* ---------- Boutons et champs (réutilisés du prototype public) ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:700 15px/1 var(--body);padding:13px 20px;border-radius:12px;text-decoration:none;background:var(--green);color:#fff}
+.btn:hover{filter:brightness(1.1)}
+.btn.line{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.btn.danger{background:var(--heart)}
+.btn.ghost{background:none;color:var(--muted);box-shadow:none}
+.btn.sm{padding:8px 12px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:17px;height:17px}
+.tag{font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--soft);color:var(--muted)}
+.agb{display:inline-flex;align-items:center;gap:5px;background:var(--blue-soft);color:var(--blue);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:800}
+.agb svg{width:13px;height:13px}
+.agb.p{background:var(--soft);color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.badge.new{background:var(--sun);color:#3A2B00}
+.badge.ok{background:var(--green-soft);color:var(--green)}
+.badge.wait{background:var(--soft);color:var(--muted)}
+.badge.ko{background:var(--heart);color:#fff}
+.pill{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:99px;font-size:14px;font-weight:600;cursor:pointer}
+.pill:hover{border-color:var(--ink)}
+.pill[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.check{display:flex;align-items:center;gap:10px;padding:5px 0;cursor:pointer;font-size:15px}
+.check input{width:20px;height:20px;accent-color:var(--green);margin:0;flex:none}
+.fld label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+.fld input,.fld textarea,.fld select{width:100%;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 12px;font:500 15px var(--body)}
+.fld textarea{min-height:96px;resize:vertical}
+.fld input:focus,.fld textarea:focus,.fld select:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
+.fld .hint{color:var(--muted);font-size:13px;margin-top:6px}
+.fld.bad input,.fld.bad textarea,.fld.bad select{border-color:var(--heart);box-shadow:inset 0 0 0 1px var(--heart)}
+.fld .err{display:block;color:var(--heart);font-size:13px;font-weight:600;margin-top:6px}
+.ok{background:var(--green-soft);border-radius:12px;padding:12px 14px;font-size:14px}
+.err{background:var(--heart);color:#fff;border-radius:12px;padding:12px 14px;font-size:14px}
+
+/* ---------- Blocs ---------- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(186px,1fr));gap:14px}
+.stat{border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--card);display:grid;gap:7px}
+.stat{min-width:0}
+.stat .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;min-width:0}
+.stat .row > div{min-width:0;flex:1}
+.stat b{display:block;font:800 clamp(22px,6vw,30px)/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat small{display:block;color:var(--muted);font-weight:600;font-size:14px;overflow-wrap:break-word;margin-top:4px}
+.stat .ico{flex:none;width:38px;height:38px;border-radius:11px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+.stat .ico svg{width:19px;height:19px}
+.stat .ico.sun{background:#FBF0D6;color:#8A6100}
+.stat .ico.blue{background:var(--blue-soft);color:var(--blue)}
+.stat .ico.red{background:#FBE3E7;color:var(--heart)}
+.panel{border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden}
+.panel > header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:15px 18px;border-bottom:1px solid var(--line)}
+.panel > header h2{font:800 18px var(--display)}
+.panel > header small{color:var(--muted)}
+.panel .pad{padding:18px}
+.split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;align-items:start}
+
+/* ---------- Barre d'outils et tableaux ---------- */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 15px;min-width:210px}
+.field svg{width:17px;height:17px;color:var(--muted);flex:none}
+.field input{border:0;background:none;outline:none;color:var(--ink);font:500 15px var(--body);width:100%;padding:0}
+.field select{border:0;background:none;outline:none;color:var(--ink);font:500 15px var(--body);padding:0 2px;cursor:pointer}
+.seg{display:flex;gap:4px;background:var(--soft);border-radius:99px;padding:4px}
+.seg button{border:0;background:none;padding:7px 13px;border-radius:99px;cursor:pointer;font:600 13.5px var(--body);color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tblwrap{overflow:auto}
+.tbl{width:100%;border-collapse:collapse;min-width:760px}
+.tbl th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--soft);white-space:nowrap}
+.tbl td{padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px;vertical-align:middle}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl tbody tr:hover{background:var(--soft)}
+.tbl .who{display:flex;align-items:center;gap:11px;min-width:220px}
+.tbl .thumb{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;color:#fff;font:800 12px var(--display);flex:none;overflow:hidden}
+.tbl .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.tbl .who b{font-size:14.5px;display:block;line-height:1.25}
+.tbl .who small{color:var(--muted);font-size:12.5px}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl .acts{display:flex;gap:6px;justify-content:flex-end}
+.act{border:1px solid var(--line);background:var(--card);border-radius:9px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer}
+.act:hover{background:var(--soft)}
+.act svg{width:17px;height:17px}
+.act.del:hover{background:var(--heart);color:#fff;border-color:var(--heart)}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.pager .p{display:flex;gap:6px;align-items:center}
+.empty{text-align:center;padding:56px 20px;border:1px dashed var(--line);border-radius:16px}
+.empty h3{font:800 20px var(--display);margin-bottom:8px}
+.empty p{color:var(--muted);margin-bottom:16px}
+
+/* ---------- Listes de demandes ---------- */
+.rows{display:grid;gap:12px}
+.rowc{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:16px;display:grid;gap:12px}
+.rowc .hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.rowc .who b{font-size:16px}
+.rowc .who small{color:var(--muted);display:block;margin-top:3px}
+.rowc .msg{color:var(--muted);max-width:78ch}
+.rowc .meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:13.5px;align-items:center}
+.rowc .foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.kv{display:grid;gap:9px;font-size:14.5px}
+.kv div{display:flex;justify-content:space-between;gap:14px}
+.kv span:first-child{color:var(--muted)}
+.kv b{font-weight:700;text-align:right}
+
+/* ---------- Formulaires ---------- */
+.form{display:grid;gap:20px}
+.form .row{display:grid;gap:16px}
+.form .two{grid-template-columns:1fr 1fr}
+.form .three{grid-template-columns:repeat(3,1fr)}
+fieldset{border:1px solid var(--line);border-radius:14px;padding:18px;margin:0;min-width:0}
+legend{font:800 14px var(--display);padding:0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.formfoot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding-top:4px}
+.formfoot .sp{margin-left:auto}
+
+/* ---------- Logo d'un institut ---------- */
+.logoedit{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.logoedit .ap{flex:none;width:104px;height:78px;border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;overflow:hidden;color:#fff;font:800 17px var(--display);background:var(--soft)}
+.logoedit .ap img{width:100%;height:100%;object-fit:cover;background:#fff;display:block}
+.logoedit .cmd{display:grid;gap:8px;justify-items:start;min-width:0}
+.logoedit .cmd .hint{max-width:460px}
+
+/* ---------- Connexion ---------- */
+.login{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.login .art{background:var(--green);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:space-between;gap:32px}
+.login .art h2{font:800 clamp(26px,3vw,38px)/1.1 var(--display)}
+.login .art p{color:#D8EDE1;margin-top:12px;font-size:17px;max-width:46ch}
+.login .art .pts{display:grid;gap:14px;margin-top:26px}
+.login .art .pts div{display:flex;gap:11px;align-items:flex-start;font-size:15px}
+.login .art .pts svg{flex:none;width:20px;height:20px;color:var(--sun)}
+.login .formside{display:grid;place-items:center;padding:48px 24px}
+.login .box{width:100%;max-width:400px;display:grid;gap:16px}
+.login .box h1{font:800 30px/1.1 var(--display)}
+.login .box > p{color:var(--muted)}
+.loginfoot{color:#B9DAC9;font-size:14px}
+
+/* ---------- Messages et fenêtres ---------- */
+.toasts{position:fixed;right:20px;bottom:20px;z-index:80;display:grid;gap:10px}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:13px 16px;font-weight:600;font-size:14px;box-shadow:var(--shadow);display:flex;gap:9px;align-items:center;animation:pop .18s ease-out}
+.toast svg{flex:none;width:18px;height:18px}
+.toast.bad svg{color:var(--heart)}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90;display:grid;place-items:center;padding:20px}
+.modal .mbox{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:24px;max-width:450px;display:grid;gap:14px;width:100%}
+.modal .mbox h3{font:800 20px var(--display)}
+.modal .mbox p{color:var(--muted)}
+.modal .mact{display:flex;gap:10px;justify-content:flex-end}
+.foot{padding:22px 28px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+
+@media (max-width:1080px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;z-index:60;left:0;top:0;bottom:0;width:280px;height:100vh;transform:translateX(-105%);transition:transform .22s;box-shadow:var(--shadow)}
+  .side.open{transform:none}
+  .burger{display:inline-flex}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .form .three{grid-template-columns:1fr 1fr}
+}
+@media (max-width:820px){
+  .bar{padding-inline:18px}
+  .page{padding:20px 18px 90px}
+  .foot{padding-inline:18px}
+  .form .two,.form .three{grid-template-columns:minmax(0,1fr)}
+  .login{grid-template-columns:minmax(0,1fr)}
+  .login .art{padding:30px 22px;gap:20px}
+  .login .art .pts{display:none}
+  .login .formside{padding:32px 20px 60px}
+  .cards{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.tarifs label{font-weight:600;color:var(--muted)}
+.deblist{max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:8px}
+.linkbtn{background:none;border:0;padding:0;color:var(--green);font:700 13.5px var(--body);cursor:pointer;text-decoration:underline}
+.mbox .fld{margin:14px 0;text-align:left}
+.fld .check{display:flex;font-size:15px;font-weight:500;margin:0}
+.fld .check input{width:20px;height:20px;padding:0;flex:none}
+.fld .err{background:none;padding:0;border-radius:0}
+.programme{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px 14px}
+.lien{display:grid;grid-template-columns:minmax(0,1fr) 150px 34px;gap:10px;align-items:center;margin-bottom:8px}
+.attach{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--soft)}
+.attach select{min-width:0;flex:1 1 180px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 12px;font:500 14px var(--body)}
+@media (max-width:520px){ .lien{grid-template-columns:minmax(0,1fr) 34px} .lien .lien-forme{grid-column:1/-1} }
+.programme .annee{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.programme ul{margin:8px 0 0;padding-left:18px;display:grid;gap:3px}
+@media (max-width:520px){
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  /* L'icône sort du flux : le libellé dispose de toute la largeur de la carte. */
+  .stat{padding:14px;position:relative}
+  .stat .ico{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:9px}
+  .stat b{padding-right:40px}
+  .stat .ico svg{width:16px;height:16px}
+  .stat small{font-size:13px}
+}
+@media (max-width:340px){
+  .cards{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<div id="modal"></div>
+
+<script>
+/* ---------- Icônes ---------- */
+const P = {
+  gauge:'<path d="M12 14 8 9"/><path d="M20.5 17a9 9 0 1 0-17 0"/><path d="M4 21h16"/>',
+  inbox:'<path d="M3 12h5l2 3h4l2-3h5"/><path d="M5 5h14l2 7v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5l2-7Z"/>',
+  users:'<path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7" r="3.5"/><path d="M21 20v-1.5a4 4 0 0 0-3-3.87M15.5 4.13a4 4 0 0 1 0 7.75"/>',
+  cap:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>',
+  building:'<path d="M4 21V4a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v17M15 9h4a1 1 0 0 1 1 1v11M3 21h18M8 7h3M8 11h3M8 15h3"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  moon:'<path d="M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10Z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  pencil:'<path d="M4 20h4L20 8l-4-4L4 16v4Z"/><path d="m14 6 4 4"/>',
+  trash:'<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  pin:'<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/>',
+  cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/>',
+  info:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M1 20h22M9 8l-2 2 2 2M15 8l2 2-2 2"/>',
+  award:'<circle cx="12" cy="9" r="6"/><path d="M9 14.5 7.5 22l4.5-2.5 4.5 2.5L15 14.5"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14Z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  sort:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>'
+};
+const icon = (k, cls) => '<svg class="'+(cls||"")+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[k]||"")+'</svg>';
+
+/* ---------- Outils ---------- */
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+const fcfa = n => Number(n||0).toLocaleString("fr-FR")+" FCFA";
+const jdate = s => new Date(s).toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"});
+const store = {
+  get(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v===null?d:v }catch(e){ return d } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+
+function toast(msg, bad){
+  const box = document.getElementById("toasts");
+  const t = document.createElement("div");
+  t.className = "toast"+(bad?" bad":"");
+  t.innerHTML = icon(bad?"x":"check")+esc(msg);
+  box.appendChild(t);
+  setTimeout(()=>t.remove(), 3800);
+}
+function closeModal(){ document.getElementById("modal").innerHTML = ""; }
+function confirmBox(title, body, payload){
+  document.getElementById("modal").innerHTML = '<div class="modal"><div class="mbox" role="dialog" aria-modal="true">'
+    + '<h3>'+esc(title)+'</h3><p>'+esc(body)+'</p>'
+    + '<div class="mact"><button class="btn line" type="button" data-modal="cancel">Annuler</button>'
+    + '<button class="btn danger" type="button" data-modal="ok" data-payload="'+esc(payload)+'">Confirmer</button></div></div></div>';
+}
+
+/* ---------- Référentiels ---------- */
+const ARR = ["Makélékélé","Bacongo","Poto-Poto","Moungali","Ouenzé","Talangaï","Mfilou","Madibou","Djoué"];
+const DIPS_SEED = ["BTS","Licence","Licence pro","Master"];
+const SERIES_SEED = [["A","Lettres"],["B","Économie"],["C","Maths-Physique"],["D","Sciences"],["E","Technique"],["F","Technique industrielle"],["G","Tertiaire"]];
+const DOMAINES_SEED = [
+  {id:"gestion",nom:"Gestion & Finance",c:"#1E6B4A"},
+  {id:"info",nom:"Informatique",c:"#2B51A3"},
+  {id:"sante",nom:"Santé",c:"#B03352"},
+  {id:"btp",nom:"BTP & Génie",c:"#9A5412"},
+  {id:"petrole",nom:"Pétrole & Mines",c:"#2F3B45"},
+  {id:"com",nom:"Communication",c:"#6D40A6"},
+  {id:"logi",nom:"Transport & Logistique",c:"#0D6F7C"},
+  {id:"droit",nom:"Droit & Administration",c:"#7A2E2E"},
+  {id:"agro",nom:"Agronomie & Environnement",c:"#4C7A1E"},
+  {id:"hotel",nom:"Hôtellerie & Tourisme",c:"#B5562A"}
+];
+
+const INST_SEED = [
+  {id:"isgf",nom:"Institut Supérieur de Gestion du Fleuve",sigle:"ISGF",arr:"Poto-Poto",adr:"Avenue de la Paix, Poto-Poto",tel:"+242 06 612 40 18",wa:"242066124018",mail:"contact@isgf.cg",ag:"N° 047/MESRTI/2009",insc:50000,rentree:"2026-11-03",clot:"2026-10-15",c:"#1E6B4A",desc:"Spécialisé dans la gestion, la comptabilité et la banque depuis 2009. Cours en journée et en soirée."},
+  {id:"esim",nom:"École Supérieure d'Informatique du Mayombe",sigle:"ESIM",arr:"Moungali",adr:"Rue Mbaka, Moungali",tel:"+242 05 530 22 71",wa:"242055302271",mail:"info@esim.cg",ag:"N° 112/MESRTI/2011",insc:60000,rentree:"2026-10-27",clot:"2026-10-04",c:"#2B51A3",desc:"Un poste par étudiant en salle machine et un projet réel avec une entreprise locale chaque année."},
+  {id:"ipm",nom:"Institut Polytechnique Les Manguiers",sigle:"IPM",arr:"Bacongo",adr:"Avenue Matsoua, Bacongo",tel:"+242 06 877 15 03",wa:"242068771503",mail:"contact@ipm.cg",ag:"N° 089/MESRTI/2008",insc:45000,rentree:"2026-11-03",clot:"2026-10-20",c:"#9A5412",desc:"Formations techniques avec ateliers équipés : électricité, bâtiment, pétrole et sécurité industrielle."},
+  {id:"isd",nom:"Institut de Santé du Djoué",sigle:"ISD",arr:"Makélékélé",adr:"Route du Djoué, Makélékélé",tel:"+242 06 409 88 52",wa:"242064098852",mail:"contact@isd.cg",ag:"N° 156/MESRTI/2012",insc:75000,rentree:"2026-10-20",clot:"2026-09-27",c:"#B03352",desc:"Métiers paramédicaux, avec stages encadrés dans des centres de santé de Brazzaville."},
+  {id:"iht",nom:"Institut Horizon de Talangaï",sigle:"IHT",arr:"Talangaï",adr:"Avenue de l'Intendance, Talangaï",tel:"+242 05 744 31 60",wa:"242057443160",mail:"contact@iht.cg",ag:"N° 203/MESRTI/2015",insc:40000,rentree:"2026-11-10",clot:"2026-10-31",c:"#6D40A6",desc:"Communication, journalisme et marketing digital. Studio radio et atelier vidéo sur place."},
+  {id:"eclc",nom:"École de Commerce et Logistique de la Corniche",sigle:"ECLC",arr:"Ouenzé",adr:"Boulevard de la Corniche, Ouenzé",tel:"+242 06 255 67 09",wa:"242062556709",mail:"contact@eclc.cg",ag:"N° 178/MESRTI/2014",insc:50000,rentree:"2026-11-03",clot:"2026-10-15",c:"#0D6F7C",desc:"Commerce international, transit et logistique, en lien avec le port fluvial et le corridor vers Pointe-Noire."},
+  {id:"ijl",nom:"Institut Juridique Lumière",sigle:"IJL",arr:"Djoué",adr:"Route du Pool, Djoué",tel:"+242 06 318 72 44",wa:"242063187244",mail:"contact@ijl.cg",ag:"N° 131/MESRTI/2010",insc:40000,rentree:"2026-11-03",clot:"2026-10-25",c:"#7A2E2E",desc:"Droit, administration et secrétariat. Nombreuses formations en cours du soir pour ceux qui travaillent."},
+  {id:"isam",nom:"Institut des Sciences Appliquées de Mfilou",sigle:"ISAM",arr:"Mfilou",adr:"Route de Kinkala, Mfilou",tel:"+242 05 690 13 27",wa:"242056901327",mail:"contact@isam.cg",ag:"",insc:35000,rentree:"2026-10-27",clot:"2026-10-10",c:"#4C7A1E",desc:"Agronomie, environnement et tourisme, avec une ferme-école et un hôtel d'application."}
+];
+/* [id, inst, domaine, intitulé, diplôme, durée, frais, séries, soir, stage, tranches, débouchés, cours, statut] */
+const FORMES_SEED = [
+  ["compta","isgf","gestion","Comptabilité et gestion des entreprises","BTS",2,420000,"BCDG",1,3,1,["Aide-comptable","Assistant de gestion","Caissier"],["Comptabilité générale","Mathématiques financières","Droit des affaires","Excel et Word","Comptabilité analytique","Fiscalité congolaise","Logiciel Sage Compta"],"publiee"],
+  ["banque","isgf","gestion","Banque et assurance","Licence pro",3,520000,"BCD",0,4,1,["Chargé de clientèle bancaire","Conseiller en assurance","Analyste crédit"],["Économie générale","Comptabilité","Statistiques","Techniques bancaires","Droit bancaire CEMAC","Marketing des services","Analyse du risque crédit","Assurance IARD"],"publiee"],
+  ["rh","isgf","gestion","Gestion des ressources humaines","Licence",3,480000,"ABCDG",1,3,1,["Assistant RH","Gestionnaire de paie","Chargé de recrutement"],["Introduction au management","Psychologie du travail","Droit civil","Droit du travail congolais","Paie et administration du personnel","Communication interne","Recrutement et formation","GPEC"],"publiee"],
+  ["audit","isgf","gestion","Audit et contrôle de gestion","Master",2,780000,"",0,6,1,["Auditeur","Contrôleur de gestion","Comptable"],["Audit comptable et financier","Contrôle interne","Normes OHADA","Tableaux de bord","Consolidation des comptes"],"publiee"],
+  ["devweb","esim","info","Développement web et mobile","BTS",2,480000,"CDEF",0,3,1,["Développeur web","Développeur mobile","Intégrateur web"],["Algorithmique","HTML, CSS, JavaScript","Bases de données SQL","Anglais technique","Frameworks web","Développement Android","Projet client réel"],"publiee"],
+  ["reseaux","esim","info","Réseaux et télécommunications","Licence",3,560000,"CDE",0,3,1,["Technicien réseau","Administrateur système","Technicien télécom"],["Électronique numérique","Systèmes d'exploitation","Mathématiques","Réseaux TCP/IP","Administration Linux","Téléphonie mobile","Sécurité des réseaux","Fibre optique"],"publiee"],
+  ["logiciel","esim","info","Génie logiciel","Master",2,750000,"",0,6,0,["Ingénieur logiciel","Chef de projet informatique"],["Architecture logicielle","Gestion de projet agile","Intelligence artificielle","Cloud et DevOps"],"publiee"],
+  ["maint","esim","info","Maintenance informatique","BTS",2,380000,"CDEFG",1,2,1,["Technicien de maintenance","Support informatique"],["Architecture des ordinateurs","Installation de systèmes","Électronique","Dépannage matériel","Réseaux locaux","Accueil et support utilisateur"],"publiee"],
+  ["electro","ipm","btp","Électrotechnique","BTS",2,450000,"CDEF",0,3,1,["Électricien bâtiment","Technicien de maintenance","Installateur solaire"],["Électricité générale","Schémas électriques","Mesures","Dessin technique","Machines électriques","Automatismes","Énergie solaire"],"publiee"],
+  ["gc","ipm","btp","Génie civil et bâtiment","Licence",3,540000,"CDE",0,3,1,["Conducteur de travaux","Métreur","Dessinateur projeteur"],["Résistance des matériaux","Topographie","AutoCAD","Béton armé","Métré et devis","Géotechnique","Conduite de chantier","Routes et ouvrages"],"publiee"],
+  ["prodpet","ipm","petrole","Production pétrolière","BTS",2,690000,"CDE",0,4,1,["Opérateur de production","Technicien de forage","Agent HSE"],["Géologie pétrolière","Mécanique des fluides","Chimie des hydrocarbures","Procédés de production","Instrumentation","Sécurité sur site"],"publiee"],
+  ["hse","ipm","petrole","Hygiène, sécurité et environnement (HSE)","Licence pro",3,620000,"CDEF",0,4,1,["Agent HSE","Responsable sécurité","Chargé environnement"],["Réglementation HSE","Prévention des risques","Secourisme","Gestion des déchets","Audit sécurité","Plan d'urgence","Normes ISO 14001 et 45001"],"publiee"],
+  ["infirm","isd","sante","Sciences infirmières","Licence",3,650000,"CD",0,6,1,["Infirmier","Agent de santé communautaire"],["Anatomie et physiologie","Soins infirmiers de base","Hygiène hospitalière","Pharmacologie","Soins en pédiatrie","Urgences et réanimation","Santé communautaire"],"publiee"],
+  ["labo","isd","sante","Techniques de laboratoire médical","BTS",2,580000,"CD",0,3,1,["Technicien de laboratoire"],["Biochimie","Hématologie","Microbiologie","Parasitologie","Contrôle qualité"],"publiee"],
+  ["sagef","isd","sante","Sage-femme","Licence",3,680000,"CD",0,6,1,["Sage-femme","Agent de santé maternelle"],["Anatomie","Obstétrique","Soins du nouveau-né","Suivi de grossesse","Accouchement","Planification familiale"],"publiee"],
+  ["pharma","isd","sante","Préparateur en pharmacie","BTS",2,500000,"CD",1,3,1,["Préparateur en pharmacie","Délégué médical"],["Chimie","Botanique médicinale","Galénique","Législation pharmaceutique","Gestion d'officine"],"publiee"],
+  ["journ","iht","com","Communication et journalisme","Licence",3,460000,"ABCDG",0,3,1,["Journaliste","Animateur radio","Chargé de communication"],["Techniques d'expression","Histoire des médias","Culture générale","Écriture journalistique","Radio et podcast","Photo et vidéo","Communication des organisations","Déontologie"],"publiee"],
+  ["mkt","iht","com","Marketing digital","BTS",2,400000,"ABCDG",1,3,1,["Community manager","Assistant marketing","Graphiste"],["Fondamentaux du marketing","Réseaux sociaux","Canva et Figma","Publicité en ligne","Mesure d'audience","Projet pour une PME locale"],"publiee"],
+  ["transp","eclc","logi","Transport et logistique","BTS",2,440000,"BCDG",1,3,1,["Agent de transit","Déclarant en douane","Gestionnaire d'entrepôt"],["Chaîne logistique","Géographie des transports","Gestion des stocks","Transit et douane","Transport fluvial et ferroviaire"],"publiee"],
+  ["cominter","eclc","logi","Commerce international","Licence",3,510000,"BCDG",0,3,1,["Commercial export","Assistant import-export","Déclarant en douane"],["Économie internationale","Comptabilité","Anglais des affaires","Incoterms","Réglementation CEMAC","Négociation","Import-export"],"publiee"],
+  ["droitaff","ijl","droit","Droit des affaires","Licence",3,470000,"ABCDG",1,2,1,["Juriste d'entreprise","Assistant juridique","Clerc de notaire"],["Introduction au droit","Droit civil","Droit constitutionnel","Droit OHADA","Droit des contrats","Droit fiscal","Contentieux"],"publiee"],
+  ["adminpub","ijl","droit","Administration publique","Licence",3,430000,"ABCDG",1,2,1,["Agent administratif","Secrétaire de direction","Assistant de collectivité"],["Institutions du Congo","Finances publiques","Droit administratif","Gestion des collectivités","Rédaction administrative","Marchés publics"],"publiee"],
+  ["secret","ijl","droit","Secrétariat de direction","BTS",2,350000,"ABCDG",1,2,1,["Secrétaire de direction","Assistant administratif"],["Techniques de secrétariat","Bureautique","Correspondance professionnelle","Anglais","Organisation d'événements","Archivage"],"publiee"],
+  ["agro","isam","agro","Agronomie et agro-business","BTS",2,390000,"CD",0,4,1,["Technicien agricole","Entrepreneur agricole","Conseiller agricole"],["Biologie végétale","Sciences du sol","Élevage","Maraîchage","Gestion d'une exploitation","Commercialisation des produits"],"publiee"],
+  ["envir","isam","agro","Environnement, eaux et forêts","Licence",3,470000,"CD",0,3,1,["Agent des eaux et forêts","Chargé environnement","Technicien en aménagement"],["Écologie","Botanique forestière","Cartographie SIG","Gestion des forêts","Faune sauvage","Études d'impact"],"publiee"],
+  ["hotel","isam","hotel","Hôtellerie et tourisme","BTS",2,410000,"ABCDG",0,4,1,["Réceptionniste","Guide touristique","Gestionnaire hôtelier"],["Accueil et réception","Service en salle","Anglais du tourisme","Patrimoine du Congo","Gestion hôtelière","Organisation de circuits"],"publiee"]
+];
+
+/* ---------- Données et persistance ---------- */
+const ENREG = store.get("orienta-bo", null);
+const DB = Object.assign({inst:{},formes:{},dips:null,dipDur:null,debs:null,cours:null,series:null,domaines:null}, ENREG||{});
+
+/* Domaines d'insertion : référentiel {id, nom, c}. L'identifiant ne change jamais,
+   donc renommer un domaine ne touche ni les formations ni les débouchés. */
+const DOMAINES = (DB.domaines || DOMAINES_SEED).map(x=>Object.assign({},x));
+const DOM = {};
+function majDom(){ for(const k in DOM) delete DOM[k]; for(const x of DOMAINES) DOM[x.id] = x; }
+majDom();
+const usageDom = nom => { const x = DOMAINES.find(v=>v.nom===nom); return x ? Object.values(FORMES).filter(f=>f.dom===x.id).length : 0; };
+
+/* Au premier lancement, tout vient du jeu de démonstration. Dès qu'un enregistrement
+   existe, il fait foi : une entrée supprimée ne doit pas ressusciter au rechargement. */
+const INST = {};
+for(const s of INST_SEED){
+  if(ENREG && !(s.id in DB.inst)) continue;
+  INST[s.id] = Object.assign({avantages:[],logo:null}, s, DB.inst[s.id]||{});
+}
+const FORMES = {};
+for(const r of FORMES_SEED){
+  if(ENREG && !(r[0] in DB.formes)) continue;
+  const [id,inst,dom,nom,dip,duree,frais,series,soir,stage,tranches,jobs,cours,statut] = r;
+  FORMES[id] = Object.assign(
+    {id,inst,dom,nom,dip,duree,frais,tarifs:Array(duree).fill(frais),series,admission:"",desc:"",soir:!!soir,stage,tranches:!!tranches,jobs:jobs.slice(),cours:cours.slice(),statut},
+    DB.formes[id]||{}
+  );
+}
+/* Un institut ou une formation créés dans le back-office n'ont pas d'équivalent
+   dans le jeu de démonstration : ils viennent tels quels de l'enregistrement. */
+for(const k in DB.inst) if(!INST[k]) INST[k] = Object.assign({avantages:[],logo:null}, DB.inst[k]);
+for(const k in DB.formes) if(!FORMES[k]) FORMES[k] = Object.assign({tarifs:[],admission:"",desc:""}, DB.formes[k]);
+
+/* Référentiels gérés par la Squad (EX-08) : diplômes et débouchés. */
+const DIPS = DB.dips ? DB.dips.slice() : DIPS_SEED.slice();
+const DEBS = DB.debs ? DB.debs.map(x=>Object.assign({},x)) : (function(){
+  const m = {};
+  for(const f of Object.values(FORMES)) for(const j of f.jobs) if(!m[j]) m[j] = {nom:j, secteur:f.dom};
+  return Object.values(m);
+})();
+const usageDip = n => Object.values(FORMES).filter(f=>f.dip===n).length;
+const usageDeb = n => Object.values(FORMES).filter(f=>f.jobs.includes(n)).length;
+/* Séries du baccalauréat : référentiel {nom, lib}. Chaque formation porte la liste des séries admises. */
+const SERIES = DB.series ? DB.series.map(x=>Object.assign({},x)) : SERIES_SEED.map(p=>({nom:p[0], lib:p[1]}));
+for(const f of Object.values(FORMES)) if(!Array.isArray(f.series)) f.series = String(f.series||"").split("");
+const usageSer = n => Object.values(FORMES).filter(f=>f.series.includes(n)).length;
+/* Sans programme saisi année par année, les cours sont répartis à parts égales. */
+const repartir = (cours, duree) => {
+  const per = Math.max(1, Math.ceil(cours.length/Math.max(1,duree)));
+  return Array.from({length:Math.max(1,duree)}, (_,k)=>cours.slice(k*per,(k+1)*per));
+};
+for(const f of Object.values(FORMES)) if(!f.programme) f.programme = repartir(f.cours||[], f.duree);
+
+/* La durée des études est portée par le diplôme : elle s'impose aux formations qui le délivrent. */
+const DUREE = DB.dipDur ? Object.assign({}, DB.dipDur) : {"BTS":2,"Licence":3,"Licence pro":3,"Master":2};
+const dureeDip = (nom, defaut) => DUREE[nom] || defaut || 1;
+
+/* Catalogue de cours partagé : un cours (Français, Mathématiques…) peut être
+   rattaché à plusieurs formations, chacune avec son année d'études. */
+const COURS = (function(){
+  const parNom = {}, liste = [];
+  const cours = nom => {
+    const k = norm(nom);
+    if(!parNom[k]){ parNom[k] = {id:"c"+(liste.length+1), nom, liens:[]}; liste.push(parNom[k]); }
+    return parNom[k];
+  };
+  const lier = (c, forme, annee) => { if(!c.liens.some(l=>l.forme===forme)) c.liens.push({forme, annee}); };
+  if(DB.cours) for(const x of DB.cours){
+    /* Ancien enregistrement : un cours par formation, regroupé ici par intitulé. */
+    if(x.liens) liste.push({id:x.id, nom:x.nom, liens:x.liens.map(l=>Object.assign({},l))});
+    else lier(cours(x.nom), x.forme, x.annee);
+  }
+  else for(const f of Object.values(FORMES)) f.programme.forEach((noms,k)=>noms.forEach(nom=>lier(cours(nom), f.id, k+1)));
+  return liste;
+})();
+
+/* Recalcule, pour chaque formation, ce qui découle du diplôme et des cours :
+   durée, nombre de tarifs, programme par année. Le site public lit ce résultat. */
+function majProgrammes(){
+  for(const c of COURS) c.liens = c.liens.filter(l=>FORMES[l.forme]);
+  for(const f of Object.values(FORMES)){
+    f.duree = dureeDip(f.dip, f.duree);
+    const tarifs = (f.tarifs||[]).slice(0, f.duree);
+    while(tarifs.length < f.duree) tarifs.push(tarifs.length ? tarifs[tarifs.length-1] : f.frais);
+    f.tarifs = tarifs;
+    f.programme = Array.from({length:f.duree}, ()=>[]);
+  }
+  for(const c of COURS) for(const l of c.liens){
+    const f = FORMES[l.forme];
+    /* Un diplôme raccourci ramène les cours des années retirées sur la dernière année. */
+    if(l.annee > f.duree) l.annee = f.duree;
+    f.programme[l.annee-1].push(c.nom);
+  }
+  for(const f of Object.values(FORMES)) f.cours = f.programme.flat();
+}
+majProgrammes();
+const libForme = f => f.nom+" — "+(INST[f.inst] ? INST[f.inst].sigle : "institut supprimé");
+const niveau = k => (k ? (k+1)+"e" : "1re")+" année";
+
+/* Le site public lit cet enregistrement : il reflète donc le back-office. */
+function saveBO(){
+  majProgrammes();
+  store.set("orienta-bo",{inst:INST,formes:FORMES,dips:DIPS,dipDur:DUREE,debs:DEBS,cours:COURS,series:SERIES,domaines:DOMAINES});
+}
+
+/* ---------- Session ---------- */
+let SESSION = store.get("orienta-bo-session", null);
+const isAuthed = () => !!(SESSION && SESSION.login);
+const badgeAg = i => agrement(i)
+  ? '<span class="agb">'+icon("check")+esc(agrement(i))+'</span>'
+  : '<span class="agb p">Non agréé</span>';
+
+/* ---------- État de l'interface ---------- */
+const S = {
+  prog:{q:"",dom:"",statut:"",page:1,par:8},
+  inst:{q:"",arr:"",ag:"",page:1,par:6},
+  /* refl : diplôme, débouché ou série en cours de saisie, {type, nom} (nom nul = ajout). */
+  refl:null,
+  cours:{q:"",forme:"",page:1,par:10},
+  /* coursEdit : cours en cours de saisie, {id, liens} (id nul = ajout). */
+  coursEdit:null,
+  sideOpen:false,
+  /* logoBrouillon : image choisie dans le formulaire d'institut en cours.
+     logoChoisi indique qu'on y a touché ; sinon l'image déjà enregistrée est
+     conservée. */
+  logoBrouillon:null,
+  logoChoisi:false
+};
+/* Un numéro d'agrément est saisi tel quel ; vide ou « en cours » vaut absence d'agrément. */
+const agrement = i => (i.ag && norm(i.ag).replace(/[\s.?!]/g,"")!=="encours") ? i.ag.trim() : "";
+
+/* ---------- Filtres ---------- */
+function filterForms(){
+  const s = S.prog, q = norm(s.q);
+  return Object.values(FORMES).filter(f=>{
+    if(q){ const i = INST[f.inst]; if(!i) return false; const hay = norm([f.nom,f.jobs.join(" "),f.cours.join(" "),i.nom,i.sigle,DOM[f.dom].nom,f.dip].join(" ")); if(!q.split(/\s+/).filter(Boolean).every(w=>hay.includes(w))) return false; }
+    if(s.dom && f.dom!==s.dom) return false;
+    if(s.statut && f.statut!==s.statut) return false;
+    return true;
+  }).sort((a,b)=>a.nom.localeCompare(b.nom,"fr"));
+}
+function filterInst(){
+  const s = S.inst, q = norm(s.q);
+  return Object.values(INST).filter(i=>{
+    if(q && !norm(i.nom+" "+i.sigle+" "+i.arr+" "+i.adr).includes(q)) return false;
+    if(s.arr && i.arr!==s.arr) return false;
+    if(s.ag==="oui" && !agrement(i)) return false;
+    if(s.ag==="non" && agrement(i)) return false;
+    return true;
+  }).sort((a,b)=>a.sigle.localeCompare(b.sigle));
+}
+
+/* ---------- Coquille ---------- */
+const NAV = [
+  {g:"Pilotage",items:[
+    {h:"#/tableau-de-bord",i:"gauge",t:"Tableau de bord"}
+  ]},
+  {g:"Catalogue",items:[
+    {h:"#/instituts",i:"building",t:"Instituts"},
+    {h:"#/formations",i:"cap",t:"Formations"},
+    {h:"#/cours",i:"book",t:"Cours"},
+    {h:"#/diplomes",i:"award",t:"Diplômes"},
+    {h:"#/debouches",i:"brief",t:"Débouchés"},
+    {h:"#/series",i:"list",t:"Séries du bac"},
+    {h:"#/domaines",i:"grid",t:"Domaines d'insertion"}
+  ]}
+];
+const currentHash = () => (location.hash||"#/tableau-de-bord");
+/* Identifiants de l'entité en cours d'édition, extraits de l'adresse. */
+const formeId = () => { const m = currentHash().match(/^#\/formations\/(.+)$/); return m && FORMES[m[1]] ? m[1] : ""; };
+const instId  = () => { const m = currentHash().match(/^#\/instituts\/(.+)$/); return m && INST[m[1]]  ? m[1]  : ""; };
+
+function sidebar(){
+  const h = currentHash();
+  return '<aside class="side" id="side">'
+    + '<a class="brand" href="#/tableau-de-bord">'
+    + '<svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M7 13.5 16 9l9 4.5-9 4.5-9-4.5Z" fill="#fff"/><path d="M11 16v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V16" stroke="#fff" stroke-width="2" fill="none"/></svg>'
+    + '<span><b>Orienta</b><small>Espace Squad</small></span></a>'
+    + NAV.map(g=>'<div class="navgroup"><h4>'+esc(g.g)+'</h4>'
+      + g.items.map(it=>{
+          const n = it.ct ? it.ct() : 0;
+          const on = h === it.h || h.indexOf(it.h + "/") === 0;
+          return '<a class="navitem" href="'+it.h+'"'+(on?' aria-current="page"':'')+'>'+icon(it.i)+'<span>'+esc(it.t)+'</span>'+(n?'<span class="ct">'+n+'</span>':'')+'</a>';
+        }).join("")
+      + '</div>').join("")
+    + '<div class="sidefoot">'
+    + '<div class="who"><span class="avatar">'+esc((SESSION&&SESSION.nom?SESSION.nom:"SQ").slice(0,2).toUpperCase())+'</span><span><b>'+esc(SESSION&&SESSION.nom?SESSION.nom:"Squad")+'</b><small>'+esc(SESSION&&SESSION.role?SESSION.role:"SuperAdmin")+'</small></span></div>'
+    + '<a class="navitem" href="#/compte">'+icon("user")+'<span>Mon compte</span></a>'
+    + '<button class="navitem" type="button" data-act="logout">'+icon("logout")+'<span>Se déconnecter</span></button>'
+    + '</div></aside>';
+}
+function bar(crumbs, actions){
+  return '<div class="bar">'
+    + '<div style="display:flex;align-items:center;gap:10px">'
+    + '<button class="iconbtn burger" type="button" data-act="side" aria-label="Ouvrir le menu">'+icon("menu")+'</button>'
+    + '<div class="crumbs">'+crumbs.map((c,i)=>(i?'<span class="sep">/</span>':"")+(c.h?'<a href="'+c.h+'">'+esc(c.t)+'</a>':'<b>'+esc(c.t)+'</b>')).join("")+'</div>'
+    + '</div>'
+    + '<div class="baractions">'
+    + '<button class="iconbtn" type="button" data-act="theme" aria-label="Basculer le thème clair ou sombre">'+icon("moon")+'</button>'
+    + '<a class="iconbtn" href="index.html">'+icon("eye")+'<span>Voir le site</span></a>'
+    + (actions||"")
+    + '</div></div>';
+}
+function shell(inner, crumbs, actions){
+  return '<div class="shell">'+sidebar()+'<div class="main">'+bar(crumbs,actions)
+    + '<div class="page">'+inner+'</div>'
+    + '<div class="foot">Démonstration : les modifications sont conservées dans ce navigateur. Dans la version finale, tout est enregistré par l\'API sécurisée.</div>'
+    + '</div></div>';
+}
+
+/* ---------- Connexion ---------- */
+function loginArt(){
+  return '<div class="art">'
+    + '<a class="brand" href="#" style="border:0;padding:0;color:#fff"><svg class="mk" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#fff"/><path d="M7 13.5 16 9l9 4.5-9 4.5-9-4.5Z" fill="#17693F"/><path d="M11 16v4.5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V16" stroke="#17693F" stroke-width="2" fill="none"/></svg><span><b style="color:#fff">Orienta</b><small style="color:#B9DAC9">Espace Squad</small></span></a>'
+    + '<div><h2>Le catalogue de Brazzaville, tenu à jour.</h2><p>Instituts, formations, diplômes et débouchés : une seule source de vérité pour les bacheliers de la capitale.</p>'
+    + '<div class="pts">'
+    + '<div>'+icon("check")+'<span>'+Object.keys(FORMES).length+' formations et '+Object.keys(INST).length+' instituts référencés</span></div>'
+    + '<div>'+icon("check")+'<span>'+DIPS.length+' diplômes et '+DEBS.length+' débouchés au référentiel</span></div>'
+    + '<div>'+icon("check")+'<span>Agréments affichés avec leur numéro officiel</span></div>'
+    + '</div></div>'
+    + '<div class="loginfoot">Usage réservé à l\'équipe de la Squad. Les comptes sont ouverts par un SuperAdmin.</div>'
+    + '</div>';
+}
+function pageLogin(){
+  return '<div class="login">'+loginArt()
+    + '<div class="formside"><form class="box" id="login-form">'
+    + '<h1>Connexion</h1>'
+    + '<p>Identifiez-vous pour accéder au tableau de bord et au catalogue.</p>'
+    + '<div class="fld"><label for="u">Nom d\'utilisateur</label><input id="u" autocomplete="username" required placeholder="squad"></div>'
+    + '<div class="fld"><label for="p">Mot de passe</label><input id="p" type="password" autocomplete="current-password" required></div>'
+    + '<button class="btn" type="submit">Se connecter</button>'
+    + '<div class="err" id="login-err" hidden></div>'
+    + '<p style="font-size:13.5px;"><button class="linkbtn" type="button" data-act="forgot">Mot de passe oublié ?</button></p>'
+    + '<p class="hint" style="color:var(--muted);font-size:13.5px">Démo : <b>squad</b> / <b>orienta2026</b>. Le site public reste accessible sans compte.</p>'
+    + '<p style="font-size:13.5px"><a href="index.html" style="color:var(--green);font-weight:700">Retour au site public</a></p>'
+    + '</form></div></div>';
+}
+function forgotBox(){
+  document.getElementById("modal").innerHTML = '<div class="modal"><form class="mbox" id="forgot-form" role="dialog" aria-modal="true" novalidate>'
+    + '<h3>Mot de passe oublié</h3><p>Saisissez l\'adresse e-mail liée à votre compte : un lien de réinitialisation vous sera envoyé.</p>'
+    + '<div class="fld" data-f="fg-m"><label for="fg-m">Adresse e-mail</label><input id="fg-m" type="email" autocomplete="email" required></div>'
+    + '<div class="mact"><button class="btn line" type="button" data-modal="cancel">Annuler</button>'
+    + '<button class="btn" type="submit">Envoyer le lien</button></div></form></div>';
+  document.getElementById("fg-m").focus();
+}
+
+/* ---------- Tableau de bord ---------- */
+function pageDash(){
+  const formes = Object.values(FORMES);
+  const brouillons = formes.filter(f=>f.statut!=="publiee").length;
+  const arrCouverts = new Set(Object.values(INST).map(i=>i.arr)).size;
+  const sansAg = Object.values(INST).filter(i=>!agrement(i)).length;
+  const budget = formes.reduce((s,f)=>s+f.frais,0)/Math.max(1,formes.length);
+  const parDom = DOMAINES.map(d=>({d,n:formes.filter(f=>f.dom===d.id).length})).sort((a,b)=>b.n-a.n).slice(0,6);
+  const maxDom = Math.max(1,...parDom.map(x=>x.n));
+  return shell(
+    '<div class="pagehead"><div><h1>Tableau de bord</h1><p>Indicateurs clés du catalogue.</p></div>'
+    + '<a class="btn" href="#/instituts/nouveau">'+icon("plus")+'Ajouter un institut</a></div>'
+    + '<div class="cards">'
+    + stat(Object.keys(INST).length,"Établissements","building","")
+    + stat(formes.length,"Formations et filières","cap","blue")
+    + stat(arrCouverts+" / "+ARR.length,"Arrondissements couverts","pin","")
+    + stat(DIPS.length,"Diplômes délivrés","award","blue")
+    + stat(DEBS.length,"Débouchés","brief","")
+    + '</div>'
+    + '<div class="split">'
+    + '<div class="panel"><header><h2>Répartition par domaine</h2><small>'+formes.length+' formations</small></header>'
+    + '<div class="pad" style="display:grid;gap:12px">'
+    + parDom.map(x=>'<div style="display:grid;grid-template-columns:150px minmax(0,1fr) 34px;gap:12px;align-items:center">'
+      + '<span style="font-weight:600;font-size:14px">'+esc(x.d.nom)+'</span>'
+      + '<span style="height:10px;border-radius:99px;background:var(--soft);overflow:hidden"><span style="display:block;height:100%;width:'+Math.round(x.n/maxDom*100)+'%;background:'+x.d.c+'"></span></span>'
+      + '<b class="num" style="text-align:right">'+x.n+'</b></div>').join("")
+    + '</div></div>'
+    + '<div style="display:grid;gap:20px">'
+    + '<div class="panel"><header><h2>Points de vigilance</h2></header><div class="pad" style="display:grid;gap:14px">'
+    + '<div class="kv"><div><span>Formations en brouillon</span><b>'+brouillons+'</b></div>'
+    + '<div><span>Instituts non agréés</span><b>'+sansAg+'</b></div>'
+    + '<div><span>Frais moyens par an</span><b>'+fcfa(Math.round(budget))+'</b></div></div>'
+    + '<p style="color:var(--muted);font-size:13.5px">Une formation en brouillon n\'apparaît pas sur le site public.</p></div></div>'
+    + '<div class="panel"><header><h2>Ajouter</h2></header><div class="pad" style="display:grid;gap:10px">'
+    + '<a class="btn line" href="#/instituts/nouveau" style="justify-content:flex-start">'+icon("plus")+'Un institut</a>'
+    + '<a class="btn line" href="#/formations/nouvelle" style="justify-content:flex-start">'+icon("plus")+'Une formation</a>'
+    + '<a class="btn line" href="#/cours" style="justify-content:flex-start">'+icon("plus")+'Un cours</a>'
+    + '<a class="btn line" href="#/diplomes" style="justify-content:flex-start">'+icon("plus")+'Un diplôme</a>'
+    + '<a class="btn line" href="#/debouches" style="justify-content:flex-start">'+icon("plus")+'Un débouché</a>'
+    + '</div></div>'
+    + '</div></div>',
+    [{t:"Espace Squad"},{t:"Tableau de bord"}]
+  );
+}
+function stat(v,l,ic,tone){
+  return '<div class="stat"><div class="row"><div><b>'+esc(v)+'</b><small>'+esc(l)+'</small></div>'
+    + '<span class="ico '+(tone||"")+'">'+icon(ic)+'</span></div></div>';
+}
+
+/* ---------- Formations : liste ---------- */
+function pageFormes(){
+  const rows = filterForms(), s = S.prog;
+  s.page = Math.min(s.page, pages(rows.length, s.par));
+  const slice = rows.slice((s.page-1)*s.par, s.page*s.par);
+  return shell(
+    '<div class="pagehead"><div><h1>Formations</h1><p>'+Object.keys(FORMES).length+' formations au catalogue, dont '+Object.values(FORMES).filter(f=>f.statut!=="publiee").length+' en brouillon.</p></div>'
+    + '<a class="btn" href="#/formations/nouvelle">'+icon("plus")+'Ajouter une formation</a></div>'
+    + '<div class="panel"><header>'
+    + '<div class="toolbar">'
+    + '<span class="field">'+icon("search")+'<input id="fq" type="search" placeholder="Rechercher une formation, un débouché, un institut" value="'+esc(s.q)+'" aria-label="Rechercher"></span>'
+    + '<select class="field" id="fdom" aria-label="Filtrer par domaine"><option value="">Tous les domaines</option>'
+    + DOMAINES.map(d=>'<option value="'+d.id+'"'+(s.dom===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")+'</select>'
+    + '<div class="seg" role="group" aria-label="Filtrer par statut">'
+    + [["","Tous"],["publiee","Publiées"],["brouillon","Brouillons"]].map(o=>'<button type="button" data-statut="'+o[0]+'" aria-pressed="'+(s.statut===o[0])+'">'+o[1]+'</button>').join("")
+    + '</div></div>'
+    + '<small>'+rows.length+' résultat'+(rows.length>1?"s":"")+'</small>'
+    + '</header>'
+    + (slice.length
+      ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>Formation</th><th>Institut</th><th>Domaine</th><th>Diplôme</th><th class="num">Frais / an</th><th>Statut</th><th></th></tr></thead><tbody>'
+        + slice.map(f=>{
+            const i = INST[f.inst];
+            /* Un institut supprimé laisse la formation orpheline : on le signale au lieu d'afficher « undefined ». */
+            const institut = i ? '<td>'+esc(i.sigle)+'<br><small style="color:var(--muted)">'+esc(i.arr)+'</small></td>'
+              : '<td><span class="badge ko">Institut supprimé</span></td>';
+            return '<tr>'
+              + '<td><div class="who"><span class="thumb" style="background:'+DOM[f.dom].c+'">'+esc(DOM[f.dom].nom.slice(0,3).toUpperCase())+'</span><span><b>'+esc(f.nom)+'</b><small>'+esc(f.jobs.slice(0,2).join(" · "))+'</small></span></div></td>'
+              + institut
+              + '<td>'+esc(DOM[f.dom].nom)+'</td>'
+              + '<td>'+esc(f.dip)+'<br><small style="color:var(--muted)">'+f.duree+' ans'+(f.soir?" · soir":"")+'</small></td>'
+              + '<td class="num">'+fcfa(f.frais)+'</td>'
+              + '<td>'+(f.statut==="publiee"?'<span class="badge ok">Publiée</span>':'<span class="badge wait">Brouillon</span>')+'</td>'
+              + '<td><div class="acts">'
+              + '<a class="act" href="#/formations/'+esc(f.id)+'" title="Modifier" aria-label="Modifier '+esc(f.nom)+'">'+icon("pencil")+'</a>'
+              + '<button class="act del" type="button" data-act="del-forme" data-id="'+esc(f.id)+'" title="Supprimer" aria-label="Supprimer '+esc(f.nom)+'">'+icon("trash")+'</button>'
+              + '</div></td></tr>';
+          }).join("")
+        + '</tbody></table></div>'+pager(rows.length, s.par, s.page)
+      : '<div class="pad"><div class="empty"><h3>Aucune formation ne correspond</h3><p>Modifiez la recherche ou les filtres.</p><button class="btn line" type="button" data-act="reset-f">Réinitialiser les filtres</button></div></div>')
+    + '</div>',
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Catalogue"},{t:"Formations"}]
+  );
+}
+
+/* ---------- Formations : formulaire ---------- */
+function pageForme(rawId){
+  /* Une adresse d'édition inconnue renvoie directement sur la liste. */
+  if(rawId && !FORMES[rawId]) return pageFormes();
+  const f = rawId ? FORMES[rawId] : null;
+  const instCible = f ? f.inst : (S.instCible && INST[S.instCible] ? S.instCible : Object.keys(INST)[0]);
+  const nbFormes = Object.values(FORMES).filter(x=>x.inst===instCible).length;
+  /* Un diplôme ou un débouché retiré du référentiel reste proposé tant que la formation le porte. */
+  const dips = f && !DIPS.includes(f.dip) ? DIPS.concat([f.dip]) : DIPS;
+  const debs = DEBS.map(d=>d.nom).concat(f ? f.jobs.filter(j=>!DEBS.some(d=>d.nom===j)) : []).sort((a,b)=>a.localeCompare(b,"fr"));
+  return shell(
+    '<div class="pagehead"><div><a class="btn ghost sm" href="#/formations">'+icon("back")+'Retour à la liste</a>'
+    + '<h1 style="margin-top:10px">'+(f?"Modifier la formation":"Ajouter une formation")+'</h1>'
+    + '<p>'+(f?"Les modifications sont reprises par le site public ouvert dans ce navigateur.":"Renseignez l\'intitulé, le diplôme visé et l\'institut qui porte la formation.")+'</p></div></div>'
+    + '<form class="form" id="forme-form" novalidate>'
+    + '<fieldset><legend>Identification</legend><div class="row two">'
+    + '<div class="fld" data-f="nom"><label for="f-nom">Intitulé de la filière</label><input id="f-nom" required value="'+esc(f?f.nom:"")+'" placeholder="ex. Comptabilité et gestion des entreprises"></div>'
+    + '<div class="fld" data-f="dip"><label for="f-dip">Diplôme délivré</label><select id="f-dip">'
+    + dips.map(d=>'<option value="'+esc(d)+'"'+(f&&f.dip===d?" selected":"")+'>'+esc(d)+(DUREE[d]?' — '+DUREE[d]+' an'+(DUREE[d]>1?"s":""):"")+'</option>').join("")
+    + '</select><span class="hint"><a href="#/diplomes" style="color:var(--green);font-weight:700">Gérer les diplômes</a></span></div>'
+    + '</div><div class="row two">'
+    + '<div class="fld" data-f="inst"><label for="f-inst">Institut</label><select id="f-inst">'
+    + Object.values(INST).map(i=>'<option value="'+esc(i.id)+'"'+(instCible===i.id?" selected":"")+'>'+esc(i.sigle)+' — '+esc(i.nom)+'</option>').join("")
+    + '</select><span class="hint" id="inst-hint">'+nbFormes+' formation'+(nbFormes>1?"s":"")+' déjà rattachée'+(nbFormes>1?"s":"")+' à cet institut.</span></div>'
+    + '<div class="fld" data-f="dom"><label for="f-dom">Domaine</label><select id="f-dom">'
+    + DOMAINES.map(d=>'<option value="'+d.id+'"'+(f&&f.dom===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")
+    + '</select></div>'
+    + '</div><div class="row">'
+    + '<div class="fld" data-f="desc"><label for="f-desc">Description</label><textarea id="f-desc" placeholder="Présentation courte de la formation, affichée sur sa fiche publique">'+esc(f?f.desc:"")+'</textarea></div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Niveaux et tarifs</legend><div class="row two">'
+    + '<div class="fld"><label>Durée des études</label><p id="duree-txt" style="font-weight:700;padding:11px 0"></p><span class="hint">Définie par le diplôme délivré.</span></div>'
+    + '<div class="fld" data-f="stage"><label for="f-stage">Stage (mois)</label><input id="f-stage" type="number" min="0" max="12" value="'+(f?f.stage:0)+'"><span class="hint">0 signifie qu\'aucun stage n\'est prévu.</span></div>'
+    + '</div><div class="row" style="margin-top:16px">'
+    + '<div class="fld" data-f="frais"><label>Frais par niveau (FCFA par an)</label><div class="tarifs" id="tarifs"></div></div>'
+    + '</div>'
+    + '<div class="row" style="margin-top:16px"><div class="fld"><label>Options</label>'
+    + '<label class="check"><input type="checkbox" id="f-soir"'+(f&&f.soir?" checked":"")+'>Cours du soir</label>'
+    + '<label class="check"><input type="checkbox" id="f-tranches"'+(f&&f.tranches?" checked":"")+'>Paiement en plusieurs fois</label>'
+    + '</div></div>'
+    + '</fieldset>'
+    + '<fieldset><legend>Conditions d\'admission</legend><div class="row two">'
+    + '<div class="fld" data-f="series"><label>Séries du bac acceptées</label><div class="sergrid" id="f-series">'
+    + (SERIES.map(x=>'<label class="check"><input type="checkbox" value="'+esc(x.nom)+'"'+(f&&f.series.includes(x.nom)?" checked":"")+'>Série '+esc(x.nom)+(x.lib?' — '+esc(x.lib):"")+'</label>').join("") || '<span class="hint">Aucune série au référentiel.</span>')
+    + '</div><span class="hint">Aucune case cochée : la série n\'est pas un critère d\'admission. <a href="#/series" style="color:var(--green);font-weight:700">Gérer les séries</a></span></div>'
+    + '<div class="fld" data-f="admission"><label for="f-admission">Autres conditions</label><input id="f-admission" value="'+esc(f?f.admission:"")+'" placeholder="ex. Étude de dossier et entretien"></div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Contenu</legend><div class="row">'
+    + '<div class="fld" data-f="jobs"><label for="deb-find">Débouchés</label><input id="deb-find" type="search" placeholder="Filtrer les débouchés">'
+    + '<div class="deblist" id="f-jobs">'+(debs.map(n=>'<label class="check"><input type="checkbox" value="'+esc(n)+'"'+(f&&f.jobs.includes(n)?" checked":"")+'>'+esc(n)+'</label>').join("") || '<span class="hint">Aucun débouché au référentiel.</span>')+'</div>'
+    + '<span class="hint"><a href="#/debouches" style="color:var(--green);font-weight:700">Gérer les débouchés</a></span></div>'
+    + '</div><div class="row" style="margin-top:16px">'
+    + '<div class="fld"><label>Programme</label>'
+    + (f ? '<div class="programme">'+f.programme.map((a,k)=>'<div class="annee"><b>'+niveau(k)+'</b>'+(a.length?'<ul>'+a.map(c=>'<li>'+esc(c)+'</li>').join("")+'</ul>':'<span class="hint" style="display:block">Aucun cours.</span>')+'</div>').join("")+'</div>'
+        + '<span class="hint"><a href="#/cours" data-act="cours-de" data-id="'+esc(f.id)+'" style="color:var(--green);font-weight:700">Gérer les cours de cette formation</a></span>'
+      : '<span class="hint">Créez d\'abord la formation : ses cours s\'ajoutent ensuite dans la rubrique Cours, année par année.</span>')
+    + '</div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Publication</legend><div class="fld" data-f="statut"><label for="f-statut">Statut</label><select id="f-statut">'
+    + '<option value="publiee"'+(!f||f.statut==="publiee"?" selected":"")+'>Publiée — visible sur le site public</option>'
+    + '<option value="brouillon"'+(f&&f.statut==="brouillon"?" selected":"")+'>Brouillon — invisible du public</option>'
+    + '</select></div></fieldset>'
+    + '<div class="formfoot"><button class="btn" type="submit">'+(f?"Enregistrer les modifications":"Créer la formation")+'</button>'
+    + '<a class="btn line" href="#/formations">Annuler</a>'
+    + '<span class="sp" style="color:var(--muted);font-size:13.5px">'+(f?"Identifiant : "+esc(f.id):"L\'identifiant sera généré automatiquement.")+'</span></div>'
+    + '</form>',
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Formations",h:"#/formations"},{t:f?"Modification":"Création"}]
+  );
+}
+
+/* ---------- Instituts : liste ---------- */
+function pageInsts(){
+  const rows = filterInst(), s = S.inst;
+  s.page = Math.min(s.page, pages(rows.length, s.par));
+  const slice = rows.slice((s.page-1)*s.par, s.page*s.par);
+  const count = id => Object.values(FORMES).filter(f=>f.inst===id).length;
+  return shell(
+    '<div class="pagehead"><div><h1>Instituts</h1><p>'+Object.keys(INST).length+' instituts référencés sur les '+ARR.length+' arrondissements de Brazzaville.</p></div>'
+    + '<a class="btn" href="#/instituts/nouveau">'+icon("plus")+'Ajouter un institut</a></div>'
+    + '<div class="panel"><header><div class="toolbar">'
+    + '<span class="field">'+icon("search")+'<input id="iq" type="search" placeholder="Rechercher un institut" value="'+esc(s.q)+'" aria-label="Rechercher"></span>'
+    + '<select class="field" id="iarr" aria-label="Filtrer par arrondissement"><option value="">Tous les arrondissements</option>'
+    + ARR.map(a=>'<option'+(s.arr===a?" selected":"")+'>'+a+'</option>').join("")+'</select>'
+    + '<div class="seg" role="group" aria-label="Filtrer par agrément">'
+    + [["","Tous"],["oui","Agréés"],["non","Non agréés"]].map(o=>'<button type="button" data-ag="'+o[0]+'" aria-pressed="'+(s.ag===o[0])+'">'+o[1]+'</button>').join("")
+    + '</div></div><small>'+rows.length+' résultat'+(rows.length>1?"s":"")+'</small></header>'
+    + (slice.length
+      ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>Institut</th><th>Arrondissement</th><th>Contact</th><th>Agrément</th><th class="num">Formations</th><th class="num">Inscription</th><th></th></tr></thead><tbody>'
+        + slice.map(i=>'<tr>'
+          + '<td><div class="who"><span class="thumb" style="background:'+i.c+'">'+(i.logo?'<img src="'+esc(i.logo)+'" alt="">':esc(i.sigle))+'</span><span><b>'+esc(i.nom)+'</b><small>'+esc(i.adr)+'</small></span></div></td>'
+          + '<td>'+esc(i.arr)+'</td>'
+          + '<td><small>'+esc(i.tel)+'</small><br><small style="color:var(--muted)">'+esc(i.mail)+'</small></td>'
+          + '<td>'+badgeAg(i)+'</td>'
+          + '<td class="num">'+count(i.id)+'</td>'
+          + '<td class="num">'+fcfa(i.insc)+'</td>'
+          + '<td><div class="acts">'
+          + '<a class="act" href="#/instituts/'+esc(i.id)+'" title="Modifier" aria-label="Modifier '+esc(i.nom)+'">'+icon("pencil")+'</a>'
+          + '<button class="act del" type="button" data-act="del-inst" data-id="'+esc(i.id)+'" title="Supprimer" aria-label="Supprimer '+esc(i.nom)+'">'+icon("trash")+'</button>'
+          + '</div></td></tr>').join("")
+        + '</tbody></table></div>'+pager(rows.length, s.par, s.page)
+      : '<div class="pad"><div class="empty"><h3>Aucun institut ne correspond</h3><p>Modifiez la recherche ou les filtres.</p><button class="btn line" type="button" data-act="reset-i">Réinitialiser les filtres</button></div></div>')
+    + '</div>',
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Catalogue"},{t:"Instituts"}]
+  );
+}
+
+/* ---------- Instituts : formulaire ---------- */
+function pageInstEdit(rawId){
+  if(rawId && !INST[rawId]) return pageInsts();
+  const i = rawId ? INST[rawId] : null;
+  const linked = i ? Object.values(FORMES).filter(f=>f.inst===i.id) : [];
+  return shell(
+    '<div class="pagehead"><div><a class="btn ghost sm" href="#/instituts">'+icon("back")+'Retour à la liste</a>'
+    + '<h1 style="margin-top:10px">'+(i?"Modifier "+esc(i.sigle):"Ajouter un institut")+'</h1>'
+    + '<p>'+(i?"La fiche publique reprend ces informations.":"Un institut doit être rattaché à un arrondissement de Brazzaville.")+'</p></div>'
+    + (i && linked.length ? '<span class="badge ok">'+linked.length+' formation'+(linked.length>1?"s":"")+' rattachée'+(linked.length>1?"s":"")+'</span>' : "")
+    + '</div>'
+    + '<form class="form" id="inst-form" novalidate>'
+    + '<fieldset><legend>Identité</legend><div class="row two">'
+    + '<div class="fld" data-f="nom"><label for="i-nom">Nom complet</label><input id="i-nom" required value="'+esc(i?i.nom:"")+'" placeholder="ex. Institut Supérieur de Gestion du Fleuve"></div>'
+    + '<div class="fld" data-f="sigle"><label for="i-sigle">Sigle</label><input id="i-sigle" required value="'+esc(i?i.sigle:"")+'" placeholder="ex. ISGF" maxlength="12"></div>'
+    + '</div><div class="row two" style="margin-top:16px">'
+    + '<div class="fld" data-f="arr"><label for="i-arr">Arrondissement</label><select id="i-arr">'
+    + ARR.map(a=>'<option'+(i&&i.arr===a?" selected":"")+'>'+a+'</option>').join("")
+    + '</select></div>'
+    + '<div class="fld" data-f="adr"><label for="i-adr">Adresse</label><input id="i-adr" value="'+esc(i?i.adr:"")+'" placeholder="Avenue …, quartier"></div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Contact</legend><div class="row two">'
+    + '<div class="fld" data-f="tel"><label for="i-tel">Téléphone</label><input id="i-tel" required value="'+esc(i?i.tel:"")+'" placeholder="+242 …" inputmode="tel"></div>'
+    + '<div class="fld" data-f="wa"><label for="i-wa">WhatsApp</label><input id="i-wa" required value="'+esc(i?i.wa:"")+'" placeholder="24206…" inputmode="numeric"><span class="hint">Format international, sans le +.</span></div>'
+    + '</div><div class="row" style="margin-top:16px">'
+    + '<div class="fld" data-f="mail"><label for="i-mail">Adresse électronique</label><input id="i-mail" type="email" value="'+esc(i?i.mail:"")+'" placeholder="contact@institut.cg"></div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Agrément et frais</legend><div class="row two">'
+    + '<div class="fld" data-f="ag"><label for="i-ag">Numéro d\'agrément</label><input id="i-ag" value="'+esc(i?i.ag:"")+'" placeholder="ex. N° 047/MESRTI/2009"><span class="hint">Laisser vide si l\'institut n\'est pas agréé : il apparaîtra sans badge.</span></div>'
+    + '<div class="fld" data-f="insc"><label for="i-insc">Frais d\'inscription (FCFA)</label><input id="i-insc" type="number" min="0" step="1000" required value="'+(i?i.insc:50000)+'"></div>'
+    + '</div><div class="row two" style="margin-top:16px">'
+    + '<div class="fld" data-f="clot"><label for="i-clot">Clôture des inscriptions</label><input id="i-clot" type="date" value="'+esc(i?i.clot:"")+'"></div>'
+    + '<div class="fld" data-f="rentree"><label for="i-rentree">Rentrée</label><input id="i-rentree" type="date" value="'+esc(i?i.rentree:"")+'"></div>'
+    + '</div></fieldset>'
+    + '<fieldset><legend>Présentation et image</legend>'
+    + '<div class="fld" data-f="desc"><label for="i-desc">Description</label><textarea id="i-desc" placeholder="Présentation courte, affichée sur la fiche publique">'+esc(i?i.desc:"")+'</textarea></div>'
+    + '<div class="fld" data-f="avantages" style="margin-top:16px"><label for="i-avantages">Avantages (optionnel)</label><textarea id="i-avantages" placeholder="Un avantage par ligne : bibliothèque, bourses, restauration…">'+esc(i&&i.avantages?i.avantages.join("\n"):"")+'</textarea></div>'
+    + '<div class="fld" style="margin-top:16px"><label id="logo-label">Image de l\'institut</label>'
+    + '<div class="logoedit" id="logo-edit" role="group" aria-labelledby="logo-label"></div>'
+    + '<input type="file" id="i-logo" accept="image/jpeg,image/png,image/webp" hidden></div>'
+    + '</fieldset>'
+    + '<div class="formfoot"><button class="btn" type="submit">'+(i?"Enregistrer les modifications":"Créer l\'institut")+'</button>'
+    + '<a class="btn line" href="#/instituts">Annuler</a>'
+    + '<span class="sp" style="color:var(--muted);font-size:13.5px">'+(i&&linked.length?"Cet institut porte "+linked.length+" formation(s) : elles seront retirées du catalogue public s'il est supprimé.":"")+'</span></div>'
+    + '</form>'
+    + (i && linked.length ? '<div class="panel"><header><h2>Formations rattachées</h2></header><div class="tblwrap"><table class="tbl"><thead><tr><th>Formation</th><th>Diplôme</th><th class="num">Frais</th><th>Statut</th></tr></thead><tbody>'
+      + linked.map(f=>'<tr><td><b>'+esc(f.nom)+'</b></td><td>'+esc(f.dip)+'</td><td class="num">'+fcfa(f.frais)+'</td><td>'+(f.statut==="publiee"?'<span class="badge ok">Publiée</span>':'<span class="badge wait">Brouillon</span>')+'</td></tr>').join("")
+      + '</tbody></table></div></div>' : ""),
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Instituts",h:"#/instituts"},{t:i?"Modification":"Création"}]
+  );
+}
+
+/* ---------- Diplômes et débouchés : référentiels (EX-08) ---------- */
+const REFL = {
+  dip:{h:"#/diplomes", titre:"Diplômes", nom:"diplôme", un:"un diplôme", le:"le diplôme", ce:"ce diplôme", aucun:"Aucun diplôme", ph:"ex. Licence", usage:n=>usageDip(n),
+    intro:"Référentiel des diplômes délivrés, avec leur durée d'études : il alimente les formations et la recherche publique.", rows:()=>DIPS.map(n=>({nom:n, duree:dureeDip(n)}))},
+  deb:{h:"#/debouches", titre:"Débouchés", nom:"débouché", un:"un débouché", le:"le débouché", ce:"ce débouché", aucun:"Aucun débouché", ph:"ex. Comptable", usage:n=>usageDeb(n),
+    intro:"Référentiel des débouchés professionnels, rattachés aux formations.", rows:()=>DEBS.slice().sort((a,b)=>a.nom.localeCompare(b.nom,"fr"))},
+  dom:{h:"#/domaines", titre:"Domaines d'insertion", nom:"domaine", un:"un domaine", le:"le domaine", ce:"ce domaine", aucun:"Aucun domaine", ph:"ex. Informatique", usage:n=>usageDom(n),
+    intro:"Référentiel des domaines d'insertion : ils classent les formations et les débouchés, et forment la barre de catégories du site public.", rows:()=>DOMAINES.slice()},
+  ser:{h:"#/series", titre:"Séries du bac", nom:"série", un:"une série", le:"la série", ce:"cette série", aucun:"Aucune série", ph:"ex. A", usage:n=>usageSer(n),
+    intro:"Référentiel des séries du baccalauréat. Elles se rattachent aux formations comme conditions d'admission et servent de filtre sur le site public.", rows:()=>SERIES.slice()}
+};
+function pageRefl(type){
+  const c = REFL[type], rows = c.rows();
+  const ed = S.refl && S.refl.type===type ? S.refl : null;
+  const cur = ed && ed.nom!==null ? rows.find(r=>r.nom===ed.nom) : null;
+  /* Colonne et champ propres à chaque référentiel. */
+  const col = {dip:"Durée des études", deb:"Domaine d'insertion", ser:"Libellé", dom:"Couleur"}[type];
+  const cell = r => type==="dom" ? '<span style="display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;background:'+esc(r.c)+'"></span> <small style="color:var(--muted)">'+DEBS.filter(x=>x.secteur===r.id).length+' débouché(s)</small>' : type==="dip" ? r.duree+' an'+(r.duree>1?"s":"") : type==="deb" ? esc(DOM[r.secteur]?DOM[r.secteur].nom:"—") : esc(r.lib||"—");
+  const champ = type==="dip" ? '<div class="fld" data-f="rduree"><label for="r-duree">Durée des études</label><select id="r-duree">'
+        + [1,2,3,4,5].map(d=>'<option value="'+d+'"'+((cur?cur.duree:2)===d?" selected":"")+'>'+d+' an'+(d>1?"s":"")+'</option>').join("")
+        + '</select><span class="hint">S\'applique à toutes les formations qui délivrent ce diplôme.</span></div>'
+    : type==="deb" ? '<div class="fld" data-f="rsect"><label for="r-sect">Domaine d\'insertion</label><select id="r-sect">'
+        + DOMAINES.map(d=>'<option value="'+d.id+'"'+(cur&&cur.secteur===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")+'</select></div>'
+    : type==="dom" ? '<div class="fld" data-f="rcoul"><label for="r-coul">Couleur</label><input id="r-coul" type="color" value="'+esc(cur?cur.c:"#1E6B4A")+'" style="height:46px;padding:4px"><span class="hint">Couleur des vignettes des formations de ce domaine.</span></div>'
+    : '<div class="fld" data-f="rlib"><label for="r-lib">Libellé</label><input id="r-lib" value="'+esc(cur?cur.lib:"")+'" placeholder="ex. Lettres"><span class="hint">Les séries se rattachent ensuite aux formations, dans leur fiche.</span></div>';
+  return shell(
+    '<div class="pagehead"><div><h1>'+c.titre+'</h1><p>'+esc(c.intro)+'</p></div>'
+    + (ed?"":'<button class="btn" type="button" data-act="refl-add" data-type="'+type+'">'+icon("plus")+'Ajouter '+c.un+'</button>')+'</div>'
+    + (ed ? '<form class="form" id="refl-form" novalidate><fieldset><legend>'+(cur?"Modifier "+c.le:"Ajouter "+c.un)+'</legend><div class="row two">'
+        + '<div class="fld" data-f="rnom"><label for="r-nom">'+(type==="ser"?"Série":"Intitulé")+'</label><input id="r-nom" required value="'+esc(cur?cur.nom:"")+'" placeholder="'+c.ph+'"></div>'
+        + champ
+        + '</div></fieldset><div class="formfoot"><button class="btn" type="submit">'+(cur?"Enregistrer les modifications":"Ajouter")+'</button>'
+        + '<button class="btn line" type="button" data-act="refl-cancel">Annuler</button></div></form>' : "")
+    + '<div class="panel"><header><h2>'+rows.length+' '+c.nom+(rows.length>1?"s":"")+'</h2></header>'
+    + (rows.length
+      ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>'+(type==="ser"?"Série":"Intitulé")+'</th><th>'+col+'</th><th class="num">Formations</th><th></th></tr></thead><tbody>'
+        + rows.map(r=>'<tr><td><b>'+esc(r.nom)+'</b></td>'
+          + '<td>'+cell(r)+'</td>'
+          + '<td class="num">'+c.usage(r.nom)+'</td>'
+          + '<td><div class="acts">'
+          + '<button class="act" type="button" data-act="refl-edit" data-type="'+type+'" data-id="'+esc(r.nom)+'" title="Modifier" aria-label="Modifier '+esc(r.nom)+'">'+icon("pencil")+'</button>'
+          + '<button class="act del" type="button" data-act="refl-del" data-type="'+type+'" data-id="'+esc(r.nom)+'" title="Supprimer" aria-label="Supprimer '+esc(r.nom)+'">'+icon("trash")+'</button>'
+          + '</div></td></tr>').join("")
+        + '</tbody></table></div>'
+      : '<div class="pad"><div class="empty"><h3>'+c.aucun+'</h3><p>Ajoutez-en pour pouvoir les rattacher aux formations.</p></div></div>')
+    + '</div>',
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Catalogue"},{t:c.titre}]
+  );
+}
+
+/* ---------- Cours : catalogue partagé, rattaché aux formations ---------- */
+const formesTriees = () => Object.values(FORMES).sort((a,b)=>libForme(a).localeCompare(libForme(b),"fr"));
+const optFormes = sel => formesTriees().map(f=>'<option value="'+esc(f.id)+'"'+(sel===f.id?" selected":"")+'>'+esc(libForme(f))+' ('+esc(f.dip)+')</option>').join("");
+const optAnnees = (formeId, sel) => {
+  const f = FORMES[formeId];
+  return Array.from({length:f ? f.duree : 1}, (_,k)=>'<option value="'+(k+1)+'"'+(sel===k+1?" selected":"")+'>'+niveau(k)+'</option>').join("");
+};
+/* Une ligne « formation + année » du formulaire d'un cours. */
+const lienRow = l => '<div class="lien"><select class="lien-forme" aria-label="Formation">'+optFormes(l.forme)+'</select>'
+  + '<select class="lien-annee" aria-label="Année d\'études">'+optAnnees(l.forme, l.annee)+'</select>'
+  + '<button class="act del" type="button" data-act="lien-del" title="Retirer cette formation" aria-label="Retirer cette formation">'+icon("x")+'</button></div>';
+function pageCours(){
+  const s = S.cours, q = norm(s.q);
+  if(s.forme && !FORMES[s.forme]) s.forme = "";
+  const formes = formesTriees();
+  const lienDe = c => c.liens.find(l=>l.forme===s.forme);
+  const rows = COURS.filter(c=>(!s.forme || lienDe(c)) && (!q || norm(c.nom).includes(q)))
+    .sort((a,b)=>(s.forme ? lienDe(a).annee-lienDe(b).annee : 0) || a.nom.localeCompare(b.nom,"fr"));
+  s.page = Math.min(s.page, pages(rows.length, s.par));
+  const slice = rows.slice((s.page-1)*s.par, s.page*s.par);
+  const ed = S.coursEdit;
+  const cur = ed && ed.id ? COURS.find(c=>c.id===ed.id) : null;
+  const liens = (cur ? cur.liens : ed ? ed.liens : []).filter(l=>FORMES[l.forme]);
+  const libres = s.forme ? COURS.filter(c=>!lienDe(c)).sort((a,b)=>a.nom.localeCompare(b.nom,"fr")) : [];
+  return shell(
+    '<div class="pagehead"><div><h1>Cours</h1><p>'+COURS.length+' cours au catalogue. Un même cours peut être rattaché à plusieurs formations, chacune avec son année d\'études.</p></div>'
+    + (ed ? "" : '<button class="btn" type="button" data-act="cours-add">'+icon("plus")+'Ajouter un cours</button>')+'</div>'
+    + (ed ? '<form class="form" id="cours-form" novalidate><fieldset><legend>'+(cur?"Modifier le cours":"Ajouter un cours")+'</legend>'
+        + '<div class="row"><div class="fld" data-f="cnom"><label for="c-nom">Intitulé du cours</label><input id="c-nom" required value="'+esc(cur?cur.nom:"")+'" placeholder="ex. Français"></div></div>'
+        + '<div class="row" style="margin-top:16px"><div class="fld" data-f="cliens"><label>Formations rattachées</label>'
+        + '<div id="c-liens">'+liens.map(lienRow).join("")+'</div>'
+        + (formes.length ? '<button class="btn line sm" type="button" data-act="lien-add">'+icon("plus")+'Rattacher à une formation</button>' : "")
+        + '<span class="hint" style="display:block">Les années proposées viennent du diplôme de chaque formation. Un cours sans formation reste au catalogue.</span></div></div>'
+        + '</fieldset><div class="formfoot"><button class="btn" type="submit">'+(cur?"Enregistrer les modifications":"Ajouter le cours")+'</button>'
+        + '<button class="btn line" type="button" data-act="cours-cancel">'+(cur?"Annuler":"Terminer")+'</button></div></form>' : "")
+    + '<div class="panel"><header><div class="toolbar">'
+    + '<span class="field">'+icon("search")+'<input id="cq" type="search" placeholder="Rechercher un cours" value="'+esc(s.q)+'" aria-label="Rechercher"></span>'
+    + '<select class="field" id="cforme" aria-label="Filtrer par formation"><option value="">Toutes les formations</option>'
+    + formes.map(f=>'<option value="'+esc(f.id)+'"'+(s.forme===f.id?" selected":"")+'>'+esc(libForme(f))+'</option>').join("")+'</select>'
+    + '</div><small>'+rows.length+' résultat'+(rows.length>1?"s":"")+'</small></header>'
+    /* Formation filtrée : on peut lui rattacher directement un cours déjà au catalogue. */
+    + (s.forme && libres.length ? '<div class="attach"><b style="font-size:14px">Rattacher un cours existant</b>'
+        + '<select id="att-cours" aria-label="Cours à rattacher">'+libres.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.nom)+'</option>').join("")+'</select>'
+        + '<select id="att-annee" aria-label="Année d\'études" style="flex:0 1 150px">'+optAnnees(s.forme, 1)+'</select>'
+        + '<button class="btn sm" type="button" data-act="att-ok">'+icon("plus")+'Rattacher</button></div>' : "")
+    + (slice.length
+      ? '<div class="tblwrap"><table class="tbl"><thead><tr><th>Cours</th><th>'+(s.forme?"Année":"Formations rattachées")+'</th><th></th></tr></thead><tbody>'
+        + slice.map(c=>{
+            const noms = c.liens.map(l=>libForme(FORMES[l.forme]));
+            return '<tr><td><b>'+esc(c.nom)+'</b></td>'
+              + (s.forme ? '<td>'+niveau(lienDe(c).annee-1)+(c.liens.length>1?'<br><small style="color:var(--muted)">aussi dans '+(c.liens.length-1)+' autre'+(c.liens.length>2?"s":"")+' formation'+(c.liens.length>2?"s":"")+'</small>':"")+'</td>'
+                : '<td>'+(noms.length ? '<span class="badge '+(noms.length>1?"ok":"wait")+'">'+noms.length+' formation'+(noms.length>1?"s":"")+'</span><br><small style="color:var(--muted)">'+esc(noms.slice(0,2).join(" · "))+(noms.length>2?" …":"")+'</small>' : '<span class="badge wait">Aucune</span>')+'</td>')
+              + '<td><div class="acts">'
+              + (s.forme ? '<button class="act" type="button" data-act="cours-detach" data-id="'+esc(c.id)+'" title="Retirer de cette formation" aria-label="Retirer '+esc(c.nom)+' de cette formation">'+icon("x")+'</button>' : "")
+              + '<button class="act" type="button" data-act="cours-edit" data-id="'+esc(c.id)+'" title="Modifier" aria-label="Modifier '+esc(c.nom)+'">'+icon("pencil")+'</button>'
+              + '<button class="act del" type="button" data-act="cours-del" data-id="'+esc(c.id)+'" title="Supprimer du catalogue" aria-label="Supprimer '+esc(c.nom)+'">'+icon("trash")+'</button>'
+              + '</div></td></tr>';
+          }).join("")
+        + '</tbody></table></div>'+pager(rows.length, s.par, s.page)
+      : '<div class="pad"><div class="empty"><h3>Aucun cours</h3><p>'+(s.forme&&!q?"Cette formation n\'a pas encore de cours : rattachez-en un ou ajoutez-en un nouveau.":"Modifiez la recherche ou le filtre.")+'</p></div></div>')
+    + '</div>',
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Catalogue"},{t:"Cours"}]
+  );
+}
+
+/* ---------- Compte ---------- */
+function pageCompte(){
+  return shell(
+    '<div class="pagehead"><div><h1>Mon compte</h1><p>Session en cours sur l\'espace d\'administration.</p></div></div>'
+    + '<div class="split">'
+    + '<div class="panel"><header><h2>Identité</h2></header><div class="pad"><div class="kv">'
+    + '<div><span>Nom</span><b>'+esc(SESSION.nom)+'</b></div>'
+    + '<div><span>Identifiant</span><b>'+esc(SESSION.login)+'</b></div>'
+    + '<div><span>Rôle</span><b>'+esc(SESSION.role)+'</b></div>'
+    + '<div><span>Ouverture de session</span><b>'+esc(jdate(SESSION.quand))+'</b></div>'
+    + '</div></div></div>'
+    + '<div style="display:grid;gap:20px">'
+    + '<div class="panel"><header><h2>Apparence</h2></header><div class="pad" style="display:grid;gap:12px">'
+    + '<p style="color:var(--muted);font-size:14px">Le thème sombre s\'applique automatiquement à la nuit. Votre choix est mémorisé sur cet appareil.</p>'
+    + '<button class="btn line" type="button" data-act="theme">'+icon("moon")+'Basculer le thème</button></div></div>'
+    + '<div class="panel"><header><h2>Mot de passe</h2></header><div class="pad" style="display:grid;gap:12px">'
+    + '<p style="color:var(--muted);font-size:14px">Pour changer de mot de passe, déconnectez-vous puis utilisez « Mot de passe oublié » sur l\'écran de connexion : un lien de réinitialisation est envoyé par e-mail.</p>'
+    + '</div></div>'
+    + '<div class="panel"><header><h2>Session</h2></header><div class="pad" style="display:grid;gap:12px">'
+    + '<button class="btn line" type="button" data-act="logout" style="justify-content:flex-start">'+icon("logout")+'Se déconnecter</button>'
+    + '<button class="btn ghost sm" type="button" data-act="reset-all" style="justify-content:flex-start">Réinitialiser les données de démonstration</button>'
+    + '</div></div>'
+    + '</div></div>',
+    [{t:"Espace Squad",h:"#/tableau-de-bord"},{t:"Mon compte"}]
+  );
+}
+
+/* ---------- Pagination ---------- */
+function pages(total, par){
+  return Math.max(1, Math.ceil(total/par));
+}
+function pager(total, par, page){
+  const n = pages(total,par);
+  if(n<=1) return '<div class="pager"><span>'+total+' élément'+(total>1?"s":"")+'</span></div>';
+  const debut = (page-1)*par+1, fin = Math.min(total, page*par);
+  return '<div class="pager"><span>'+debut+' – '+fin+' sur '+total+'</span>'
+    + '<span class="p"><button class="btn line sm" type="button" data-page="'+Math.max(1,page-1)+'"'+(page<=1?" disabled":"")+'>Précédent</button>'
+    + '<b>Page '+page+' / '+n+'</b>'
+    + '<button class="btn line sm" type="button" data-page="'+Math.min(n,page+1)+'"'+(page>=n?" disabled":"")+'>Suivant</button></span></div>';
+}
+
+/* ---------- Routage ---------- */
+function render(){
+  const h = currentHash();
+  let out;
+  if(S.refl && h!==REFL[S.refl.type].h) S.refl = null;
+  if(S.coursEdit && h!=="#/cours") S.coursEdit = null;
+  if(!isAuthed()) out = pageLogin();
+  else if(h==="#/connexion") out = pageLogin();
+  else if(h==="#/tableau-de-bord") out = pageDash();
+  else if(h==="#/formations") out = pageFormes();
+  else if(h==="#/formations/nouvelle") out = pageForme(null);
+  else if(h.indexOf("#/formations/")===0) out = pageForme(h.slice(13));
+  else if(h==="#/instituts") out = pageInsts();
+  else if(h==="#/instituts/nouveau") out = pageInstEdit(null);
+  else if(h.indexOf("#/instituts/")===0) out = pageInstEdit(h.slice(12));
+  else if(h==="#/cours") out = pageCours();
+  else if(h==="#/diplomes") out = pageRefl("dip");
+  else if(h==="#/debouches") out = pageRefl("deb");
+  else if(h==="#/series") out = pageRefl("ser");
+  else if(h==="#/domaines") out = pageRefl("dom");
+  else if(h==="#/compte") out = pageCompte();
+  else out = pageDash();
+  document.getElementById("app").innerHTML = out;
+  document.title = (isAuthed()?"Espace Squad":"Connexion")+" — Orienta Brazzaville";
+  S.sideOpen = false;
+  /* Sur une fiche, l'image déjà enregistrée est celle proposée par défaut.
+     Ailleurs, le brouillon est abandonné. */
+  if(isAuthed() && /^#\/instituts\/[^/]+$/.test(h)){
+    const i = INST[h.slice(12)];
+    if(!S.logoChoisi) S.logoBrouillon = i && i.logo ? i.logo : null;
+  } else {
+    S.logoBrouillon = null;
+    S.logoChoisi = false;
+  }
+  if(isAuthed()) bindLive();
+}
+function bindLive(){
+  const side = document.getElementById("side");
+  if(side) side.classList.toggle("open", S.sideOpen);
+  const q = document.getElementById("fq");
+  if(q) q.addEventListener("input", deb(()=>{ S.prog.q=q.value; S.prog.page=1; render(); const el=document.getElementById("fq"); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length);} },260));
+  const iq = document.getElementById("iq");
+  if(iq) iq.addEventListener("input", deb(()=>{ S.inst.q=iq.value; S.inst.page=1; render(); const el=document.getElementById("iq"); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length);} },260));
+  /* Un montant par année d'études ; la durée vient du diplôme choisi. */
+  const dipSel = document.getElementById("f-dip"), tarifs = document.getElementById("tarifs");
+  if(dipSel && tarifs){
+    const f = FORMES[formeId()];
+    const draw = ()=>{
+      const n = dureeDip(dipSel.value, f ? f.duree : 1);
+      document.getElementById("duree-txt").textContent = n+" an"+(n>1?"s":"");
+      const saisis = Array.from(tarifs.querySelectorAll("input")).map(x=>x.value);
+      tarifs.innerHTML = Array.from({length:n}, (_,k)=>{
+        const v = saisis[k]!==undefined ? saisis[k]
+          : f && f.tarifs && f.tarifs[k]!=null ? f.tarifs[k]
+          : saisis.length ? saisis[saisis.length-1] : (f ? f.frais : 400000);
+        return '<label>'+niveau(k)+'<input type="number" min="0" step="10000" value="'+esc(v)+'" aria-label="Frais '+niveau(k)+'"></label>';
+      }).join("");
+    };
+    dipSel.addEventListener("change", draw);
+    draw();
+  }
+  const cq = document.getElementById("cq");
+  if(cq) cq.addEventListener("input", deb(()=>{ S.cours.q=cq.value; S.cours.page=1; render(); const el=document.getElementById("cq"); if(el){ el.focus(); el.setSelectionRange(el.value.length,el.value.length);} },260));
+  const debFind = document.getElementById("deb-find");
+  if(debFind) debFind.addEventListener("input", ()=>{
+    const q = norm(debFind.value);
+    document.querySelectorAll("#f-jobs .check").forEach(l=>{ l.style.display = q && !norm(l.textContent).includes(q) ? "none" : ""; });
+  });
+  const logoFile = document.getElementById("i-logo");
+  if(logoFile) logoFile.addEventListener("change", ()=>{ if(logoFile.files[0]) lireLogo(logoFile.files[0]); });
+  const instSel = document.getElementById("f-inst"), instHint = document.getElementById("inst-hint");
+  if(instSel && instHint){
+    instSel.addEventListener("change", ()=>{
+      S.instCible = instSel.value;
+      const n = Object.values(FORMES).filter(x=>x.inst===instSel.value).length;
+      instHint.textContent = n+" formation"+(n>1?"s":"")+" déjà rattachée"+(n>1?"s":"")+" à cet institut.";
+    });
+  }
+  logoApercu();
+}
+/* Un minuteur par champ : la recherche sur deux listes ne doit pas s'annuler. */
+const debTimers = new WeakMap();
+function deb(fn, ms){
+  return function(){
+    clearTimeout(debTimers.get(this));
+    debTimers.set(this, setTimeout(fn, ms||200));
+  };
+}
+/* Aperçu de l'image dans le formulaire d'un institut. */
+function logoApercu(){
+  const box = document.getElementById("logo-edit");
+  if(!box) return;
+  const i = INST[instId()];
+  const sigle = i ? i.sigle : "";
+  const a = S.logoBrouillon;
+  box.innerHTML = '<div class="ap" style="background:'+(a?"#fff":(i?i.c:"#5E6B64"))+'">'
+    + (a ? '<img src="'+esc(a)+'" alt="Aperçu de l\'image'+(sigle?" de "+esc(sigle):"")+'">' : esc(sigle||"IMAGE"))
+    + '</div>'
+    + '<div class="cmd"><div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<button type="button" class="btn line sm" data-act="logo-choose">'+icon("upload")+(a?"Changer l\'image":"Choisir une image")+'</button>'
+    + (a ? '<button type="button" class="btn ghost sm" data-act="logo-none">Retirer</button>' : "")
+    + '</div><span class="hint">JPEG, PNG ou WebP, 2 Mo maximum. L\'image est redimensionnée puis affichée sur la fiche publique de l\'institut.</span></div>';
+}
+
+/* Le fichier est lu localement puis réduit : il doit tenir dans le stockage du
+   navigateur avec le reste de la démonstration. */
+function lireLogo(f){
+  if(!/^image\/(jpeg|png|webp)$/.test(f.type)){ toast("Format non accepté : utilisez JPEG, PNG ou WebP.", true); return; }
+  if(f.size > 2*1024*1024){ toast("Image trop lourde : 2 Mo maximum.", true); return; }
+  const r = new FileReader();
+  r.onload = ()=>{
+    const im = new Image();
+    im.onload = ()=>{
+      const k = Math.min(1, 1000/Math.max(im.width, im.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+      const ctx = c.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(im,0,0,c.width,c.height);
+      S.logoBrouillon = c.toDataURL("image/jpeg",0.82);
+      S.logoChoisi = true;
+      logoApercu();
+      toast("Image prête. Enregistrez la fiche pour l\'appliquer.");
+    };
+    im.onerror = ()=>toast("Image illisible : essayez un autre fichier.", true);
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+}
+
+/* ---------- Validation ---------- */
+function fail(name, msg){
+  const f = document.querySelector('[data-f="'+name+'"]');
+  if(f){
+    f.classList.add("bad");
+    let e = f.querySelector(".err");
+    if(!e){ e = document.createElement("span"); e.className = "err"; f.appendChild(e); }
+    e.textContent = msg;
+  }
+  return false;
+}
+function clearFailures(){
+  document.querySelectorAll(".fld.bad").forEach(f=>{
+    f.classList.remove("bad");
+    const e = f.querySelector(".err"); if(e) e.remove();
+  });
+}
+const lines = v => String(v||"").split("\n").map(s=>s.trim()).filter(Boolean);
+
+/* ---------- Événements ---------- */
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape"){
+    if(document.getElementById("modal").innerHTML){ closeModal(); return; }
+    if(S.sideOpen){ S.sideOpen = false; const s = document.getElementById("side"); if(s) s.classList.remove("open"); }
+  }
+});
+
+document.addEventListener("click", function(e){
+  const t = e.target;
+
+  const md = t.closest("[data-modal]");
+  if(md){
+    const p = md.dataset.payload || "";
+    const ok = md.dataset.modal === "ok";
+    closeModal();
+    if(!ok) return;
+    if(p==="reset"){ resetAll(); return; }
+    if(p.indexOf("forme:")===0){
+      const id = p.slice(6);
+      const nom = FORMES[id] ? FORMES[id].nom : "";
+      delete FORMES[id];
+      saveBO();
+      toast("Formation « "+nom+" » supprimée du catalogue.");
+      render();
+      return;
+    }
+    if(p.indexOf("inst:")===0){
+      const id = p.slice(5);
+      const i = INST[id];
+      const n = Object.values(FORMES).filter(f=>f.inst===id).length;
+      for(const k in FORMES) if(FORMES[k].inst===id) delete FORMES[k];
+      delete INST[id];
+      saveBO();
+      toast("Institut supprimé"+(n?" avec "+n+" formation(s) rattachée(s)." : "."));
+      render();
+      return;
+    }
+    if(p.indexOf("cours:")===0){
+      const k = COURS.findIndex(c=>c.id===p.slice(6));
+      if(k<0) return;
+      const nom = COURS[k].nom;
+      COURS.splice(k,1);
+      if(S.coursEdit && S.coursEdit.id===p.slice(6)) S.coursEdit = null;
+      saveBO();
+      toast("Cours « "+nom+" » supprimé du catalogue.");
+      render();
+      return;
+    }
+    if(p[3]===":" && REFL[p.slice(0,3)]){
+      const type = p.slice(0,3), nom = p.slice(4);
+      if(type==="dip"){ const k = DIPS.indexOf(nom); if(k>=0) DIPS.splice(k,1); delete DUREE[nom]; }
+      else { const liste = type==="deb" ? DEBS : type==="ser" ? SERIES : DOMAINES; const k = liste.findIndex(x=>x.nom===nom); if(k>=0) liste.splice(k,1); majDom(); }
+      saveBO();
+      toast("« "+nom+" » supprimé du référentiel.");
+      render();
+      return;
+    }
+    return;
+  }
+
+  const nav = t.closest("[data-act]");
+  if(nav){
+    const a = nav.dataset.act;
+    if(a==="theme"){
+      const dark = document.documentElement.getAttribute("data-theme")==="dark";
+      document.documentElement.setAttribute("data-theme", dark?"light":"dark");
+      store.set("orienta-theme", dark?"light":"dark");
+      return;
+    }
+    if(a==="logout"){ store.del("orienta-bo-session"); SESSION=null; location.hash="#/connexion"; render(); toast("Session fermée."); return; }
+    if(a==="side"){ S.sideOpen = !S.sideOpen; const s=document.getElementById("side"); if(s) s.classList.toggle("open", S.sideOpen); return; }
+    if(a==="reset-f"){ S.prog = {q:"",dom:"",statut:"",page:1,par:8}; render(); return; }
+    if(a==="reset-i"){ S.inst = {q:"",arr:"",ag:"",page:1,par:6}; render(); return; }
+    if(a==="reset-all"){
+      confirmBox("Réinitialiser la démonstration","Toutes les modifications enregistrées dans ce navigateur seront perdues.", "reset");
+      return;
+    }
+    if(a==="del-forme"){
+      const f = FORMES[nav.dataset.id];
+      if(f) confirmBox("Supprimer cette formation ?","« "+f.nom+" » disparaîtra du site public. Cette action est définitive.", "forme:"+f.id);
+      return;
+    }
+    if(a==="del-inst"){
+      const i = INST[nav.dataset.id];
+      const n = i ? Object.values(FORMES).filter(f=>f.inst===i.id).length : 0;
+      if(i) confirmBox("Supprimer cet institut ?","« "+i.nom+" » sera retiré"+(n?" ainsi que "+n+" de ses formations" : "")+". Cette action est définitive.", "inst:"+i.id);
+      return;
+    }
+    if(a==="forgot"){ forgotBox(); return; }
+    /* Lien posé sur une fiche formation : la liste des cours s'ouvre filtrée sur elle. */
+    if(a==="cours-de"){ S.cours = {q:"",forme:nav.dataset.id,page:1,par:10}; }
+    if(a==="cours-add"){ S.coursEdit = {id:null, liens:S.cours.forme ? [{forme:S.cours.forme, annee:1}] : []}; render(); const el=document.getElementById("c-nom"); if(el) el.focus(); return; }
+    if(a==="cours-edit"){ S.coursEdit = {id:nav.dataset.id, liens:[]}; render(); window.scrollTo(0,0); return; }
+    if(a==="cours-cancel"){ S.coursEdit = null; render(); return; }
+    if(a==="lien-add"){
+      const pris = Array.from(document.querySelectorAll(".lien-forme")).map(x=>x.value);
+      const libre = formesTriees().find(f=>!pris.includes(f.id));
+      if(!libre){ toast("Ce cours est déjà rattaché à toutes les formations.", true); return; }
+      document.getElementById("c-liens").insertAdjacentHTML("beforeend", lienRow({forme:libre.id, annee:1}));
+      return;
+    }
+    if(a==="lien-del"){ nav.closest(".lien").remove(); return; }
+    if(a==="att-ok"){
+      const c = COURS.find(x=>x.id===document.getElementById("att-cours").value), f = FORMES[S.cours.forme];
+      if(!c || !f) return;
+      c.liens.push({forme:f.id, annee:+document.getElementById("att-annee").value});
+      saveBO();
+      toast("« "+c.nom+" » rattaché à « "+f.nom+" ».");
+      render();
+      return;
+    }
+    if(a==="cours-detach"){
+      const c = COURS.find(x=>x.id===nav.dataset.id);
+      if(!c) return;
+      c.liens = c.liens.filter(l=>l.forme!==S.cours.forme);
+      saveBO();
+      toast("« "+c.nom+" » retiré de cette formation. Il reste au catalogue.");
+      render();
+      return;
+    }
+    if(a==="cours-del"){
+      const c = COURS.find(x=>x.id===nav.dataset.id);
+      const n = c ? c.liens.length : 0;
+      if(c) confirmBox("Supprimer ce cours ?","« "+c.nom+" » sera supprimé du catalogue"+(n?" et retiré du programme de "+n+" formation"+(n>1?"s":""):"")+". Cette action est définitive.", "cours:"+c.id);
+      return;
+    }
+    if(a==="refl-add"){ S.refl = {type:nav.dataset.type, nom:null}; render(); const el=document.getElementById("r-nom"); if(el) el.focus(); return; }
+    if(a==="refl-edit"){ S.refl = {type:nav.dataset.type, nom:nav.dataset.id}; render(); window.scrollTo(0,0); return; }
+    if(a==="refl-cancel"){ S.refl = null; render(); return; }
+    if(a==="refl-del"){
+      const type = nav.dataset.type, nom = nav.dataset.id, c = REFL[type];
+      const n = c.usage(nom);
+      /* Un intitulé encore porté par une formation ne peut pas disparaître du référentiel. */
+      if(n){ toast("« "+nom+" » est utilisé par "+n+" formation"+(n>1?"s":"")+" : modifiez-"+(n>1?"les":"la")+" d'abord.", true); return; }
+      /* Un domaine classe aussi des débouchés : ils doivent d'abord changer de domaine. */
+      const nd = type==="dom" ? DEBS.filter(x=>x.secteur===DOMAINES.find(v=>v.nom===nom).id).length : 0;
+      if(nd){ toast("« "+nom+" » classe encore "+nd+" débouché"+(nd>1?"s":"")+" : changez leur domaine d'abord.", true); return; }
+      confirmBox("Supprimer "+c.ce+" ?","« "+nom+" » sera retiré du référentiel. Cette action est définitive.", type+":"+nom);
+      return;
+    }
+    if(a==="logo-choose"){ const f = document.getElementById("i-logo"); if(f) f.click(); return; }
+    if(a==="logo-none"){ S.logoBrouillon = null; S.logoChoisi = true; logoApercu(); return; }
+  }
+
+  const sg = t.closest("[data-statut]");
+  if(sg){ S.prog.statut = sg.dataset.statut; S.prog.page=1; render(); return; }
+  const ag = t.closest("[data-ag]");
+  if(ag){ S.inst.ag = ag.dataset.ag; S.inst.page=1; render(); return; }
+
+  const pg = t.closest("[data-page]");
+  if(pg && !pg.disabled){
+    const h = currentHash();
+    const s = h.indexOf("#/instituts")===0 ? S.inst : h.indexOf("#/cours")===0 ? S.cours : S.prog;
+    s.page = +pg.dataset.page; render(); return;
+  }
+
+  if(t.closest("a[href^='#']") && S.sideOpen){ S.sideOpen=false; const s=document.getElementById("side"); if(s) s.classList.remove("open"); }
+  if(t.classList && t.classList.contains("modal")) closeModal();
+});
+
+document.addEventListener("change", function(e){
+  const t = e.target;
+  if(t.id==="fdom"){ S.prog.dom = t.value; S.prog.page=1; render(); return; }
+  if(t.id==="iarr"){ S.inst.arr = t.value; S.inst.page=1; render(); return; }
+  if(t.id==="cforme"){ S.cours.forme = t.value; S.cours.page=1; render(); return; }
+  /* Dans le formulaire d'un cours, les années suivent la formation choisie sur la ligne. */
+  if(t.classList.contains("lien-forme")){
+    const a = t.parentNode.querySelector(".lien-annee");
+    a.innerHTML = optAnnees(t.value, Math.min(+a.value, FORMES[t.value].duree));
+    return;
+  }
+});
+
+document.addEventListener("submit", function(e){
+  if(e.target.id==="login-form"){
+    e.preventDefault();
+    const u = document.getElementById("u").value.trim();
+    const p = document.getElementById("p").value;
+    if(u==="squad" && p==="orienta2026"){
+      SESSION = {login:"squad", nom:"Squad", role:"SuperAdmin", quand:new Date().toISOString()};
+      store.set("orienta-bo-session", SESSION);
+      location.hash = "#/tableau-de-bord";
+      render();
+      toast("Bienvenue dans l'espace Squad.");
+    } else {
+      const box = document.getElementById("login-err");
+      box.hidden = false;
+      box.textContent = "Identifiants incorrects. Démo : squad / orienta2026.";
+      document.getElementById("p").value = "";
+      document.getElementById("p").focus();
+      toast("Connexion refusée : identifiants incorrects.", true);
+    }
+    return;
+  }
+
+  if(e.target.id==="forgot-form"){
+    e.preventDefault();
+    clearFailures();
+    const m = document.getElementById("fg-m").value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){ fail("fg-m","Cette adresse e-mail est incomplète."); return; }
+    closeModal();
+    toast("Démonstration : un lien de réinitialisation sera envoyé à "+m+".");
+    return;
+  }
+
+  if(e.target.id==="refl-form"){
+    e.preventDefault();
+    clearFailures();
+    if(!S.refl) return;
+    const type = S.refl.type, ancien = S.refl.nom;
+    const nom = document.getElementById("r-nom").value.trim();
+    if(!nom){ fail("rnom","Ce champ est obligatoire."); return; }
+    if(REFL[type].rows().some(r => r.nom!==ancien && norm(r.nom)===norm(nom))){ fail("rnom","« "+nom+" » existe déjà."); return; }
+    /* Un renommage suit dans toutes les formations qui portent l'ancien intitulé. */
+    if(type==="dip"){
+      if(ancien===null) DIPS.push(nom);
+      else { DIPS[DIPS.indexOf(ancien)] = nom; delete DUREE[ancien]; for(const f of Object.values(FORMES)) if(f.dip===ancien) f.dip = nom; }
+      /* La durée suit dans les formations concernées à l'enregistrement (majProgrammes). */
+      DUREE[nom] = +document.getElementById("r-duree").value;
+    } else if(type==="deb"){
+      const secteur = document.getElementById("r-sect").value;
+      if(ancien===null) DEBS.push({nom, secteur});
+      else {
+        Object.assign(DEBS.find(d=>d.nom===ancien), {nom, secteur});
+        for(const f of Object.values(FORMES)) f.jobs = f.jobs.map(j => j===ancien ? nom : j);
+      }
+    } else if(type==="dom"){
+      const c = document.getElementById("r-coul").value;
+      if(ancien===null) DOMAINES.push({id:"d"+Date.now(), nom, c});
+      else Object.assign(DOMAINES.find(x=>x.nom===ancien), {nom, c});
+      majDom();
+    } else {
+      const lib = document.getElementById("r-lib").value.trim();
+      if(ancien===null) SERIES.push({nom, lib});
+      else {
+        Object.assign(SERIES.find(x=>x.nom===ancien), {nom, lib});
+        for(const f of Object.values(FORMES)) f.series = f.series.map(x => x===ancien ? nom : x);
+      }
+    }
+    saveBO();
+    S.refl = null;
+    toast(ancien===null ? "« "+nom+" » ajouté au référentiel." : "« "+nom+" » mis à jour.");
+    render();
+    return;
+  }
+
+  if(e.target.id==="cours-form"){
+    e.preventDefault();
+    clearFailures();
+    if(!S.coursEdit) return;
+    const id = S.coursEdit.id;
+    const nom = document.getElementById("c-nom").value.trim();
+    const liens = Array.from(document.querySelectorAll("#c-liens .lien")).map(r=>({forme:r.querySelector(".lien-forme").value, annee:+r.querySelector(".lien-annee").value}));
+    if(!nom){ fail("cnom","L'intitulé est obligatoire."); return; }
+    if(COURS.some(c => c.id!==id && norm(c.nom)===norm(nom))){ fail("cnom","Ce cours existe déjà au catalogue : modifiez-le pour le rattacher à d'autres formations."); return; }
+    const double = liens.find((l,k)=>liens.findIndex(x=>x.forme===l.forme)!==k);
+    if(double){ fail("cliens","« "+FORMES[double.forme].nom+" » est rattachée deux fois."); return; }
+    if(id) Object.assign(COURS.find(c=>c.id===id), {nom, liens});
+    else COURS.push({id:"c"+Date.now(), nom, liens});
+    saveBO();
+    /* En ajout, le formulaire reste ouvert sur les mêmes formations pour enchaîner. */
+    S.coursEdit = id ? null : {id:null, liens};
+    toast(id ? "Cours mis à jour." : "« "+nom+" » ajouté"+(liens.length?" et rattaché à "+liens.length+" formation"+(liens.length>1?"s":""):" au catalogue")+".");
+    render();
+    const el = document.getElementById("c-nom"); if(el) el.focus();
+    return;
+  }
+
+  if(e.target.id==="forme-form"){
+    e.preventDefault();
+    clearFailures();
+    const id = formeId();
+    const g = n => document.getElementById(n).value.trim();
+    const nom = g("f-nom"), inst = g("f-inst");
+    const series = Array.from(document.querySelectorAll("#f-series input:checked")).map(x=>x.value);
+    const tarifs = Array.from(document.querySelectorAll("#tarifs input")).map(x=>+x.value||0);
+    const data = {
+      nom, inst, dip:g("f-dip"), dom:g("f-dom"), desc:g("f-desc"),
+      duree:dureeDip(g("f-dip"), FORMES[id] ? FORMES[id].duree : 1), tarifs, frais:tarifs[0]||0, stage:+g("f-stage")||0,
+      series, admission:g("f-admission"),
+      soir:document.getElementById("f-soir").checked,
+      tranches:document.getElementById("f-tranches").checked,
+      jobs:Array.from(document.querySelectorAll("#f-jobs input:checked")).map(x=>x.value),
+      statut:g("f-statut")
+    };
+    /* Chaque message est affiché : on collecte les erreurs au lieu de les écraser. */
+    const erreurs = [];
+    const ko = (champ, msg) => { erreurs.push(fail(champ, msg)); };
+    if(!nom) ko("nom","L'intitulé est obligatoire.");
+    /* Une même filière peut exister dans plusieurs instituts, pas deux fois dans le même. */
+    if(nom && Object.values(FORMES).some(f => f.id !== id && f.inst === inst && norm(f.nom) === norm(nom))) ko("nom","Cet institut propose déjà une formation avec cet intitulé.");
+    if(!INST[inst]) ko("inst","Choisissez un institut.");
+    if(!data.dip) ko("dip","Choisissez un diplôme.");
+    if(tarifs.some(v => v<=0)) ko("frais","Indiquez les frais de chaque niveau.");
+    if(!data.jobs.length) ko("jobs","Cochez au moins un débouché.");
+    if(erreurs.length){ toast(erreurs.length+" erreur"+(erreurs.length>1?"s":"")+" dans le formulaire.", true); const bad=document.querySelector(".fld.bad"); if(bad && bad.scrollIntoView) bad.scrollIntoView({block:"center"}); return; }
+
+    const key = id ? id : "f"+Date.now();
+    FORMES[key] = Object.assign({id:key}, data);
+    saveBO();
+    /* Une formation neuve n'a pas encore de programme : on enchaîne sur ses cours. */
+    if(id){ toast("Formation mise à jour."); location.hash = "#/formations"; }
+    else { toast("Formation ajoutée. Ajoutez maintenant ses cours."); S.cours = {q:"",forme:key,page:1,par:10}; S.coursEdit = {id:null, liens:[{forme:key, annee:1}]}; location.hash = "#/cours"; }
+    render();
+    return;
+  }
+
+  if(e.target.id==="inst-form"){
+    e.preventDefault();
+    clearFailures();
+    const id = instId();
+    const g = n => document.getElementById(n).value.trim();
+    const data = {
+      nom:g("i-nom"), sigle:g("i-sigle").toUpperCase(), arr:g("i-arr"), adr:g("i-adr"),
+      tel:g("i-tel"), wa:g("i-wa").replace(/\D/g,""), mail:g("i-mail"), ag:g("i-ag"),
+      insc:+g("i-insc")||0, clot:g("i-clot"), rentree:g("i-rentree"), desc:g("i-desc"),
+      avantages:lines(g("i-avantages"))
+    };
+    const erreurs = [];
+    const ko = (champ, msg) => { erreurs.push(fail(champ, msg)); };
+    if(!data.nom) ko("nom","Le nom complet est obligatoire.");
+    if(data.nom && Object.values(INST).some(i => i.id !== id && norm(i.nom) === norm(data.nom))) ko("nom","Cet institut est déjà au catalogue.");
+    if(!data.sigle) ko("sigle","Le sigle est obligatoire.");
+    /* Un sigle déjà pris par un autre institut rendrait la liste publique ambiguë. */
+    const autre = data.sigle ? Object.keys(INST).find(k => k!==id && INST[k].sigle === data.sigle) : null;
+    if(autre) ko("sigle","Le sigle « "+data.sigle+" » est déjà utilisé par "+INST[autre].nom+".");
+    if(!data.tel) ko("tel","Le téléphone est obligatoire.");
+    if(!data.wa || data.wa.length<8) ko("wa","Le numéro WhatsApp est incomplet.");
+    if(!data.adr) ko("adr","L'adresse est obligatoire.");
+    if(data.mail && data.mail.indexOf("@")<1) ko("mail","Cette adresse électronique est incomplète.");
+    /* Une rentrée avant la clôture des inscriptions n'a pas de sens. */
+    if(data.clot && data.rentree && data.rentree < data.clot) ko("rentree","La rentrée ("+data.rentree+") est antérieure à la clôture des inscriptions ("+data.clot+").");
+    if(erreurs.length){ toast(erreurs.length+" erreur"+(erreurs.length>1?"s":"")+" dans le formulaire.", true); const bad=document.querySelector(".fld.bad"); if(bad && bad.scrollIntoView) bad.scrollIntoView({block:"center"}); return; }
+
+    const key = id ? id : "i"+Date.now();
+    const existing = INST[key];
+    data.c = existing ? existing.c : DOMAINES[Object.keys(INST).length % DOMAINES.length].c;
+    /* Sans nouvelle image choisie, on conserve celle déjà en place. */
+    data.logo = S.logoChoisi ? (S.logoBrouillon || null) : (existing ? existing.logo || null : null);
+    S.logoChoisi = false;
+    INST[key] = Object.assign({}, existing||{}, data, {id:key});
+    saveBO();
+    S.logoBrouillon = null;
+    toast(existing?"Institut mis à jour.":"Institut ajouté au catalogue.");
+    location.hash = "#/instituts";
+    render();
+    return;
+  }
+});
+
+/* ---------- Réinitialisation ---------- */
+function resetAll(){
+  store.del("orienta-bo"); store.del("orienta-bo-session");
+  store.del("orienta-theme");
+  SESSION = null;
+  S.logoBrouillon = null;
+  S.logoChoisi = false;
+  S.prog = {q:"",dom:"",statut:"",page:1,par:8};
+  S.inst = {q:"",arr:"",ag:"",page:1,par:6};
+  S.refl = null;
+  S.cours = {q:"",forme:"",page:1,par:10};
+  S.coursEdit = null;
+  document.documentElement.setAttribute("data-theme","light");
+  /* On repasse d'abord à l'écran de connexion, puis on recharge : le rechargement
+     restaure le jeu de démonstration d'origine. */
+  location.hash = "#/connexion";
+  render();
+  location.reload();
+}
+
+/* ---------- Thème au démarrage ---------- */
+(function(){ const th = store.get("orienta-theme",null); if(th) document.documentElement.setAttribute("data-theme",th); })();
+
+window.addEventListener("hashchange", render);
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+/**
+ * assets/css/base.css
+ * ---------------------------------------------------------------------------
+ * Réinitialisation, typographie de base, conteneur `.wrap` et focus clavier.
+ */
+
+html {
+  scroll-padding-top: env(safe-area-inset-top,0px);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font: 14px -apple-system,BlinkMacSystemFont,sans-serif;
+  background: #faf9f5;
+  color: #141413;
+}
+
+img {
+  max-width: 100%;
+}
+
+[hidden] {
+  display: none!important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.5 var(--body);
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+}
+
+.wrap {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

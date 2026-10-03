@@ -1,0 +1,136 @@
+/**
+ * assets/css/responsive.css
+ * ---------------------------------------------------------------------------
+ * Adaptations par largeur d'écran et mouvement réduit.
+ * Importé en dernier : ces règles corrigent celles de tous les autres fichiers.
+ */
+
+@media (max-width: 1080px) {
+  .shell {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .side {
+    position: fixed;
+    z-index: 60;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    height: 100vh;
+    transform: translateX(-105%);
+    transition: transform .22s;
+    box-shadow: var(--shadow);
+  }
+
+  .side.open {
+    transform: none;
+  }
+
+  .burger {
+    display: inline-flex;
+  }
+
+  .split {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .bar {
+    padding-inline: 18px;
+  }
+
+  .page {
+    padding: 20px 18px 90px;
+  }
+
+  .foot {
+    padding-inline: 18px;
+  }
+
+  .form .two,
+  .form .three {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .login {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .login .art {
+    padding: 30px 22px;
+    gap: 20px;
+  }
+
+  .login .art .pts {
+    display: none;
+  }
+
+  .login .formside {
+    padding: 32px 20px 60px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none!important;
+    animation: none!important;
+  }
+}
+
+@media (max-width: 520px) {
+  .lien {
+    grid-template-columns: minmax(0,1fr) 34px;
+  }
+
+  .lien .lien-forme {
+    grid-column: 1/-1;
+  }
+}
+
+@media (max-width: 520px) {
+  .cards {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 10px;
+  }
+
+  /* L'icône sort du flux : le libellé dispose de toute la largeur de la carte. */
+
+  .stat {
+    padding: 14px;
+    position: relative;
+  }
+
+  .stat .ico {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+
+  .stat b {
+    padding-right: 40px;
+  }
+
+  .stat .ico svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .stat small {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 340px) {
+  .cards {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
