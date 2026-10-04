@@ -19,25 +19,34 @@ npm run dev
 ```
 frontend/src/
 ├── main.jsx       # Point d'entrée : charge le design system et monte l'application
-├── App.jsx        # Choisit la page à afficher
+├── App.jsx        # Routage : toutes les pages s'affichent dans l'en-tête et le pied de page
+├── routes.js      # Toutes les adresses du site au même endroit
 ├── assets/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
+├── api/           # Appels à l'API : http.js (client) et catalogue.js (une fonction par route)
+├── components/    # Composants partagés : en-tête, pied de page, cartes, badge d'agrément, icônes
+├── context/       # États partagés entre pages : favoris
+├── hooks/         # useApi (charger des données), useTheme (thème clair / sombre)
+├── utils/         # Petites fonctions : montants, dates, durées, liens de contact
 └── pages/         # Un dossier par page, avec son fichier déjà créé
 ```
 
-Chaque fichier de page existe déjà et n'affiche que son titre : il reste à le
-remplir en suivant la maquette.
+## Charger des données dans une page
 
-D'autres dossiers arriveront avec le premier fichier qui en a besoin — git ne
-garde pas un dossier vide :
+```jsx
+import { getProgram } from '../../api/catalogue';
+import PageState from '../../components/PageState';
+import { useApi } from '../../hooks/useApi';
 
-| Dossier | Ce qu'on y mettra |
-|---|---|
-| `components/` | Les composants utilisés par plusieurs pages (en-tête, pied de page, carte de formation…) |
-| `services/` | Les appels à l'API, un fichier par ressource |
-| `context/` | Les états partagés entre pages : thème, favoris |
-| `utils/` | Les petites fonctions sans dépendance (formatage des montants, des dates…) |
-| `assets/images/` | Les images importées par le code |
+const { data: program, loading, error } = useApi(() => getProgram(id), [id]);
+if (!program) return <PageState loading={loading} error={error} notFound="Formation introuvable" />;
+```
+
+- `api/catalogue.js` a une fonction par route de l'API ; une page ne fait jamais
+  `fetch` elle-même.
+- Une erreur de l'API est une `ApiError` avec `status`, `code` et `message`.
+- Les favoris se lisent avec `useFavorites()`. Ils restent dans le navigateur :
+  le site public n'a pas de compte.
 
 ## Les pages
 
