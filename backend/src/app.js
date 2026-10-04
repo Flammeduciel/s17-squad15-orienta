@@ -8,6 +8,7 @@ const { uploadDir } = require('./config/env');
 const domainsRoutes = require("./routes/domains");
 const bacSeriesRoutes = require("./routes/bacSeries");
 const careersRoutes = require("./routes/careers");
+const degreesRoutes = require("./routes/degrees");
 
 /**
  * L'application Express, sans l'écoute du port : `server.js` s'en charge.
@@ -49,6 +50,7 @@ app.use('/admin', requireAuth);
 app.use(domainsRoutes);
 app.use(bacSeriesRoutes);
 app.use(careersRoutes);
+app.use(degreesRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
