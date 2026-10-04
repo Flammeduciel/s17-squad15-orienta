@@ -4,17 +4,20 @@
  * @module validators/programs
  */
 const { z } = require('zod');
-const { id, booleanQuery, positiveIntQuery, requiredText, optionalText } = require('./common');
+const { id, booleanQuery, positiveIntQuery, listQuery, requiredText, optionalText } = require('./common');
 const { district } = require('./institutes');
 
-/** Paramètres de recherche de `GET /programs`. */
+/**
+ * Paramètres de recherche de `GET /programs`. Arrondissement, diplôme,
+ * débouché et durée acceptent plusieurs valeurs séparées par des virgules.
+ */
 const programsQuery = z.object({
   q: z.string().trim().optional(),
   domain_id: z.string().trim().optional(),
-  district: district.optional(),
-  degree_id: id.optional(),
-  career_id: id.optional(),
-  duration: positiveIntQuery.optional(),
+  district: listQuery(district).optional(),
+  degree_id: listQuery(id).optional(),
+  career_id: listQuery(id).optional(),
+  duration: listQuery(positiveIntQuery).optional(),
   max_tuition: positiveIntQuery.optional(),
   bac_series: z.string().trim().optional(),
   evening: booleanQuery,

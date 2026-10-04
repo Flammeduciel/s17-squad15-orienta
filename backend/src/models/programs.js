@@ -32,10 +32,10 @@ const SORTS = {
  * @param {'published'|'draft'} [filters.status]
  * @param {number} [filters.institute_id]
  * @param {string} [filters.domain_id]
- * @param {string} [filters.district]
- * @param {number} [filters.degree_id]
- * @param {number} [filters.career_id]
- * @param {number} [filters.duration]
+ * @param {string[]} [filters.district] Un de ces arrondissements.
+ * @param {number[]} [filters.degree_id] Un de ces diplômes.
+ * @param {number[]} [filters.career_id] Au moins un de ces débouchés.
+ * @param {number[]} [filters.duration] Une de ces durées.
  * @param {number} [filters.max_tuition] Frais de 1re année maximum.
  * @param {string} [filters.bac_series] Code de série ; une formation sans série est ouverte à toutes.
  * @param {boolean} [filters.evening]
@@ -56,11 +56,15 @@ async function findAll(filters) {
   if (filters.status) add('p.status = ?', filters.status);
   if (filters.institute_id) add('p.institute_id = ?', filters.institute_id);
   if (filters.domain_id) add('p.domain_id = ?', filters.domain_id);
-  if (filters.district) add('i.district = ?', filters.district);
-  if (filters.degree_id) add('p.degree_id = ?', filters.degree_id);
-  if (filters.duration) add('d.duration = ?', filters.duration);
+  // Critères à plusieurs valeurs : « = ANY(liste) » veut dire « une des valeurs de la liste ».
+  if (filters.district) add('i.district = ANY(?::text[])', filters.district);
+  if (filters.degree_id) add('p.degree_id = ANY(?::int[])', filters.degree_id);
+  if (filters.duration) add('d.duration = ANY(?::int[])', filters.duration);
   if (filters.career_id) {
-    add('EXISTS (SELECT 1 FROM program_careers pc WHERE pc.program_id = p.id AND pc.career_id = ?)', filters.career_id);
+    add(
+      'EXISTS (SELECT 1 FROM program_careers pc WHERE pc.program_id = p.id AND pc.career_id = ANY(?::int[]))',
+      filters.career_id,
+    );
   }
   if (filters.max_tuition !== undefined) {
     add('(SELECT amount FROM program_fees f WHERE f.program_id = p.id AND f.year = 1) <= ?', filters.max_tuition);

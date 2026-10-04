@@ -25,7 +25,7 @@ const DETAIL = `${SUMMARY},
 
 /**
  * @param {object} filters
- * @param {string} [filters.district] Arrondissement exact.
+ * @param {string[]} [filters.district] Un de ces arrondissements.
  * @param {boolean} [filters.accredited] Vrai : seulement les instituts agréés.
  * @returns {Promise<object[]>} Instituts triés par sigle.
  */
@@ -34,7 +34,7 @@ async function findAll({ district, accredited }) {
   const params = [];
   if (district) {
     params.push(district);
-    where.push(`i.district = $${params.length}`);
+    where.push(`i.district = ANY($${params.length}::text[])`);
   }
   if (accredited) {
     where.push('i.accredited');
@@ -124,15 +124,21 @@ async function remove(id) {
   return rowCount > 0;
 }
 
-/** @returns {Promise<{ name: string, program_count: number }[]>} Formations publiées par arrondissement. */
-async function countProgramsByDistrict() {
+/**
+ * Instituts et formations publiées de chaque arrondissement qui a au moins un institut.
+ *
+ * @returns {Promise<{ name: string, institute_count: number, program_count: number }[]>}
+ */
+async function countByDistrict() {
   const { rows } = await query(
-    `SELECT i.district AS name, COUNT(p.id)::int AS program_count
+    `SELECT i.district AS name,
+            COUNT(DISTINCT i.id)::int AS institute_count,
+            COUNT(p.id)::int AS program_count
      FROM institutes i
-     JOIN programs p ON p.institute_id = i.id AND p.status = 'published'
+     LEFT JOIN programs p ON p.institute_id = i.id AND p.status = 'published'
      GROUP BY i.district`,
   );
   return rows;
 }
 
-module.exports = { findAll, findById, findByNameOrShortName, create, update, remove, countProgramsByDistrict };
+module.exports = { findAll, findById, findByNameOrShortName, create, update, remove, countByDistrict };
