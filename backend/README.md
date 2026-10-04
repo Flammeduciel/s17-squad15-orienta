@@ -93,11 +93,14 @@ Un fichier par ressource dans `routes/`, `controllers/`, `models/` et
 
 | Ressource | Nom de fichier | Bloc |
 |---|---|---|
-| Authentification | `auth` (+ `models/users`, `services/auth`, `services/mail`) | BK2, fait |
+| Authentification | `auth` (+ `models/users`, `services/auth`, `services/mail`) | BK2 |
 | Domaines, diplômes, séries du bac, débouchés | `domains`, `degrees`, `bacSeries`, `careers` | BK3 |
-| Instituts, arrondissements, images | `institutes`, `districts`, `images` | BK4 |
-| Formations, indicateurs | `programs`, `indicators` | BK5 |
+| Instituts, arrondissements, images | `institutes`, `images` (+ `middlewares/upload`) | BK4 |
+| Formations, indicateurs | `programs` (+ `services/programs`) | BK5 |
 | Cours, contact | `courses`, `contact` | BK6 |
+
+Les six blocs sont en place : les 43 opérations du contrat `docs/openapi.yaml`
+répondent.
 
 Le socle (BK1) est en place : `config/`, les middlewares communs, `utils/` et
 `validators/common.js`.

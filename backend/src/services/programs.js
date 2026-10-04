@@ -40,7 +40,7 @@ function toSummary(row, relations, institute) {
  *
  * Les critères précis (domaine, diplôme, budget…) sont filtrés en SQL. La
  * recherche libre `q`, qui ignore la casse et les accents, est faite ici, sur
- * le nom, le diplôme, le domaine, les débouchés et l'institut.
+ * le nom, le diplôme, le domaine, les débouchés, les cours et l'institut.
  *
  * @param {object} filters Critères de `models/programs.findAll`, plus `q`.
  * @returns {Promise<object[]>}
@@ -53,19 +53,21 @@ async function search(filters) {
     toSummary(row, relations, allInstitutes.find((institute) => institute.id === row.institute_id)),
   );
   if (filters.q) {
-    list = list.filter((program) =>
-      matches(
+    list = list.filter((program) => {
+      const courses = relations.courses.filter((course) => course.program_id === program.id);
+      return matches(
         filters.q,
         [
           program.name,
           program.degree.name,
           program.domain.name,
           program.careers.join(' '),
+          courses.map((course) => course.name).join(' '),
           program.institute.name,
           program.institute.short_name,
         ].join(' '),
-      ),
-    );
+      );
+    });
   }
   return list;
 }
@@ -83,10 +85,29 @@ async function getDetail(id) {
   return {
     ...toSummary(row, relations, institute),
     description: row.description,
-    // Le programme par année arrive avec les cours (bloc BK6).
-    courses: [],
-    years: [],
+    courses: relations.courses.map((course) => course.name),
+    years: toYears(relations.courses, row.duration, row.degree_name),
   };
+}
+
+/**
+ * Regroupe les cours d'une formation par année. Une année sans cours est omise.
+ *
+ * @param {{ year: number, name: string }[]} courses Cours déjà triés par année et position.
+ * @param {number} duration Durée du diplôme.
+ * @param {string} degreeName Un Master est libellé « M1 », « M2 » ; les autres « 1re année », « 2e année »…
+ * @returns {{ year: number, label: string, courses: string[] }[]}
+ */
+function toYears(courses, duration, degreeName) {
+  const years = [];
+  for (let year = 1; year <= duration; year += 1) {
+    const names = courses.filter((course) => course.year === year).map((course) => course.name);
+    if (names.length > 0) {
+      const label = degreeName === 'Master' ? `M${year}` : `${year === 1 ? '1re' : `${year}e`} année`;
+      years.push({ year, label, courses: names });
+    }
+  }
+  return years;
 }
 
 module.exports = { search, getDetail };
