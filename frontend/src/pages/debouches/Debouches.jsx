@@ -20,13 +20,13 @@ async function loadCareer(id) {
 
 function Debouches() {
   const { id } = useParams();
-  const { data, loading, error } = useApi(() => loadCareer(id), [id]);
+  const { data, loading, error, reload } = useApi(() => loadCareer(id), [id]);
 
   useEffect(() => {
     if (data?.career) document.title = `${data.career.name} · Orienta`;
   }, [data]);
 
-  if (!data) return <PageState loading={loading} error={error} />;
+  if (!data) return <PageState loading={loading} error={error} onRetry={reload} />;
 
   const { career, programs } = data;
 

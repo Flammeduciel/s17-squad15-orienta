@@ -21,7 +21,8 @@
  *   10. `detail`      — fiches formation et institut : titre, couverture, points forts, programme par année, encart de contact ;
  *   11. `tables`      — tableau des tarifs et conditions d'admission de la fiche institut ;
  *   12. `pages`       — mises en page propres à une page : À propos ;
- *   13. `responsive`  — adaptations par largeur d'écran et mouvement réduit.
+ *   13. `states`      — états d'attente : indicateur de chargement, cartes fantômes ;
+ *   14. `responsive`  — adaptations par largeur d'écran et mouvement réduit.
  *
  * `tokens` vient en premier parce que tout le reste lit ses variables ;
  * `responsive` en dernier parce qu'il corrige les autres fichiers. Entre les
@@ -40,4 +41,5 @@
 @import './detail.css';
 @import './tables.css';
 @import './pages.css';
+@import './states.css';
 @import './responsive.css';

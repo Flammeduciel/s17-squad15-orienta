@@ -4,7 +4,8 @@ import { ans, fcfa, normalize } from '../../utils/format';
 import { MAX_BUDGET, MIN_BUDGET, programsWith, toggleIn } from './filters';
 
 // Panneau de filtres de l'accueil. Sur mobile, il s'ouvre en feuille par le bas.
-export default function FilterPanel({ data, open, onClose }) {
+// ready : faux tant que le catalogue n'est pas chargé ; les listes sont alors en attente.
+export default function FilterPanel({ data, ready, open, onClose }) {
   const { filters, change, resetFilters } = useSearch();
   const [careerSearch, setCareerSearch] = useState('');
 
@@ -25,6 +26,11 @@ export default function FilterPanel({ data, open, onClose }) {
 
       <div className="fgroup">
         <h3>Arrondissement</h3>
+        {!ready && (
+          <p className="hint" style={{ margin: 0 }}>
+            Chargement…
+          </p>
+        )}
         {data.districts.map((name) => (
           <label className="check" key={name}>
             <input
@@ -50,7 +56,7 @@ export default function FilterPanel({ data, open, onClose }) {
         <div className="mlist">
           {careers.length === 0 && (
             <p className="hint" style={{ margin: 0 }}>
-              Aucun débouché trouvé.
+              {ready ? 'Aucun débouché trouvé.' : 'Chargement…'}
             </p>
           )}
           {careers.map((name) => (

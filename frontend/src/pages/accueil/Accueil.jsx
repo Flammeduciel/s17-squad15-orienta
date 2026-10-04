@@ -10,7 +10,6 @@ import {
   getPrograms,
 } from '../../api/catalogue';
 import Icon from '../../components/Icon';
-import PageState from '../../components/PageState';
 import { useSearch } from '../../context/search-context';
 import { useApi } from '../../hooks/useApi';
 import FilterPanel from './FilterPanel';
@@ -43,8 +42,12 @@ async function loadHome() {
   };
 }
 
+// Catalogue vide, utilisé tant que les données ne sont pas arrivées : l'accueil
+// s'affiche tout de suite, et se remplit ensuite.
+const EMPTY = { programs: [], institutes: [], domains: [], degrees: [], bacSeries: [], careers: [], districts: [] };
+
 function Accueil() {
-  const { data, loading, error } = useApi(loadHome, []);
+  const { data: loaded, loading, error, reload } = useApi(loadHome, []);
   const { filters, change } = useSearch();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const resultsRef = useRef(null);
@@ -53,7 +56,7 @@ function Accueil() {
     document.title = 'Orienta Brazzaville — Les instituts privés de Brazzaville, au même endroit';
   }, []);
 
-  if (!data) return <PageState loading={loading} error={error} />;
+  const data = loaded ?? EMPTY;
 
   const scrollToResults = () => {
     const top = resultsRef.current.offsetTop - 80;
@@ -90,7 +93,8 @@ function Accueil() {
                 <Icon name={item.icon} />
                 <span>
                   <b>{item.label}</b>
-                  <small>{item.total} à Brazzaville</small>
+                  {/* Tant que le catalogue n'est pas là, le compte est remplacé par « … ». */}
+                  <small>{loaded ? item.total : '…'} à Brazzaville</small>
                 </span>
               </button>
             ))}
@@ -120,8 +124,14 @@ function Accueil() {
       </nav>
 
       <div className="wrap layout" ref={resultsRef}>
-        <FilterPanel data={data} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
-        <Results data={data} onOpenFilters={() => setFiltersOpen(true)} />
+        <FilterPanel data={data} ready={Boolean(loaded)} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
+        <Results
+          data={data}
+          loading={loading}
+          error={error}
+          onRetry={reload}
+          onOpenFilters={() => setFiltersOpen(true)}
+        />
       </div>
       {filtersOpen && <div className="scrim" onClick={() => setFiltersOpen(false)} />}
     </>
