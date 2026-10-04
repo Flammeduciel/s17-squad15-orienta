@@ -4,7 +4,7 @@
  * @module validators/institutes
  */
 const { z } = require('zod');
-const { requiredText, optionalText, booleanQuery, id, positiveIntQuery } = require('./common');
+const { requiredText, optionalText, booleanQuery, id, positiveIntQuery, listQuery } = require('./common');
 const DISTRICTS = require('../utils/districts');
 
 const district = z.enum(DISTRICTS, { error: 'doit être un des 9 arrondissements de Brazzaville.' });
@@ -22,12 +22,12 @@ const optionalDate = z.iso
  */
 const institutesQuery = z.object({
   q: z.string().trim().optional(),
-  district: district.optional(),
+  district: listQuery(district).optional(),
   accredited: booleanQuery,
   domain_id: z.string().trim().optional(),
-  degree_id: id.optional(),
-  career_id: id.optional(),
-  duration: positiveIntQuery.optional(),
+  degree_id: listQuery(id).optional(),
+  career_id: listQuery(id).optional(),
+  duration: listQuery(positiveIntQuery).optional(),
   max_tuition: positiveIntQuery.optional(),
   bac_series: z.string().trim().optional(),
   evening: booleanQuery,

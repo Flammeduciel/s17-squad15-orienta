@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   getBacSeries,
+  getCareers,
   getDegrees,
   getDistricts,
   getDomains,
@@ -18,56 +19,47 @@ import { searchParams } from './filters';
 import Results from './Results';
 import SearchBar from './SearchBar';
 
-// Repères de l'accueil, chargés une seule fois : listes des filtres, totaux des
-// quatre accès, formations consultées récemment. La recherche, elle, interroge
-// l'API à chaque changement (voir loadSearch).
-async function loadHome() {
-  const [programs, institutes, domains, degrees, bacSeries, districts] = await Promise.all([
-    getPrograms(),
-    getInstitutes(),
+// Listes de référence de l'accueil (domaines, diplômes, séries, débouchés,
+// arrondissements), chargées une seule fois. Elles remplissent les filtres et
+// donnent les totaux des quatre accès. Aucun institut ni formation ici.
+async function loadLists() {
+  const [domains, degrees, bacSeries, careers, districts] = await Promise.all([
     getDomains(),
     getDegrees(),
     getBacSeries(),
+    getCareers(),
     getDistricts(),
   ]);
-  // Débouchés portés par les formations publiées, par ordre alphabétique.
-  const careers = [...new Set(programs.flatMap((program) => program.careers))].sort((a, b) =>
-    a.localeCompare(b, 'fr'),
-  );
-  return {
-    programs,
-    institutes,
-    domains,
-    degrees,
-    bacSeries,
-    careers,
-    districts: districts.map((district) => district.name),
-  };
+  return { domains, degrees, bacSeries, careers, districts };
 }
 
-// Recherche : l'API renvoie les formations et les instituts qui correspondent
-// au mot tapé et aux filtres.
-async function loadSearch(params, sort) {
-  const [programs, institutes] = await Promise.all([getPrograms({ ...params, sort }), getInstitutes(params)]);
-  return { programs, institutes };
+// Résultats de la grille : on ne demande à l'API que ce que la vue affiche.
+// La vue Instituts charge les instituts ; les vues Formations, Diplômes et
+// Débouchés chargent les formations.
+async function loadResults(kind, params, sort) {
+  const items = kind === 'institutes' ? await getInstitutes(params) : await getPrograms({ ...params, sort });
+  return { kind, items };
 }
 
-// Catalogue vide, utilisé tant que les données ne sont pas arrivées : l'accueil
+// Listes vides, utilisées tant que les données ne sont pas arrivées : l'accueil
 // s'affiche tout de suite, et se remplit ensuite.
-const EMPTY = { programs: [], institutes: [], domains: [], degrees: [], bacSeries: [], careers: [], districts: [] };
+const EMPTY = { domains: [], degrees: [], bacSeries: [], careers: [], districts: [] };
+
+const sum = (list, key) => list.reduce((total, item) => total + item[key], 0);
 
 function Accueil() {
-  const { data: loaded, loading, error, reload } = useApi(loadHome, []);
+  const { data: loaded, error: listsError, reload: reloadLists } = useApi(loadLists, []);
   const { filters, change } = useSearch();
 
-  // On attend que le visiteur arrête de taper, ou de déplacer le curseur du
-  // budget, avant d'interroger l'API.
-  const q = useDebounce(filters.q.trim());
+  // Le curseur du budget bouge vite : on attend qu'il s'arrête avant d'appeler l'API.
   const budget = useDebounce(filters.budget);
-  const params = searchParams({ ...filters, q, budget });
-  const search = useApi(() => loadSearch(params, filters.sort), [params, filters.sort]);
-  // Pendant une nouvelle recherche, les résultats précédents restent affichés.
-  const found = search.data ?? search.lastData;
+  const params = searchParams({ ...filters, budget });
+  const kind = filters.view === 'inst' ? 'institutes' : 'programs';
+  const search = useApi(() => loadResults(kind, params, filters.sort), [kind, params, filters.sort]);
+  // Pendant une nouvelle recherche, les résultats précédents restent affichés,
+  // sauf s'ils sont d'une autre sorte (instituts au lieu de formations).
+  const last = search.data ?? search.lastData;
+  const found = last && last.kind === kind ? last.items : null;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const resultsRef = useRef(null);
 
@@ -82,10 +74,17 @@ function Accueil() {
     window.scrollTo({ top, behavior: 'smooth' });
   };
 
+  // Bouton « Rechercher » : la grille est toujours rechargée depuis l'API, même
+  // si le mot n'a pas changé, puis on descend jusqu'aux résultats.
+  const onSearch = () => {
+    search.reload();
+    scrollToResults();
+  };
+
   // Les quatre accès de l'accueil (EX-09) : chacun change ce que la grille affiche.
   const access = [
-    { view: 'inst', icon: 'building', label: 'Instituts', total: data.institutes.length },
-    { view: 'form', icon: 'cap', label: 'Formations', total: data.programs.length },
+    { view: 'inst', icon: 'building', label: 'Instituts', total: sum(data.districts, 'institute_count') },
+    { view: 'form', icon: 'cap', label: 'Formations', total: sum(data.districts, 'program_count') },
     { view: 'dip', icon: 'award', label: 'Diplômes', total: data.degrees.length },
     { view: 'deb', icon: 'brief', label: 'Débouchés', total: data.careers.length },
   ];
@@ -96,7 +95,9 @@ function Accueil() {
         <div className="wrap">
           <h1>Trouve ton institut à Brazzaville</h1>
           <p>Instituts privés, formations, diplômes et débouchés : tout au même endroit, sans te déplacer.</p>
-          <SearchBar data={data} found={found ?? EMPTY} onSearch={scrollToResults} />
+          {/* key : quand la recherche appliquée change (rappel retiré, filtres
+              effacés), la barre repart de ce texte. */}
+          <SearchBar key={filters.q} data={data} onSearch={onSearch} />
           <div className="access" role="group" aria-label="Parcourir">
             {access.map((item) => (
               <button
@@ -143,21 +144,15 @@ function Accueil() {
       </nav>
 
       <div className="wrap layout" ref={resultsRef}>
-        <FilterPanel
-          data={data}
-          programs={found ? found.programs : []}
-          ready={Boolean(loaded)}
-          open={filtersOpen}
-          onClose={() => setFiltersOpen(false)}
-        />
+        <FilterPanel data={data} ready={Boolean(loaded)} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
         <Results
           data={data}
-          found={found ?? EMPTY}
-          loading={loading || !found}
+          found={found ?? []}
+          loading={!found && !search.error}
           searching={search.loading}
-          error={error || (found ? null : search.error)}
+          error={found ? null : search.error || listsError}
           onRetry={() => {
-            reload();
+            reloadLists();
             search.reload();
           }}
           onOpenFilters={() => setFiltersOpen(true)}

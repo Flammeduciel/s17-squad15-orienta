@@ -1,42 +1,55 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getInstitutes, getPrograms } from '../../api/catalogue';
 import Icon from '../../components/Icon';
 import { useSearch } from '../../context/search-context';
+import { useApi } from '../../hooks/useApi';
+import { useDebounce } from '../../hooks/useDebounce';
 import { formationPath, institutPath } from '../../routes';
 import { normalize, pluriel } from '../../utils/format';
 
+const NONE = { institutes: [], programs: [] };
+
+// Suggestions : les premiers instituts et formations que l'API trouve pour ce mot.
+async function loadSuggestions(word) {
+  if (!word) return NONE;
+  const [institutes, programs] = await Promise.all([getInstitutes({ q: word }), getPrograms({ q: word })]);
+  return { institutes: institutes.slice(0, 3), programs: programs.slice(0, 5) };
+}
+
 // Barre de recherche de l'accueil : mot-clé, arrondissement, diplôme (EX-01, EX-02).
-// Chaque lettre tapée met à jour le filtre « q » : l'accueil relance alors la
-// recherche dans l'API, et la grille comme les suggestions suivent.
-// found : formations et instituts renvoyés par l'API pour la recherche en cours.
-export default function SearchBar({ data, found, onSearch }) {
+// - Le bouton « Rechercher » (ou Entrée) lance la recherche : la grille est
+//   rechargée depuis l'API avec le mot tapé.
+// - Pendant la frappe, seules des suggestions apparaissent. Elles sont demandées
+//   à l'API après une pause de 0,4 s et à partir de 2 lettres, pour ne pas
+//   l'appeler à chaque touche.
+export default function SearchBar({ data, onSearch }) {
   const { filters, change } = useSearch();
   const navigate = useNavigate();
+  const [text, setText] = useState(filters.q);
   const [open, setOpen] = useState(false);
 
-  // Suggestions : les premiers résultats de l'API, et les débouchés de ces
-  // formations dont le nom contient le mot tapé.
-  const word = normalize(filters.q.trim());
-  const institutes = word ? found.institutes.slice(0, 3) : [];
-  const programs = word ? found.programs.slice(0, 5) : [];
+  const typed = useDebounce(text.trim(), 400);
+  // Liste fermée (recherche lancée, champ quitté) : on ne demande rien.
+  const word = open && typed.length >= 2 ? typed : '';
+  const suggestions = useApi(() => loadSuggestions(word), [word]);
+  const { institutes, programs } = suggestions.data ?? NONE;
+  // Les débouchés viennent de la liste de référence, déjà chargée.
   const careers = word
-    ? [...new Set(found.programs.flatMap((program) => program.careers))]
-        .filter((name) => normalize(name).includes(word))
-        .slice(0, 5)
+    ? data.careers.filter((career) => normalize(career.name).includes(normalize(word))).slice(0, 5)
     : [];
   const hasSuggestions = institutes.length + careers.length + programs.length > 0;
 
-  // Entrée ou « Rechercher » : on ferme les suggestions et on montre la grille.
   const onSubmit = (event) => {
     event.preventDefault();
-    change({ q: filters.q.trim() });
     setOpen(false);
+    change({ q: text.trim() });
     onSearch();
   };
 
-  const pickCareer = (name) => {
+  const pickCareer = (career) => {
     setOpen(false);
-    change({ q: '', careers: [name], view: 'form' });
+    change({ q: '', careers: [career.id], view: 'form' });
     onSearch();
   };
 
@@ -51,9 +64,9 @@ export default function SearchBar({ data, found, onSearch }) {
         <input
           id="s-q"
           placeholder="ex. ISGF, comptabilité, BTS"
-          value={filters.q}
+          value={text}
           onChange={(event) => {
-            change({ q: event.target.value });
+            setText(event.target.value);
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
@@ -74,14 +87,14 @@ export default function SearchBar({ data, found, onSearch }) {
               </button>
             ))}
             {careers.length > 0 && <h4>Débouchés</h4>}
-            {careers.map((name) => (
-              <button key={name} type="button" onClick={() => pickCareer(name)}>
+            {careers.map((career) => (
+              <button key={career.id} type="button" onClick={() => pickCareer(career)}>
                 <span className="ic">
                   <Icon name="brief" />
                 </span>
                 <span>
-                  {name}
-                  <small>{pluriel(found.programs.filter((p) => p.careers.includes(name)).length, 'formation')}</small>
+                  {career.name}
+                  <small>{pluriel(career.program_count, 'formation')}</small>
                 </span>
               </button>
             ))}
@@ -110,8 +123,8 @@ export default function SearchBar({ data, found, onSearch }) {
           onChange={(event) => change({ districts: event.target.value ? [event.target.value] : [] })}
         >
           <option value="">Tout Brazzaville</option>
-          {data.districts.map((name) => (
-            <option key={name}>{name}</option>
+          {data.districts.map((item) => (
+            <option key={item.name}>{item.name}</option>
           ))}
         </select>
       </div>
@@ -120,11 +133,13 @@ export default function SearchBar({ data, found, onSearch }) {
         <select
           id="s-dip"
           value={degree}
-          onChange={(event) => change({ degrees: event.target.value ? [event.target.value] : [] })}
+          onChange={(event) => change({ degrees: event.target.value ? [Number(event.target.value)] : [] })}
         >
           <option value="">Tous</option>
           {data.degrees.map((item) => (
-            <option key={item.id}>{item.name}</option>
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
           ))}
         </select>
       </div>

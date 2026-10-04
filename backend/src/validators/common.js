@@ -36,6 +36,21 @@ const positiveIntQuery = z.coerce
   .min(0, 'doit être un nombre entier positif.');
 
 /**
+ * Liste de valeurs de filtre dans l'URL, séparées par des virgules :
+ * `?degree_id=1,3` devient `[1, 3]`. Une seule valeur donne une liste d'un élément.
+ *
+ * @param {import('zod').ZodType} item Schéma de chaque valeur.
+ *
+ * @example
+ * const query = z.object({ degree_id: listQuery(id).optional() });
+ */
+const listQuery = (item) =>
+  z
+    .string()
+    .transform((value) => value.split(','))
+    .pipe(z.array(item));
+
+/**
  * Texte obligatoire d'un corps de requête, débarrassé des espaces autour.
  *
  * @param {number} max Longueur maximale, celle de la colonne en base.
@@ -64,4 +79,4 @@ const optionalText = (max) =>
     .nullish()
     .transform((value) => value || null);
 
-module.exports = { id, idParams, booleanQuery, positiveIntQuery, requiredText, optionalText };
+module.exports = { id, idParams, booleanQuery, positiveIntQuery, listQuery, requiredText, optionalText };

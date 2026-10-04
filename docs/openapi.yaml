@@ -227,7 +227,7 @@ paths:
       summary: Lister les 9 arrondissements de Brazzaville
       responses:
         "200":
-          description: Arrondissements avec nombre de formations disponibles
+          description: Arrondissements avec leur nombre d'instituts et de formations publiées
           content:
             application/json:
               schema:
@@ -1113,24 +1113,40 @@ components:
     District:
       name: district
       in: query
-      description: Un des 9 arrondissements de Brazzaville
-      schema: { $ref: "#/components/schemas/DistrictName" }
-      example: Makélékélé
+      description: Un ou plusieurs des 9 arrondissements de Brazzaville, séparés par des virgules
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { $ref: "#/components/schemas/DistrictName" }
+      example: [Makélékélé, Bacongo]
     DegreeId:
       name: degree_id
       in: query
-      description: Identifiant du diplôme délivré (voir `/degrees`)
-      schema: { type: integer, minimum: 1 }
+      description: Identifiants des diplômes délivrés (voir `/degrees`), séparés par des virgules — `degree_id=1,3`
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: integer, minimum: 1 }
     CareerId:
       name: career_id
       in: query
-      description: Identifiant du débouché visé (voir `/careers`)
-      schema: { type: integer, minimum: 1 }
+      description: Identifiants des débouchés visés (voir `/careers`), séparés par des virgules ; la formation doit mener à au moins un d'eux
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: integer, minimum: 1 }
     Duration:
       name: duration
       in: query
-      description: Durée des études en années (celle du diplôme)
-      schema: { type: integer, minimum: 1, maximum: 5 }
+      description: Durées des études en années (celle du diplôme), séparées par des virgules — `duration=2,3`
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: integer, minimum: 1, maximum: 5 }
     MaxTuition:
       name: max_tuition
       in: query
@@ -1217,11 +1233,12 @@ components:
 
     District:
       type: object
-      description: Vue agrégée — les 9 arrondissements sont fixes ; le compte vient de `institutes.district`
-      required: [name, program_count]
+      description: Vue agrégée — les 9 arrondissements sont fixes ; les comptes viennent de `institutes.district`
+      required: [name, institute_count, program_count]
       properties:
         name: { $ref: "#/components/schemas/DistrictName" }
-        program_count: { type: integer, example: 5 }
+        institute_count: { type: integer, example: 2, description: Instituts de l'arrondissement }
+        program_count: { type: integer, example: 5, description: Formations publiées de ces instituts }
 
     # ------------------------------------------------------------ Référentiels
     Domain:

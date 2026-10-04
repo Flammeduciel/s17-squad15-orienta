@@ -70,11 +70,15 @@ function publishedPrograms(instituteId) {
 
 /** `GET /districts` — les 9 arrondissements, avec leur nombre de formations publiées. */
 async function listDistricts(req, res) {
-  const counts = await institutes.countProgramsByDistrict();
+  const counts = await institutes.countByDistrict();
   res.json(
     DISTRICTS.map((name) => {
       const found = counts.find((count) => count.name === name);
-      return { name, program_count: found ? found.program_count : 0 };
+      return {
+        name,
+        institute_count: found ? found.institute_count : 0,
+        program_count: found ? found.program_count : 0,
+      };
     }),
   );
 }

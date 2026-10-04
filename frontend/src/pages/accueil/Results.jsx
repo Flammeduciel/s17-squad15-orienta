@@ -1,3 +1,4 @@
+import { getProgram } from '../../api/catalogue';
 import Icon from '../../components/Icon';
 import InstituteCard from '../../components/InstituteCard';
 import LoadError from '../../components/LoadError';
@@ -5,54 +6,63 @@ import MiniCard from '../../components/MiniCard';
 import ProgramCard from '../../components/ProgramCard';
 import SkeletonCards from '../../components/SkeletonCards';
 import { useSearch } from '../../context/search-context';
+import { useApi } from '../../hooks/useApi';
 import { ans, fcfa, pluriel } from '../../utils/format';
 import { popularIds, recentIds } from '../../utils/history';
-import { MAX_BUDGET, activeCount, instituteResults, programMatches, programsWith } from './filters';
+import { MAX_BUDGET, activeCount } from './filters';
+
+// Formations déjà consultées par le visiteur, relues dans l'API par leur
+// identifiant. Une formation supprimée depuis est simplement ignorée.
+async function loadVisited() {
+  const ids = [...new Set([...recentIds().slice(0, 4), ...popularIds().slice(0, 4)])];
+  const programs = await Promise.all(ids.map((id) => getProgram(id).catch(() => null)));
+  return programs.filter(Boolean);
+}
 
 // Colonne de résultats de l'accueil : compteur, tri, rappels de filtres, grille.
 // La grille change selon la vue choisie : instituts, formations, diplômes ou débouchés.
-// found contient les formations et les instituts renvoyés par l'API pour la
-// recherche en cours. Pendant le premier chargement, la grille affiche des cartes
-// fantômes ; en cas d'échec, un message avec un bouton pour réessayer.
+// found est la liste renvoyée par l'API pour cette vue, déjà cherchée et filtrée :
+// des instituts dans la vue Instituts, des formations dans les autres.
+// Pendant le chargement, la grille affiche des cartes fantômes ; en cas d'échec,
+// un message avec un bouton pour réessayer.
 export default function Results({ data, found, loading, searching, error, onRetry, onOpenFilters }) {
   const { filters, change, resetFilters } = useSearch();
   const { view } = filters;
   const domain = data.domains.find((item) => item.id === filters.domain);
   const inDomain = domain ? ` en ${domain.name}` : '';
-
-  // L'API a déjà appliqué le mot recherché, les critères simples et le tri ;
-  // il reste les listes à choix multiples (arrondissements, diplômes…).
-  const programs = found.programs.filter((program) => programMatches(program, filters));
+  const visited = useApi(loadVisited, []).data ?? [];
 
   let label;
   let content = null;
 
   if (view === 'inst') {
-    const institutes = instituteResults(found.institutes, found.programs, filters);
-    label = `${pluriel(institutes.length, 'institut')}${inDomain} à Brazzaville`;
-    content = institutes.map((institute) => {
-      // On affiche ses formations correspondantes ; s'il n'y en a pas (institut
-      // trouvé par son nom), le total et les diplômes donnés par l'API.
-      const hits = programs.filter((program) => program.institute.id === institute.id);
-      return (
-        <InstituteCard
-          key={institute.id}
-          institute={institute}
-          programCount={hits.length || institute.program_count}
-          degrees={hits.length ? [...new Set(hits.map((program) => program.degree.name))] : institute.degrees}
-        />
-      );
-    });
+    // program_count et degrees ne comptent que les formations qui correspondent aux filtres.
+    label = `${pluriel(found.length, 'institut')}${inDomain} à Brazzaville`;
+    content = found.map((institute) => (
+      <InstituteCard
+        key={institute.id}
+        institute={institute}
+        programCount={institute.program_count}
+        degrees={institute.degrees}
+      />
+    ));
   } else if (view === 'form') {
-    label = `${pluriel(programs.length, 'formation')}${inDomain} à Brazzaville`;
-    content = programs.map((program) => <ProgramCard key={program.id} program={program} />);
+    label = `${pluriel(found.length, 'formation')}${inDomain} à Brazzaville`;
+    content = found.map((program) => <ProgramCard key={program.id} program={program} />);
   } else {
-    // Vues Diplômes et Débouchés : une tuile par valeur, qui ouvre ses formations.
+    // Vues Diplômes et Débouchés : les formations trouvées sont regroupées en
+    // tuiles, une par diplôme ou par débouché. Un clic ouvre ses formations.
     const isDegree = view === 'dip';
     const key = isDegree ? 'degrees' : 'careers';
-    const names = isDegree ? data.degrees.map((degree) => degree.name) : data.careers;
-    const tiles = names
-      .map((name) => ({ name, programs: programsWith(found.programs, filters, key, name) }))
+    const list = isDegree ? data.degrees : data.careers;
+    const tiles = list
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        programs: found.filter((program) =>
+          isDegree ? program.degree.id === item.id : program.careers.includes(item.name),
+        ),
+      }))
       .filter((tile) => tile.programs.length > 0);
     label = isDegree
       ? `${pluriel(tiles.length, 'diplôme')} préparé${tiles.length > 1 ? 's' : ''} à Brazzaville`
@@ -64,8 +74,8 @@ export default function Results({ data, found, loading, searching, error, onRetr
             <button
               className="job"
               type="button"
-              key={tile.name}
-              onClick={() => change({ [key]: [tile.name], view: 'form' })}
+              key={tile.id}
+              onClick={() => change({ [key]: [tile.id], view: 'form' })}
             >
               <Icon name={isDegree ? 'award' : 'brief'} />
               <span>
@@ -87,10 +97,17 @@ export default function Results({ data, found, loading, searching, error, onRetr
   // Rappels des filtres actifs : un clic retire le filtre.
   const tags = [];
   if (filters.q) tags.push({ text: `« ${filters.q} »`, remove: { q: '' } });
-  for (const key of ['careers', 'degrees', 'districts']) {
-    for (const value of filters[key]) {
-      tags.push({ text: value, remove: { [key]: filters[key].filter((item) => item !== value) } });
-    }
+  // Débouchés et diplômes sont gardés par identifiant : leur nom vient des listes de référence.
+  for (const id of filters.careers) {
+    const career = data.careers.find((item) => item.id === id);
+    if (career) tags.push({ text: career.name, remove: { careers: filters.careers.filter((item) => item !== id) } });
+  }
+  for (const id of filters.degrees) {
+    const degree = data.degrees.find((item) => item.id === id);
+    if (degree) tags.push({ text: degree.name, remove: { degrees: filters.degrees.filter((item) => item !== id) } });
+  }
+  for (const value of filters.districts) {
+    tags.push({ text: value, remove: { districts: filters.districts.filter((item) => item !== value) } });
   }
   for (const value of filters.durations) {
     tags.push({ text: ans(value), remove: { durations: filters.durations.filter((item) => item !== value) } });
@@ -101,7 +118,7 @@ export default function Results({ data, found, loading, searching, error, onRetr
   if (filters.internship) tags.push({ text: 'Stage inclus', remove: { internship: false } });
   if (filters.installments) tags.push({ text: 'Paiement en tranches', remove: { installments: false } });
 
-  const byId = (id) => data.programs.find((program) => program.id === id);
+  const byId = (id) => visited.find((program) => program.id === id);
   const recent = recentIds().map(byId).filter(Boolean).slice(0, 4);
   const popular = popularIds().map(byId).filter(Boolean).slice(0, 4);
   const miniDetail = (program) =>
