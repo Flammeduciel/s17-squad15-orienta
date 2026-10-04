@@ -25,10 +25,10 @@ frontend/src/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
 ├── api/           # Appels à l'API : http.js (client) et catalogue.js (une fonction par route)
 ├── components/    # Composants partagés : en-tête, pied de page, cartes, badge d'agrément, icônes
-├── context/       # États partagés entre pages : favoris
+├── context/       # États partagés entre pages : favoris, filtres de l'accueil
 ├── hooks/         # useApi (charger des données), useTheme (thème clair / sombre)
 ├── utils/         # Petites fonctions : montants, dates, durées, liens de contact
-└── pages/         # Un dossier par page, avec son fichier déjà créé
+└── pages/         # Un dossier par page ; l'accueil a aussi ses sous-composants et ses filtres
 ```
 
 ## Charger des données dans une page
