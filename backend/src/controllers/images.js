@@ -1,8 +1,9 @@
 const httpError = require('../utils/httpError');
 
 /**
- * `POST /admin/images` — enregistre l'image d'un institut et renvoie son
- * adresse, à mettre ensuite dans `image_url` de l'institut.
+ * `POST /admin/images` — enregistre une image d'institut et renvoie son
+ * adresse, à mettre ensuite dans `image_url` (image des cartes) ou
+ * `banner_url` (bannière de la fiche) de l'institut.
  *
  * @param {import('express').Request} req `req.file` : le fichier enregistré par le middleware d'upload.
  * @param {import('express').Response} res 201 `{ url }`.

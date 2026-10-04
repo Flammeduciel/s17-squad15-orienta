@@ -57,6 +57,7 @@ const instituteBody = z
       .nullish()
       .transform((value) => value || null),
     image_url: optionalText(500),
+    banner_url: optionalText(500),
     description: optionalText(2000),
     benefits: z.array(requiredText(200), { error: 'doit être une liste de textes.' }).default([]),
     registration_fee: z

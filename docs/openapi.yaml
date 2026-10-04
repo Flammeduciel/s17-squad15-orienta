@@ -583,7 +583,7 @@ paths:
     post:
       tags: [Admin]
       summary: Téléverser une image d'institut
-      description: Upload multipart (image de la fiche — EX-04). Formats acceptés JPEG/PNG/WebP, 2 Mo maximum.
+      description: Upload multipart (image des cartes ou bannière de la fiche — EX-04). L'adresse renvoyée se met dans `image_url` ou `banner_url` de l'institut. Formats acceptés JPEG/PNG/WebP, 2 Mo maximum.
       security:
         - bearerAuth: []
       requestBody:
@@ -1325,7 +1325,7 @@ components:
           type: string
           nullable: true
           example: "/uploads/institutes/4-isd-2026.jpg"
-          description: Image de l'institut (EX-04) ; null → couverture de couleur
+          description: Image de l'institut affichée sur les cartes (EX-04) ; null → couverture de couleur
         registration_fee: { type: integer, example: 75000, description: FCFA }
         program_count: { type: integer, example: 4, description: "Formations publiées (correspondant aux filtres, s'il y en a)" }
         degrees:
@@ -1341,6 +1341,11 @@ components:
         - type: object
           required: [benefits, programs]
           properties:
+            banner_url:
+              type: string
+              nullable: true
+              example: "/uploads/institutes/4-isd-banniere.jpg"
+              description: Grande image affichée en bannière de la fiche ; null → `image_url`, puis couverture de couleur
             address: { type: string, example: "Route du Djoué, Makélékélé", nullable: true }
             phone: { type: string, example: "+242 06 409 88 52", nullable: true }
             whatsapp: { type: string, example: "242064098852", nullable: true, description: Numéro international sans « + » (pour wa.me) }
@@ -1492,7 +1497,8 @@ components:
         whatsapp: { type: string, example: "242064098852" }
         email: { type: string, format: email, nullable: true, example: "contact@isd.cg" }
         color: { type: string, nullable: true, example: "#B03352", description: Attribuée par le backend si absente }
-        image_url: { type: string, nullable: true, example: null, description: URL renvoyée par `/admin/images` }
+        image_url: { type: string, nullable: true, example: null, description: "Image des cartes : URL renvoyée par `/admin/images`" }
+        banner_url: { type: string, nullable: true, example: null, description: "Bannière de la fiche : URL renvoyée par `/admin/images`" }
         description: { type: string, nullable: true, example: "Métiers paramédicaux..." }
         benefits: { type: array, items: { type: string }, default: [] }
         registration_fee: { type: integer, minimum: 0, example: 75000 }
