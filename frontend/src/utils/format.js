@@ -19,3 +19,8 @@ export function formatDate(iso) {
 export function formatDuration(years) {
   return `${years} an${years > 1 ? 's' : ''}`;
 }
+
+// (1, 'formation') -> « 1 formation », (3, 'formation') -> « 3 formations ».
+export function plural(count, word) {
+  return `${count} ${word}${count > 1 ? 's' : ''}`;
+}
