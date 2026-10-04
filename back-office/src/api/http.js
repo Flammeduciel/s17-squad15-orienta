@@ -2,7 +2,7 @@ import { clearSession, readSession } from './session';
 
 // URL de l'API : VITE_API_URL (voir .env.example), sans barre finale.
 // Les chemins ci-dessous s'ajoutent à cette base : request('/auth/login') appelle {VITE_API_URL}/auth/login.
-const BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000').replace(/\/$/, '');
+export const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000').replace(/\/$/, '');
 
 // Événement émis quand l'API refuse le jeton (expiré, compte supprimé) :
 // AuthContext l'écoute pour ramener l'utilisateur à la page de connexion.
@@ -31,7 +31,7 @@ export async function request(path, { method = 'GET', body } = {}) {
 
   let res;
   try {
-    res = await fetch(BASE + path, {
+    res = await fetch(API_URL + path, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
@@ -48,5 +48,28 @@ export async function request(path, { method = 'GET', body } = {}) {
     }
     throw new ApiError(res.status, data?.message, data?.code);
   }
+  return data;
+}
+
+/**
+ * Envoie un fichier à l'API (multipart/form-data, champ « file ») et renvoie
+ * le JSON de la réponse. Sert au dépôt de l'image d'un institut.
+ */
+export async function upload(path, file) {
+  const session = readSession();
+  const form = new FormData();
+  form.append('file', file);
+  let res;
+  try {
+    res = await fetch(API_URL + path, {
+      method: 'POST',
+      headers: session ? { Authorization: `Bearer ${session.token}` } : {},
+      body: form,
+    });
+  } catch {
+    throw new ApiError(0, 'Impossible de joindre le serveur.');
+  }
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError(res.status, data?.message, data?.code);
   return data;
 }
