@@ -1,15 +1,9 @@
-import { clearSession, readSession } from './session';
-
 // URL de l'API : VITE_API_URL (voir .env.example), sans barre finale.
 // Les chemins s'ajoutent à cette base : request('/programs') appelle {VITE_API_URL}/programs.
 export const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:4000').replace(/\/$/, '');
 
 // Au-delà, l'appel est abandonné plutôt que de laisser la page en chargement.
 const TIMEOUT_MS = 30000;
-
-// Événement émis quand l'API refuse le jeton (expiré, compte supprimé) :
-// AuthContext l'écoute pour ramener l'utilisateur à la page de connexion.
-export const SESSION_EXPIRED = 'orienta:session-expiree';
 
 export class ApiError extends Error {
   // status : statut HTTP (0 = serveur injoignable) ; code : code machine du contrat (ex. FORMATION_INTROUVABLE).
@@ -23,7 +17,6 @@ export class ApiError extends Error {
 // Message de repli quand l'API n'en fournit pas (réponse sans corps, erreur du serveur web).
 function defaultMessage(status) {
   if (status === 400) return 'Les informations envoyées ne sont pas valides.';
-  if (status === 401) return 'Votre session a expiré. Reconnectez-vous.';
   if (status === 404) return 'Cette ressource est introuvable.';
   if (status >= 500) return 'Le serveur a rencontré un problème. Réessayez dans un instant.';
   return 'Une erreur est survenue.';
@@ -48,14 +41,11 @@ function buildUrl(path, params) {
  * Client HTTP de l'application (le contrat est docs/openapi.yaml).
  * - params : paramètres de requête, ajoutés à l'adresse ;
  * - body : objet envoyé en JSON, ou FormData pour un dépôt de fichier ;
- * - envoie le jeton de session dans l'en-tête Authorization, comme le demande le contrat ;
  * - lève une ApiError avec le statut et le code d'erreur renvoyés par l'API ;
  * - une réponse sans corps (202, 204) renvoie null.
  */
 export async function request(path, { method = 'GET', params, body } = {}) {
-  const session = readSession();
   const headers = {};
-  if (session) headers.Authorization = `Bearer ${session.token}`;
   let payload;
   if (body instanceof FormData) {
     // Pas de Content-Type : le navigateur le fixe lui-même, avec la limite du multipart.
@@ -78,14 +68,7 @@ export async function request(path, { method = 'GET', params, body } = {}) {
   }
 
   const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    // Jeton refusé alors qu'on en envoyait un : la session n'est plus valable.
-    if (res.status === 401 && session) {
-      clearSession();
-      window.dispatchEvent(new Event(SESSION_EXPIRED));
-    }
-    throw new ApiError(res.status, data?.message ?? defaultMessage(res.status), data?.code);
-  }
+  if (!res.ok) throw new ApiError(res.status, data?.message ?? defaultMessage(res.status), data?.code);
   return data;
 }
 
