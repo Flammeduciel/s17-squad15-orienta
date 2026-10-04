@@ -34,13 +34,17 @@ function App() {
               <Route path="/" element={<Navigate to={ROUTES.accueil} replace />} />
               <Route path={ROUTES.accueil} element={<TableauDeBord />} />
 
-              <Route path={ROUTES.instituts} element={<ListeInstituts />} />
-              <Route path={`${ROUTES.instituts}/nouveau`} element={<FormulaireInstitut />} />
-              <Route path={`${ROUTES.instituts}/:id`} element={<FormulaireInstitut />} />
+              {/* Les formulaires sont des routes enfants de leur liste : ils s'ouvrent
+                  en fenêtre par-dessus elle, et gardent leur propre adresse. */}
+              <Route path={ROUTES.instituts} element={<ListeInstituts />}>
+                <Route path="nouveau" element={<FormulaireInstitut />} />
+                <Route path=":id" element={<FormulaireInstitut />} />
+              </Route>
 
-              <Route path={ROUTES.formations} element={<ListeFormations />} />
-              <Route path={`${ROUTES.formations}/nouvelle`} element={<FormulaireFormation />} />
-              <Route path={`${ROUTES.formations}/:id`} element={<FormulaireFormation />} />
+              <Route path={ROUTES.formations} element={<ListeFormations />}>
+                <Route path="nouvelle" element={<FormulaireFormation />} />
+                <Route path=":id" element={<FormulaireFormation />} />
+              </Route>
 
               <Route path={ROUTES.cours} element={<Cours />} />
               <Route path={ROUTES.diplomes} element={<Diplomes />} />

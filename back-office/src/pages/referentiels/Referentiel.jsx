@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Icon from '../../components/Icon';
+import Modal from '../../components/Modal';
 import PageState from '../../components/PageState';
 import { useToast } from '../../context/toast-context';
 import { useApi } from '../../hooks/useApi';
@@ -8,8 +9,8 @@ import { errorMessage } from '../../utils/format';
 
 /**
  * Écran commun aux quatre référentiels (diplômes, débouchés, séries du bac,
- * domaines d'insertion) : une liste, un formulaire à deux champs, une
- * suppression avec confirmation. Chaque page lui passe sa configuration.
+ * domaines d'insertion) : une liste, un formulaire à deux champs ouvert dans
+ * une fenêtre, une suppression avec confirmation. Chaque page lui passe sa configuration.
  *
  * config :
  * - title, intro : titre et phrase d'introduction de la page ;
@@ -45,7 +46,6 @@ export default function Referentiel({ config }) {
     setForm({ ...config.empty, ...row });
     setFormError('');
     setEditing(row);
-    window.scrollTo(0, 0);
   };
 
   const onSubmit = async (event) => {
@@ -93,18 +93,20 @@ export default function Referentiel({ config }) {
           <h1>{config.title}</h1>
           <p>{config.intro}</p>
         </div>
-        {!editing && (
-          <button className="btn" type="button" onClick={startAdd}>
-            <Icon name="plus" />
-            Ajouter {config.un}
-          </button>
-        )}
+        <button className="btn" type="button" onClick={startAdd}>
+          <Icon name="plus" />
+          Ajouter {config.un}
+        </button>
       </div>
 
+      {/* L'ajout et la modification se font dans une fenêtre, par-dessus la liste. */}
       {editing && (
-        <form className="form" onSubmit={onSubmit} noValidate>
-          <fieldset>
-            <legend>{editing === 'new' ? `Ajouter ${config.un}` : `Modifier ${config.le}`}</legend>
+        <Modal
+          size="medium"
+          title={editing === 'new' ? `Ajouter ${config.un}` : `Modifier ${config.le}`}
+          onClose={() => setEditing(null)}
+        >
+          <form className="form" onSubmit={onSubmit} noValidate>
             <div className="row two">
               <div className={`fld${formError ? ' bad' : ''}`}>
                 <label htmlFor="r-nom">{config.nameLabel}</label>
@@ -123,16 +125,16 @@ export default function Referentiel({ config }) {
               </div>
               {config.field(form, setForm, data)}
             </div>
-          </fieldset>
-          <div className="formfoot">
-            <button className="btn" type="submit">
-              {editing === 'new' ? 'Ajouter' : 'Enregistrer les modifications'}
-            </button>
-            <button className="btn line" type="button" onClick={() => setEditing(null)}>
-              Annuler
-            </button>
-          </div>
-        </form>
+            <div className="formfoot">
+              <button className="btn" type="submit">
+                {editing === 'new' ? 'Ajouter' : 'Enregistrer les modifications'}
+              </button>
+              <button className="btn line" type="button" onClick={() => setEditing(null)}>
+                Annuler
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       <div className="panel">
