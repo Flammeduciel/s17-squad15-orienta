@@ -83,8 +83,7 @@ Le fichier `docs/openapi.yaml` est la source de vérité pour les 3 applications
 | GET | /institutes/:id | Fiche détaillée d'un institut |
 | GET | /domains, /degrees, /bac-series, /careers, /districts | Listes de référence pour les filtres |
 | POST | /contact | Envoyer une question à un institut |
-| POST | /auth/login | Connexion Squad |
-| POST | /auth/password-reset | Mot de passe oublié (lien de réinitialisation) |
+| POST | /auth/login | Connexion Squad (adresse e-mail et mot de passe) |
 | GET | /admin/indicators | Les 5 KPI du dashboard |
 | GET/POST/PUT/DELETE | /admin/programs | CRUD formations |
 | POST/PUT/DELETE | /admin/institutes | CRUD instituts |

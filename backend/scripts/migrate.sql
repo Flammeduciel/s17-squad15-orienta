@@ -36,21 +36,30 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- Table: users (Squad accounts — EX-15, EX-16, EX-17)
+-- Table: users (Squad accounts — EX-15, EX-16)
 -- ---------------------------------------------------------------------------
--- `email` receives the password reset link. The API requires it when an account
--- is created; it stays nullable for accounts that predate the column.
+-- A member of the Squad signs in with an e-mail address and a password.
 CREATE TABLE IF NOT EXISTS users (
     id              SERIAL PRIMARY KEY,
-    username        VARCHAR(50) NOT NULL UNIQUE,
-    email           VARCHAR(150) UNIQUE,
+    email           VARCHAR(150) NOT NULL UNIQUE,
     password_hash   TEXT NOT NULL,
     name            VARCHAR(100) NOT NULL,
     role            VARCHAR(20) NOT NULL DEFAULT 'superadmin',
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Databases created when the login was a username: an account without e-mail
+-- gets "<username>@orienta.cg", then the username column is dropped.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(150) UNIQUE;
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns
+               WHERE table_name = 'users' AND column_name = 'username') THEN
+        UPDATE users SET email = username || '@orienta.cg' WHERE email IS NULL;
+        ALTER TABLE users DROP COLUMN username;
+    END IF;
+END $$;
+ALTER TABLE users ALTER COLUMN email SET NOT NULL;
 ALTER TABLE users ALTER COLUMN role SET DEFAULT 'superadmin';
 
 -- ---------------------------------------------------------------------------

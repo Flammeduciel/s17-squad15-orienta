@@ -81,7 +81,7 @@ Toute nouvelle fonction suit la même forme.
 
 **Authentification.** Toute route sous `/admin` exige une session : c'est
 déclaré une fois dans `app.js`, les blocs suivants n'ont rien à ajouter. Le
-compte connecté est dans `req.user` (`id`, `username`, `email`, `name`,
+compte connecté est dans `req.user` (`id`, `email`, `name`,
 `role`). Pour protéger une route hors `/admin`, ajouter le middleware
 `requireAuth` de `middlewares/auth.js`.
 

@@ -10,7 +10,6 @@ is its plain-DDL reference copy.
 erDiagram
     users {
         SERIAL id PK
-        VARCHAR username UK
         VARCHAR email UK
         TEXT password_hash
         VARCHAR name
@@ -135,13 +134,12 @@ erDiagram
 ## Table Descriptions
 
 ### `users`
-Squad members who can access the back-office (EX-15, EX-16, EX-17).
+Squad members who can access the back-office (EX-15, EX-16). They sign in with their e-mail address and password.
 
 | Column | Type | Description |
 |---|---|---|
 | id | SERIAL PK | Unique identifier |
-| username | VARCHAR(50) UNIQUE | Login identifier |
-| email | VARCHAR(150) UNIQUE | Receives the password reset link. Required by the API at creation; nullable for older accounts |
+| email | VARCHAR(150) UNIQUE NOT NULL | Login identifier |
 | password_hash | TEXT | Bcrypt hash |
 | name | VARCHAR(100) | Display name |
 | role | VARCHAR(20) | Role (default: `superadmin`) |

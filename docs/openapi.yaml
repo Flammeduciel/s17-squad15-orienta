@@ -292,14 +292,14 @@ paths:
     post:
       tags: [Auth]
       summary: Connexion Squad
-      description: Authentifie un membre de la Squad et renvoie un token JWT pour les routes `/admin` (EX-16).
+      description: Authentifie un membre de la Squad et renvoie un token JWT pour les routes `/admin` (EX-16). L'identifiant est l'adresse e-mail du compte.
       requestBody:
         required: true
         content:
           application/json:
             schema: { $ref: "#/components/schemas/LoginInput" }
             example:
-              username: squad
+              email: squad@orienta.cg
               password: orienta2026
       responses:
         "200":
@@ -314,7 +314,7 @@ paths:
               schema: { $ref: "#/components/schemas/Error" }
               example:
                 code: IDENTIFIANTS_INVALIDES
-                message: "Identifiant ou mot de passe incorrect."
+                message: "Adresse e-mail ou mot de passe incorrect."
 
   /auth/logout:
     post:
@@ -325,53 +325,6 @@ paths:
       responses:
         "204":
           description: Session terminée
-
-  /auth/password-reset:
-    post:
-      tags: [Auth]
-      summary: Demander un lien de réinitialisation du mot de passe
-      description: |
-        « Mot de passe oublié » (EX-17). Envoie un lien de réinitialisation à
-        l'adresse si elle correspond à un compte (`users.email`) — jamais le mot
-        de passe lui-même. La réponse est la même que le compte existe ou non.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [email]
-              properties:
-                email: { type: string, format: email, example: "squad@exemple.cg" }
-      responses:
-        "202":
-          description: Demande prise en compte
-        "400":
-          $ref: "#/components/responses/BadRequest"
-
-  /auth/password-reset/confirm:
-    post:
-      tags: [Auth]
-      summary: Choisir un nouveau mot de passe
-      description: Le `token` vient du lien reçu par e-mail ; il est signé et expire.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [token, password]
-              properties:
-                token: { type: string }
-                password: { type: string, format: password, minLength: 8 }
-      responses:
-        "204":
-          description: Mot de passe modifié
-        "400":
-          description: Lien invalide ou expiré, ou mot de passe trop court
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Error" }
 
   # --------------------------------------------------------------------------
   # ADMIN (back-office — Bearer requis)
@@ -1560,10 +1513,10 @@ components:
 
     LoginInput:
       type: object
-      description: Colonnes `users` (`username` + `password_hash` vérifié en bcrypt)
-      required: [username, password]
+      description: Colonnes `users` (`email` + `password_hash` vérifié en bcrypt)
+      required: [email, password]
       properties:
-        username: { type: string, example: squad }
+        email: { type: string, format: email, example: squad@orienta.cg }
         password: { type: string, format: password, example: orienta2026 }
 
     LoginResponse:

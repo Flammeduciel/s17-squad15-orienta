@@ -9,14 +9,12 @@
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
--- Table: users (Squad accounts — EX-15, EX-16, EX-17)
+-- Table: users (Squad accounts — EX-15, EX-16)
 -- ---------------------------------------------------------------------------
--- `email` receives the password reset link. The API requires it when an account
--- is created; it stays nullable for accounts that predate the column.
+-- A member of the Squad signs in with an e-mail address and a password.
 CREATE TABLE users (
     id              SERIAL PRIMARY KEY,
-    username        VARCHAR(50) NOT NULL UNIQUE,
-    email           VARCHAR(150) UNIQUE,
+    email           VARCHAR(150) NOT NULL UNIQUE,
     password_hash   TEXT NOT NULL,
     name            VARCHAR(100) NOT NULL,
     role            VARCHAR(20) NOT NULL DEFAULT 'superadmin',
