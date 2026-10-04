@@ -22,11 +22,13 @@
   min-width: 210px;
 }
 
-.field svg {
+.field svg,
+.field .icon {
   width: 17px;
   height: 17px;
   color: var(--muted);
   flex: none;
+  font-size: 14px;
 }
 
 .field input {

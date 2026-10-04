@@ -27,13 +27,16 @@
   animation: pop .18s ease-out;
 }
 
-.toast svg {
+.toast svg,
+.toast .icon {
   flex: none;
   width: 18px;
   height: 18px;
+  font-size: 15px;
 }
 
-.toast.bad svg {
+.toast.bad svg,
+.toast.bad .icon {
   color: var(--heart);
 }
 

@@ -49,9 +49,11 @@
   cursor: not-allowed;
 }
 
-.btn svg {
+.btn svg,
+.btn .icon {
   width: 17px;
   height: 17px;
+  font-size: 14px;
 }
 
 .act {
@@ -69,9 +71,11 @@
   background: var(--soft);
 }
 
-.act svg {
+.act svg,
+.act .icon {
   width: 17px;
   height: 17px;
+  font-size: 14px;
 }
 
 .act.del:hover {

@@ -129,9 +129,11 @@
     padding-right: 40px;
   }
 
-  .stat .ico svg {
+  .stat .ico svg,
+  .stat .ico .icon {
     width: 16px;
     height: 16px;
+    font-size: 14px;
   }
 
   .stat small {
