@@ -1,4 +1,4 @@
-# Backend — API Orienta
+# Backend - API Orienta
 
 API REST en Node.js (Express) sur PostgreSQL. Le contrat à respecter est
 `docs/openapi.yaml` ; le découpage du travail en blocs (BK1 à BK6) est dans

@@ -1,4 +1,4 @@
-# Back-office — interface Squad Orienta
+# Back-office - interface Squad Orienta
 
 Interface d'administration en React (JavaScript, Vite), réservée à la Squad.
 L'apparence, les libellés et les parcours viennent de la maquette
@@ -72,7 +72,7 @@ du catalogue, elles, ont besoin de la vraie API.
 | `pages/instituts/ListeInstituts.jsx` | Liste des instituts | `/admin/instituts` | P16 |
 | `pages/instituts/FormulaireInstitut.jsx` | Formulaire institut | `/admin/instituts/nouveau`, `/admin/instituts/:id` | P17 |
 | `pages/cours/Cours.jsx` | Cours | `/admin/cours` | P19 |
-| `pages/referentiels/Referentiel.jsx` | Écran commun aux quatre référentiels ci-dessous | — | P20 à P23 |
+| `pages/referentiels/Referentiel.jsx` | Écran commun aux quatre référentiels ci-dessous | - | P20 à P23 |
 | `pages/referentiels/Diplomes.jsx` | Diplômes | `/admin/diplomes` | P20 |
 | `pages/referentiels/Debouches.jsx` | Débouchés | `/admin/debouches` | P21 |
 | `pages/referentiels/SeriesBac.jsx` | Séries du bac | `/admin/series` | P22 |

@@ -40,7 +40,7 @@ async function getCourse(id) {
   return all.find((course) => course.id === id);
 }
 
-/** `GET /admin/courses` — catalogue de cours, filtrable par nom et par formation. */
+/** `GET /admin/courses` - catalogue de cours, filtrable par nom et par formation. */
 async function listCourses(req, res) {
   const { q, program_id: programId } = req.valid.query;
   let list = groupCourses(await courses.findAllWithPrograms());
@@ -81,7 +81,7 @@ async function createCourse(req, res) {
   res.status(201).json(await getCourse(id));
 }
 
-/** `PUT /admin/courses/:id` — `programs` remplace toute la liste des rattachements. */
+/** `PUT /admin/courses/:id` - `programs` remplace toute la liste des rattachements. */
 async function updateCourse(req, res) {
   const { id } = req.valid.params;
   const { name, programs } = req.valid.body;
@@ -102,7 +102,7 @@ async function deleteCourse(req, res) {
   res.status(204).end();
 }
 
-/** `PUT /admin/programs/:id/courses/:course_id` — rattache un cours, ou change son année. */
+/** `PUT /admin/programs/:id/courses/:course_id` - rattache un cours, ou change son année. */
 async function linkCourse(req, res) {
   const { id: programId, course_id: courseId } = req.valid.params;
   const { year } = req.valid.body;
@@ -116,7 +116,7 @@ async function linkCourse(req, res) {
   res.json(await programService.getDetail(programId));
 }
 
-/** `DELETE /admin/programs/:id/courses/:course_id` — le cours reste au catalogue. */
+/** `DELETE /admin/programs/:id/courses/:course_id` - le cours reste au catalogue. */
 async function unlinkCourse(req, res) {
   const { id: programId, course_id: courseId } = req.valid.params;
   const found = await courses.unlink(programId, courseId);

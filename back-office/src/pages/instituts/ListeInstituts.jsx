@@ -1,4 +1,4 @@
-/* Liste des instituts — route /admin/instituts (ticket P16).
+/* Liste des instituts - route /admin/instituts (ticket P16).
    Maquette : template/back-office.html. */
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';

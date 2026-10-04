@@ -3,7 +3,7 @@ const degrees = require('../models/degrees');
 
 const NOT_FOUND = [404, 'DIPLOME_INTROUVABLE', 'Aucun diplôme ne correspond à cet identifiant.'];
 
-/** `GET /degrees` — liste des diplômes avec leur durée. */
+/** `GET /degrees` - liste des diplômes avec leur durée. */
 async function listDegrees(req, res) {
   res.json(await degrees.findAll());
 }
@@ -18,7 +18,7 @@ async function createDegree(req, res) {
   res.status(201).json({ ...degree, program_count: 0 });
 }
 
-/** `PUT /admin/degrees/:id` — changer la durée ajuste les formations du diplôme. */
+/** `PUT /admin/degrees/:id` - changer la durée ajuste les formations du diplôme. */
 async function updateDegree(req, res) {
   const { id } = req.valid.params;
   const { name, duration } = req.valid.body;
@@ -32,7 +32,7 @@ async function updateDegree(req, res) {
   res.json(all.find((degree) => degree.id === id));
 }
 
-/** `DELETE /admin/degrees/:id` — refusé tant qu'une formation délivre ce diplôme. */
+/** `DELETE /admin/degrees/:id` - refusé tant qu'une formation délivre ce diplôme. */
 async function deleteDegree(req, res) {
   const { id } = req.valid.params;
   const degree = await degrees.findById(id);

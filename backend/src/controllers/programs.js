@@ -8,26 +8,26 @@ const programService = require('../services/programs');
 const NOT_FOUND = [404, 'FORMATION_INTROUVABLE', 'Aucune formation ne correspond à cet identifiant.'];
 const invalid = (message) => httpError(400, 'PARAMETRE_INVALIDE', message);
 
-/** `GET /programs` — recherche parmi les formations publiées. */
+/** `GET /programs` - recherche parmi les formations publiées. */
 async function listPrograms(req, res) {
   const items = await programService.search({ ...req.valid.query, status: 'published' });
   res.json({ total: items.length, items });
 }
 
-/** `GET /programs/:id` — fiche d'une formation publiée ; un brouillon répond 404. */
+/** `GET /programs/:id` - fiche d'une formation publiée ; un brouillon répond 404. */
 async function getProgram(req, res) {
   const program = await programService.getDetail(req.valid.params.id);
   if (!program || program.status !== 'published') throw httpError(...NOT_FOUND);
   res.json(program);
 }
 
-/** `GET /admin/programs` — toutes les formations, brouillons compris. */
+/** `GET /admin/programs` - toutes les formations, brouillons compris. */
 async function listAllPrograms(req, res) {
   const items = await programService.search(req.valid.query);
   res.json({ total: items.length, items });
 }
 
-/** `GET /admin/programs/:id` — fiche d'une formation, brouillon compris. */
+/** `GET /admin/programs/:id` - fiche d'une formation, brouillon compris. */
 async function getAnyProgram(req, res) {
   const program = await programService.getDetail(req.valid.params.id);
   if (!program) throw httpError(...NOT_FOUND);
@@ -87,7 +87,7 @@ async function deleteProgram(req, res) {
   res.status(204).end();
 }
 
-/** `GET /admin/indicators` — les 5 KPI du tableau de bord (EX-07). */
+/** `GET /admin/indicators` - les 5 KPI du tableau de bord (EX-07). */
 async function getIndicators(req, res) {
   res.json(await programs.findIndicators());
 }

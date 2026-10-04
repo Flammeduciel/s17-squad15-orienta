@@ -15,7 +15,7 @@ export default function BackOfficeLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    document.title = 'Espace Squad — Orienta Brazzaville';
+    document.title = 'Espace Squad - Orienta Brazzaville';
   }, []);
 
   const onLogout = async () => {

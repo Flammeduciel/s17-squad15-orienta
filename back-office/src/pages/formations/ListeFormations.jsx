@@ -1,4 +1,4 @@
-/* Liste des formations — route /admin/formations (ticket P14).
+/* Liste des formations - route /admin/formations (ticket P14).
    Maquette : template/back-office.html. */
 import { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';

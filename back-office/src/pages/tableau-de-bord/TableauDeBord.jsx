@@ -1,4 +1,4 @@
-/* Tableau de bord — route /admin (ticket P11).
+/* Tableau de bord - route /admin (ticket P11).
    Maquette : template/back-office.html. */
 import { Link } from 'react-router-dom';
 import { getDistricts, getDomains, getIndicators, getInstitutes, getPrograms } from '../../api/catalogue';

@@ -1,5 +1,5 @@
 -- ============================================================================
--- ORIENTA BRAZZAVILLE — Database Schema (PostgreSQL 12+)
+-- ORIENTA BRAZZAVILLE - Database Schema (PostgreSQL 12+)
 -- ============================================================================
 -- Reference copy of the schema, for reading and for tools that want plain DDL.
 -- The executable version is backend/scripts/migrate.sql (idempotent, with the
@@ -9,7 +9,7 @@
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
--- Table: users (Squad accounts — EX-15, EX-16)
+-- Table: users (Squad accounts - EX-15, EX-16)
 -- ---------------------------------------------------------------------------
 -- A member of the Squad signs in with an e-mail address and a password.
 CREATE TABLE users (
@@ -206,7 +206,7 @@ CREATE TABLE contact_requests (
 );
 
 -- ---------------------------------------------------------------------------
--- View: indicators (the 5 dashboard KPI — EX-07)
+-- View: indicators (the 5 dashboard KPI - EX-07)
 -- ---------------------------------------------------------------------------
 CREATE VIEW indicators AS
 SELECT

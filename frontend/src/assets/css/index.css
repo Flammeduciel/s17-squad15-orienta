@@ -1,7 +1,7 @@
 /**
  * assets/css/index.css
  * ---------------------------------------------------------------------------
- * Point d'entrée du design system Orienta — site public.
+ * Point d'entrée du design system Orienta - site public.
  *
  * Importé une seule fois, au démarrage de l'application :
  *
@@ -9,20 +9,20 @@
  *
  * Le design system reprend le CSS de la maquette `template/index.html`, éclaté par
  * rôle. L'ordre d'import est significatif :
- *   1. `tokens`      — variables du design system : couleurs, typographies, ombre, en thème clair et sombre ;
- *   2. `base`        — réinitialisation, typographie de base, conteneur `.wrap` et focus clavier ;
- *   3. `buttons`     — boutons et liens d'action : `.btn` et ses variantes, bouton de recherche, liens d'en-tête, favori ;
- *   4. `forms`       — champs et contrôles : champ étiqueté, cases à cocher, pastilles, curseur, interrupteur, messages ;
- *   5. `badges`      — étiquettes : badge d'agrément, étiquettes de carte, rappels de filtres actifs ;
- *   6. `layout`      — structure commune des pages : en-tête, pied de page, grille filtres + résultats, sections, voile ;
- *   7. `search`      — accueil : bandeau de titre, barre de recherche et suggestions, cartes d'accès, barre des domaines ;
- *   8. `filters`     — panneau de filtres et barre de résultats (compteur, tri, ouverture des filtres sur mobile) ;
- *   9. `cards`       — grille et cartes : carte de formation ou d'institut, couverture, mini-cartes, débouchés, état vide ;
- *   10. `detail`      — fiches formation et institut : titre, couverture, points forts, programme par année, encart de contact ;
- *   11. `tables`      — tableau des tarifs et conditions d'admission de la fiche institut ;
- *   12. `pages`       — mises en page propres à une page : À propos ;
- *   13. `states`      — états d'attente : indicateur de chargement, cartes fantômes ;
- *   14. `responsive`  — adaptations par largeur d'écran et mouvement réduit.
+ *   1. `tokens`      - variables du design system : couleurs, typographies, ombre, en thème clair et sombre ;
+ *   2. `base`        - réinitialisation, typographie de base, conteneur `.wrap` et focus clavier ;
+ *   3. `buttons`     - boutons et liens d'action : `.btn` et ses variantes, bouton de recherche, liens d'en-tête, favori ;
+ *   4. `forms`       - champs et contrôles : champ étiqueté, cases à cocher, pastilles, curseur, interrupteur, messages ;
+ *   5. `badges`      - étiquettes : badge d'agrément, étiquettes de carte, rappels de filtres actifs ;
+ *   6. `layout`      - structure commune des pages : en-tête, pied de page, grille filtres + résultats, sections, voile ;
+ *   7. `search`      - accueil : bandeau de titre, barre de recherche et suggestions, cartes d'accès, barre des domaines ;
+ *   8. `filters`     - panneau de filtres et barre de résultats (compteur, tri, ouverture des filtres sur mobile) ;
+ *   9. `cards`       - grille et cartes : carte de formation ou d'institut, couverture, mini-cartes, débouchés, état vide ;
+ *   10. `detail`      - fiches formation et institut : titre, couverture, points forts, programme par année, encart de contact ;
+ *   11. `tables`      - tableau des tarifs et conditions d'admission de la fiche institut ;
+ *   12. `pages`       - mises en page propres à une page : À propos ;
+ *   13. `states`      - états d'attente : indicateur de chargement, cartes fantômes ;
+ *   14. `responsive`  - adaptations par largeur d'écran et mouvement réduit.
  *
  * `tokens` vient en premier parce que tout le reste lit ses variables ;
  * `responsive` en dernier parce qu'il corrige les autres fichiers. Entre les

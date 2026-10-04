@@ -1,4 +1,4 @@
-/* À propos — route /a-propos (ticket P7).
+/* À propos - route /a-propos (ticket P7).
    Maquette : template/index.html. */
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -48,7 +48,7 @@ function APropos() {
           <p>
             <b>Pour les nouveaux bacheliers et leurs familles</b>, qui peuvent comparer les offres à distance,
             gratuitement et sans inscription. <b>Pour les instituts sérieux</b> sans site web, qui gagnent en
-            visibilité auprès des futurs étudiants — notre équipe collecte et vérifie l'information avec eux,
+            visibilité auprès des futurs étudiants : notre équipe collecte et vérifie l'information avec eux,
             gratuitement.
           </p>
         </section>

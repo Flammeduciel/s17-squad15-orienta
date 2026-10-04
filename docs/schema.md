@@ -1,4 +1,4 @@
-# Orienta Brazzaville — Database Schema
+# Orienta Brazzaville - Database Schema
 
 The schema follows the back-office: every list the Squad manages there is a table
 here. The executable version is `backend/scripts/migrate.sql`; `docs/schema.sql`
@@ -188,7 +188,7 @@ Private higher education institutes in Brazzaville.
 | id | SERIAL PK | Unique identifier |
 | name | VARCHAR(200) UNIQUE | Full name |
 | short_name | VARCHAR(20) UNIQUE | Acronym (ex: ISGF, ESIM) |
-| district | VARCHAR(50) | One of the 9 Brazzaville districts, written with accents (`Makélékélé`, `Talangaï`…) — CHECK constraint |
+| district | VARCHAR(50) | One of the 9 Brazzaville districts, written with accents (`Makélékélé`, `Talangaï`…) - CHECK constraint |
 | address | VARCHAR(300) | Physical address |
 | phone | VARCHAR(20) | Phone number |
 | whatsapp | VARCHAR(20) | WhatsApp number (international, no +) |
@@ -202,7 +202,7 @@ Private higher education institutes in Brazzaville.
 | registration_deadline | DATE | Enrollment deadline |
 | start_date | DATE | School year start (not before the deadline) |
 | accreditation_number | VARCHAR(100) | Official accreditation number; null = not accredited |
-| accredited | BOOLEAN (generated) | True when `accreditation_number` is set — drives the blue badge (EX-05 / EX-14) |
+| accredited | BOOLEAN (generated) | True when `accreditation_number` is set - drives the blue badge (EX-05 / EX-14) |
 | created_at | TIMESTAMP | Creation date |
 | updated_at | TIMESTAMP | Last update date |
 
