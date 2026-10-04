@@ -3,39 +3,38 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import { useSearch } from '../../context/search-context';
 import { formationPath, institutPath } from '../../routes';
-import { normalize } from '../../utils/format';
+import { normalize, pluriel } from '../../utils/format';
 
 // Barre de recherche de l'accueil : mot-clé, arrondissement, diplôme (EX-01, EX-02).
-// En tapant, des suggestions apparaissent : instituts, débouchés, formations.
-export default function SearchBar({ data, onSearch }) {
+// Chaque lettre tapée met à jour le filtre « q » : l'accueil relance alors la
+// recherche dans l'API, et la grille comme les suggestions suivent.
+// found : formations et instituts renvoyés par l'API pour la recherche en cours.
+export default function SearchBar({ data, found, onSearch }) {
   const { filters, change } = useSearch();
   const navigate = useNavigate();
-  const [text, setText] = useState(filters.q);
   const [open, setOpen] = useState(false);
 
-  const word = normalize(text.trim());
-  const institutes = word
-    ? data.institutes
-        .filter((i) => normalize(i.name).includes(word) || normalize(i.short_name).includes(word))
-        .slice(0, 3)
-    : [];
-  const careers = word ? data.careers.filter((name) => normalize(name).includes(word)).slice(0, 5) : [];
-  const programs = word
-    ? data.programs
-        .filter((p) => normalize(p.name).includes(word) || normalize(p.domain.name).includes(word))
+  // Suggestions : les premiers résultats de l'API, et les débouchés de ces
+  // formations dont le nom contient le mot tapé.
+  const word = normalize(filters.q.trim());
+  const institutes = word ? found.institutes.slice(0, 3) : [];
+  const programs = word ? found.programs.slice(0, 5) : [];
+  const careers = word
+    ? [...new Set(found.programs.flatMap((program) => program.careers))]
+        .filter((name) => normalize(name).includes(word))
         .slice(0, 5)
     : [];
   const hasSuggestions = institutes.length + careers.length + programs.length > 0;
 
+  // Entrée ou « Rechercher » : on ferme les suggestions et on montre la grille.
   const onSubmit = (event) => {
     event.preventDefault();
-    change({ q: text.trim() });
+    change({ q: filters.q.trim() });
     setOpen(false);
     onSearch();
   };
 
   const pickCareer = (name) => {
-    setText('');
     setOpen(false);
     change({ q: '', careers: [name], view: 'form' });
     onSearch();
@@ -52,9 +51,9 @@ export default function SearchBar({ data, onSearch }) {
         <input
           id="s-q"
           placeholder="ex. ISGF, comptabilité, BTS"
-          value={text}
+          value={filters.q}
           onChange={(event) => {
-            setText(event.target.value);
+            change({ q: event.target.value });
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
@@ -82,7 +81,7 @@ export default function SearchBar({ data, onSearch }) {
                 </span>
                 <span>
                   {name}
-                  <small>{data.programs.filter((p) => p.careers.includes(name)).length} formation(s)</small>
+                  <small>{pluriel(found.programs.filter((p) => p.careers.includes(name)).length, 'formation')}</small>
                 </span>
               </button>
             ))}

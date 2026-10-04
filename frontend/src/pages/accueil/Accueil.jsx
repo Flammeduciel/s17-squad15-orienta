@@ -12,12 +12,15 @@ import {
 import Icon from '../../components/Icon';
 import { useSearch } from '../../context/search-context';
 import { useApi } from '../../hooks/useApi';
+import { useDebounce } from '../../hooks/useDebounce';
 import FilterPanel from './FilterPanel';
+import { searchParams } from './filters';
 import Results from './Results';
 import SearchBar from './SearchBar';
 
-// Tout ce dont l'accueil a besoin, chargé en une fois. Le catalogue est petit :
-// les filtres s'appliquent ensuite dans le navigateur, sans nouvel appel.
+// Repères de l'accueil, chargés une seule fois : listes des filtres, totaux des
+// quatre accès, formations consultées récemment. La recherche, elle, interroge
+// l'API à chaque changement (voir loadSearch).
 async function loadHome() {
   const [programs, institutes, domains, degrees, bacSeries, districts] = await Promise.all([
     getPrograms(),
@@ -42,6 +45,13 @@ async function loadHome() {
   };
 }
 
+// Recherche : l'API renvoie les formations et les instituts qui correspondent
+// au mot tapé et aux filtres.
+async function loadSearch(params, sort) {
+  const [programs, institutes] = await Promise.all([getPrograms({ ...params, sort }), getInstitutes(params)]);
+  return { programs, institutes };
+}
+
 // Catalogue vide, utilisé tant que les données ne sont pas arrivées : l'accueil
 // s'affiche tout de suite, et se remplit ensuite.
 const EMPTY = { programs: [], institutes: [], domains: [], degrees: [], bacSeries: [], careers: [], districts: [] };
@@ -49,6 +59,15 @@ const EMPTY = { programs: [], institutes: [], domains: [], degrees: [], bacSerie
 function Accueil() {
   const { data: loaded, loading, error, reload } = useApi(loadHome, []);
   const { filters, change } = useSearch();
+
+  // On attend que le visiteur arrête de taper, ou de déplacer le curseur du
+  // budget, avant d'interroger l'API.
+  const q = useDebounce(filters.q.trim());
+  const budget = useDebounce(filters.budget);
+  const params = searchParams({ ...filters, q, budget });
+  const search = useApi(() => loadSearch(params, filters.sort), [params, filters.sort]);
+  // Pendant une nouvelle recherche, les résultats précédents restent affichés.
+  const found = search.data ?? search.lastData;
   const [filtersOpen, setFiltersOpen] = useState(false);
   const resultsRef = useRef(null);
 
@@ -77,7 +96,7 @@ function Accueil() {
         <div className="wrap">
           <h1>Trouve ton institut à Brazzaville</h1>
           <p>Instituts privés, formations, diplômes et débouchés : tout au même endroit, sans te déplacer.</p>
-          <SearchBar data={data} onSearch={scrollToResults} />
+          <SearchBar data={data} found={found ?? EMPTY} onSearch={scrollToResults} />
           <div className="access" role="group" aria-label="Parcourir">
             {access.map((item) => (
               <button
@@ -124,12 +143,23 @@ function Accueil() {
       </nav>
 
       <div className="wrap layout" ref={resultsRef}>
-        <FilterPanel data={data} ready={Boolean(loaded)} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
+        <FilterPanel
+          data={data}
+          programs={found ? found.programs : []}
+          ready={Boolean(loaded)}
+          open={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+        />
         <Results
           data={data}
-          loading={loading}
-          error={error}
-          onRetry={reload}
+          found={found ?? EMPTY}
+          loading={loading || !found}
+          searching={search.loading}
+          error={error || (found ? null : search.error)}
+          onRetry={() => {
+            reload();
+            search.reload();
+          }}
           onOpenFilters={() => setFiltersOpen(true)}
         />
       </div>

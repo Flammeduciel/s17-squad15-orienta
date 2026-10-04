@@ -1,5 +1,3 @@
-import { matches } from '../../utils/format';
-
 // Bornes du curseur « Budget par an » (FCFA). À MAX_BUDGET, il n'y a pas de limite.
 export const MIN_BUDGET = 300000;
 export const MAX_BUDGET = 800000;
@@ -22,20 +20,26 @@ export const emptyFilters = () => ({
   view: 'inst',
 });
 
-// Vrai si la formation correspond à tous les filtres.
+// Critères envoyés à l'API (GET /programs et GET /institutes) : le mot recherché
+// et les filtres à une seule valeur. L'API n'accepte qu'une valeur par critère :
+// les listes à choix multiples (arrondissements, débouchés, diplômes, durées)
+// sont appliquées ensuite, dans le navigateur, par programMatches.
+export function searchParams(filters) {
+  const params = {};
+  if (filters.q) params.q = filters.q;
+  if (filters.domain) params.domain_id = filters.domain;
+  if (filters.budget < MAX_BUDGET) params.max_tuition = filters.budget;
+  if (filters.series) params.bac_series = filters.series;
+  if (filters.evening) params.evening = true;
+  if (filters.internship) params.internship = true;
+  if (filters.installments) params.installments = true;
+  return params;
+}
+
+// Vrai si la formation correspond aux filtres. Le mot recherché n'est pas vérifié
+// ici : les formations reçues de l'API y correspondent déjà.
 export function programMatches(program, filters) {
   const { institute } = program;
-  if (filters.q) {
-    const text = [
-      program.name,
-      program.careers.join(' '),
-      institute.name,
-      institute.short_name,
-      program.domain.name,
-      program.degree.name,
-    ].join(' ');
-    if (!matches(filters.q, text)) return false;
-  }
   if (filters.domain && program.domain.id !== filters.domain) return false;
   if (filters.careers.length && !filters.careers.some((career) => program.careers.includes(career))) return false;
   if (filters.degrees.length && !filters.degrees.includes(program.degree.name)) return false;
@@ -74,16 +78,16 @@ const hasProgramFilter = (filters) =>
       filters.installments,
   );
 
-// Instituts à afficher : ceux qui ont au moins une formation correspondant aux
-// filtres ; sans filtre de formation, tous les instituts (liste exhaustive).
+// Instituts à afficher, parmi ceux que l'API a trouvés : ceux qui ont au moins
+// une formation correspondant aux filtres ; sans filtre de formation, tous
+// (ils correspondent au mot recherché par leur nom).
 export function instituteResults(institutes, programs, filters) {
   return institutes.filter((institute) => {
     if (programs.some((program) => program.institute.id === institute.id && programMatches(program, filters))) {
       return true;
     }
     if (hasProgramFilter(filters)) return false;
-    if (filters.districts.length && !filters.districts.includes(institute.district)) return false;
-    return matches(filters.q, `${institute.name} ${institute.short_name} ${institute.district}`);
+    return !filters.districts.length || filters.districts.includes(institute.district);
   });
 }
 

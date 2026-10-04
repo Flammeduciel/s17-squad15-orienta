@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
  * - loader : fonction qui renvoie une promesse (un appel de src/api/).
  * - deps   : quand une de ces valeurs change, les données sont rechargées.
  * - reload : relance le chargement, par exemple depuis un bouton « Réessayer ».
+ * - lastData : le dernier résultat reçu, encore disponible pendant qu'une nouvelle
+ *   demande est en cours (pour ne pas vider une liste à chaque recherche).
  */
 export function useApi(loader, deps) {
   // « key » identifie la demande en cours : tant que le résultat gardé n'est pas
@@ -31,6 +33,7 @@ export function useApi(loader, deps) {
   const loading = result.key !== key;
   return {
     data: loading ? null : result.data,
+    lastData: result.data,
     loading,
     error: loading ? null : result.error,
     reload: () => setReloadCount((count) => count + 1),
