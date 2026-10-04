@@ -1,4 +1,4 @@
-/* Débouchés — route /debouches/:id (ticket P5).
+/* Débouchés - route /debouches/:id (ticket P5).
    Maquette : template/index.html. */
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';

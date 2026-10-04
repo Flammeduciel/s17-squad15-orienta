@@ -1,4 +1,4 @@
-/* Formulaire institut — routes /admin/instituts/nouveau et /admin/instituts/:id (ticket P17).
+/* Formulaire institut - routes /admin/instituts/nouveau et /admin/instituts/:id (ticket P17).
    Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
 import { useRef, useState } from 'react';
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom';

@@ -1,4 +1,4 @@
-/* Fiche institut — route /instituts/:id (ticket P6).
+/* Fiche institut - route /instituts/:id (ticket P6).
    Maquette : template/index.html. */
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -128,7 +128,7 @@ function FicheInstitut() {
           {/* Contact direct : WhatsApp pré-rempli, e-mail, appel (EX-06). */}
           <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
             <a className="btn wa" href={whatsappLink(institute, waMessage)} target="_blank" rel="noopener">
-              WhatsApp — message pré-rempli
+              WhatsApp (message pré-rempli)
             </a>
             {institute.email && (
               <a className="btn line" href={mailLink(institute, "Demande d'informations")}>

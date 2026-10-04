@@ -1,4 +1,4 @@
-/* Accueil et recherche — route / (ticket P2).
+/* Accueil et recherche - route / (ticket P2).
    Maquette : template/index.html. */
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -64,7 +64,7 @@ function Accueil() {
   const resultsRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'Orienta Brazzaville — Les instituts privés de Brazzaville, au même endroit';
+    document.title = 'Orienta Brazzaville - Les instituts privés de Brazzaville, au même endroit';
   }, []);
 
   const data = loaded ?? EMPTY;

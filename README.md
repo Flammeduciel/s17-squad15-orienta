@@ -17,10 +17,10 @@ Orienta centralise les fiches des instituts privés de Brazzaville (formations, 
 
 ```
 orienta/
-├── backend/          # API REST — Node.js (Express) + PostgreSQL
+├── backend/          # API REST - Node.js (Express) + PostgreSQL
 │   └── scripts/      # migrate.sql, seed.sql, reset.sql, start.sh
-├── frontend/         # Site public — React (JavaScript, Vite)
-├── back-office/      # Interface Squad — React (JavaScript, Vite)
+├── frontend/         # Site public - React (JavaScript, Vite)
+├── back-office/      # Interface Squad - React (JavaScript, Vite)
 ├── template/         # Maquettes HTML autonomes : index.html (site public), back-office.html
 ├── product/          # Product Discovery, catalogue des exigences, user stories, FRD
 ├── docs/             # Contrat d'API (openapi.yaml), schéma de base, roadmap, cadrage Jira
@@ -71,7 +71,7 @@ npm run dev
 
 Le fichier `docs/openapi.yaml` est la source de vérité pour les 3 applications. Il décrit tous les endpoints, les paramètres et les formats de réponses. Toute modification passe par une PR revue par le lead dev.
 
-**Nomenclature :** chemins, paramètres et champs de réponse sont en anglais, alignés sur les colonnes de la base (`docs/schema.sql`). Seul le contenu métier reste en français — libellés affichés, messages d'erreur, noms des diplômes, des débouchés ou des arrondissements.
+**Nomenclature :** chemins, paramètres et champs de réponse sont en anglais, alignés sur les colonnes de la base (`docs/schema.sql`). Seul le contenu métier reste en français - libellés affichés, messages d'erreur, noms des diplômes, des débouchés ou des arrondissements.
 
 ### Endpoints principaux
 
@@ -115,7 +115,7 @@ Le contrat complet compte 43 opérations ; ce tableau n'en donne que les famille
 
 ## Règles de gestion
 
-1. Le contrat d'API ne change pas en silence — toute modification passe par une PR revue par le lead dev.
-2. Les 3 apps consomment le même contrat — les appels API respectent openapi.yaml.
-3. Pas de compte utilisateur côté étudiant — l'accès public est totalement libre.
-4. L'admin est réservé à la Squad — authentification JWT requise pour les routes /admin, et aucune inscription : les comptes sont ouverts par un SuperAdmin.
+1. Le contrat d'API ne change pas en silence - toute modification passe par une PR revue par le lead dev.
+2. Les 3 apps consomment le même contrat - les appels API respectent openapi.yaml.
+3. Pas de compte utilisateur côté étudiant - l'accès public est totalement libre.
+4. L'admin est réservé à la Squad - authentification JWT requise pour les routes /admin, et aucune inscription : les comptes sont ouverts par un SuperAdmin.

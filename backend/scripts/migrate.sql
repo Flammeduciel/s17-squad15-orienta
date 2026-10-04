@@ -1,12 +1,12 @@
 -- ============================================================================
--- ORIENTA BRAZZAVILLE — Migration (PostgreSQL 12+)
+-- ORIENTA BRAZZAVILLE - Migration (PostgreSQL 12+)
 -- ============================================================================
 -- Run with: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/scripts/migrate.sql
 -- Creates all tables, indexes and the indicators view.
 --
 -- The script is idempotent: scripts/start.sh runs it at every start of the API.
 -- The model follows the back-office (template/back-office.html): every list the
--- Squad manages there is a table here — institutes, programs, courses, degrees,
+-- Squad manages there is a table here - institutes, programs, courses, degrees,
 -- careers, bac series and domains.
 -- ============================================================================
 
@@ -17,7 +17,7 @@ BEGIN;
 -- ---------------------------------------------------------------------------
 -- The first schema stored the degree as a text column of `programs`, tied each
 -- course to a single program and had no table for degrees or bac series. It
--- cannot be altered in place into the model below, so it is rebuilt — but only
+-- cannot be altered in place into the model below, so it is rebuilt - but only
 -- when it holds no data. With data, the migration stops: run scripts/reset.sql
 -- knowingly, then start again. Accounts (`users`) are always kept.
 DO $$
@@ -36,7 +36,7 @@ BEGIN
 END $$;
 
 -- ---------------------------------------------------------------------------
--- Table: users (Squad accounts — EX-15, EX-16)
+-- Table: users (Squad accounts - EX-15, EX-16)
 -- ---------------------------------------------------------------------------
 -- A member of the Squad signs in with an e-mail address and a password.
 CREATE TABLE IF NOT EXISTS users (
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS contact_requests (
 );
 
 -- ---------------------------------------------------------------------------
--- View: indicators (the 5 dashboard KPI — EX-07)
+-- View: indicators (the 5 dashboard KPI - EX-07)
 -- ---------------------------------------------------------------------------
 -- Dropped first: CREATE OR REPLACE cannot rename the columns of an existing view.
 DROP VIEW IF EXISTS indicators;

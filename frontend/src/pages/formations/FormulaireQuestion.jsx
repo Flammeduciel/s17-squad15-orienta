@@ -1,4 +1,4 @@
-/* Question à un institut — formulaire affiché dans la fiche formation (ticket P9).
+/* Question à un institut - formulaire affiché dans la fiche formation (ticket P9).
    Maquette : template/index.html. */
 import { useState } from 'react';
 import { sendQuestion } from '../../api/catalogue';

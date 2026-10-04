@@ -11,12 +11,12 @@ async function checkDomain(domainId) {
   }
 }
 
-/** `GET /careers` — débouchés proposés sur le site public. */
+/** `GET /careers` - débouchés proposés sur le site public. */
 async function listCareers(req, res) {
   res.json(await careers.findPublished());
 }
 
-/** `GET /admin/careers` — tout le référentiel, pour le back-office. */
+/** `GET /admin/careers` - tout le référentiel, pour le back-office. */
 async function listAllCareers(req, res) {
   res.json(await careers.findAll());
 }
@@ -46,7 +46,7 @@ async function updateCareer(req, res) {
   res.json({ ...career, program_count: await careers.countPrograms(id) });
 }
 
-/** `DELETE /admin/careers/:id` — refusé tant qu'une formation porte ce débouché. */
+/** `DELETE /admin/careers/:id` - refusé tant qu'une formation porte ce débouché. */
 async function deleteCareer(req, res) {
   const { id } = req.valid.params;
   const career = await careers.findById(id);

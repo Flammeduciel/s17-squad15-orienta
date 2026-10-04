@@ -1,4 +1,4 @@
-/* Séries du bac — route /admin/series (ticket P22).
+/* Séries du bac - route /admin/series (ticket P22).
    Maquette : template/back-office.html. */
 import { createBacSeries, deleteBacSeries, getBacSeries, getPrograms, updateBacSeries } from '../../api/catalogue';
 import Referentiel from './Referentiel';
@@ -15,7 +15,7 @@ const config = {
   nameLabel: 'Série',
   namePlaceholder: 'ex. A',
   column: 'Libellé',
-  cell: (series) => series.label || '—',
+  cell: (series) => series.label || '-',
   empty: { code: '', label: '' },
   field: (form, setForm) => (
     <div className="fld">

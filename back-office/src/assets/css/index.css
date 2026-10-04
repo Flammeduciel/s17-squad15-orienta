@@ -1,7 +1,7 @@
 /**
  * assets/css/index.css
  * ---------------------------------------------------------------------------
- * Point d'entrée du design system Orienta — back-office.
+ * Point d'entrée du design system Orienta - back-office.
  *
  * Importé une seule fois, au démarrage de l'application :
  *
@@ -9,17 +9,17 @@
  *
  * Le design system reprend le CSS de la maquette `template/back-office.html`, éclaté par
  * rôle. L'ordre d'import est significatif :
- *   1. `tokens`      — variables du design system : couleurs, typographies, ombre, en thème clair et sombre ;
- *   2. `base`        — réinitialisation, typographie de base, focus clavier et texte réservé aux lecteurs d'écran ;
- *   3. `shell`       — coquille du back-office : menu latéral, barre supérieure, fil d'Ariane, zone de page, pied ;
- *   4. `buttons`     — boutons : `.btn` et ses variantes, bouton-lien, boutons d'action des tableaux ;
- *   5. `badges`      — étiquettes : badge d'agrément et statuts ;
- *   6. `forms`       — formulaires : champs, cases à cocher, groupes, pied de formulaire, messages ;
- *   7. `dashboard`   — blocs de contenu : cartes KPI, panneaux, colonnes, lignes libellé / valeur ;
- *   8. `tables`      — listes : barre d'outils, filtres segmentés, tableau, pagination, état vide, barre de rattachement ;
- *   9. `login`       — écran de connexion ;
- *   10. `overlays`    — messages éphémères et fenêtre de confirmation ;
- *   11. `responsive`  — adaptations par largeur d'écran et mouvement réduit.
+ *   1. `tokens`      - variables du design system : couleurs, typographies, ombre, en thème clair et sombre ;
+ *   2. `base`        - réinitialisation, typographie de base, focus clavier et texte réservé aux lecteurs d'écran ;
+ *   3. `shell`       - coquille du back-office : menu latéral, barre supérieure, fil d'Ariane, zone de page, pied ;
+ *   4. `buttons`     - boutons : `.btn` et ses variantes, bouton-lien, boutons d'action des tableaux ;
+ *   5. `badges`      - étiquettes : badge d'agrément et statuts ;
+ *   6. `forms`       - formulaires : champs, cases à cocher, groupes, pied de formulaire, messages ;
+ *   7. `dashboard`   - blocs de contenu : cartes KPI, panneaux, colonnes, lignes libellé / valeur ;
+ *   8. `tables`      - listes : barre d'outils, filtres segmentés, tableau, pagination, état vide, barre de rattachement ;
+ *   9. `login`       - écran de connexion ;
+ *   10. `overlays`    - messages éphémères et fenêtre de confirmation ;
+ *   11. `responsive`  - adaptations par largeur d'écran et mouvement réduit.
  *
  * `tokens` vient en premier parce que tout le reste lit ses variables ;
  * `responsive` en dernier parce qu'il corrige les autres fichiers. Entre les

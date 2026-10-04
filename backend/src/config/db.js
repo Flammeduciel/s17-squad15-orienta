@@ -17,7 +17,7 @@ const pool = databaseUrl
 // erreur sur le pool : sans écouteur, elle arrêterait le processus.
 if (pool) {
   pool.on('error', (error) => {
-    console.error('PostgreSQL : connexion inactive perdue —', error.message);
+    console.error('PostgreSQL : connexion inactive perdue -', error.message);
   });
 }
 
@@ -45,7 +45,7 @@ async function checkDatabase() {
     await pool.query('SELECT 1');
     return { status: 'up', latency_ms: Date.now() - start };
   } catch (error) {
-    console.error('PostgreSQL injoignable —', error.message);
+    console.error('PostgreSQL injoignable -', error.message);
     return { status: 'down' };
   }
 }

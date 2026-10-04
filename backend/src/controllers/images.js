@@ -1,7 +1,7 @@
 const httpError = require('../utils/httpError');
 
 /**
- * `POST /admin/images` — enregistre une image d'institut et renvoie son
+ * `POST /admin/images` - enregistre une image d'institut et renvoie son
  * adresse, à mettre ensuite dans `image_url` (image des cartes) ou
  * `banner_url` (bannière de la fiche) de l'institut.
  *

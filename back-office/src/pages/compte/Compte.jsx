@@ -1,4 +1,4 @@
-/* Compte — route /compte (ticket P10).
+/* Compte - route /compte (ticket P10).
    Maquette : template/back-office.html. */
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';

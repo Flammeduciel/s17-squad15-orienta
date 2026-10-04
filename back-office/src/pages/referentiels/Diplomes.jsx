@@ -1,4 +1,4 @@
-/* Diplômes — route /admin/diplomes (ticket P20).
+/* Diplômes - route /admin/diplomes (ticket P20).
    Maquette : template/back-office.html. */
 import { createDegree, deleteDegree, getDegrees, getPrograms, updateDegree } from '../../api/catalogue';
 import { ans } from '../../utils/format';

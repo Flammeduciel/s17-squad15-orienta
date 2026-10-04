@@ -1,5 +1,5 @@
 -- ============================================================================
--- ORIENTA BRAZZAVILLE — Réinitialisation du catalogue
+-- ORIENTA BRAZZAVILLE - Réinitialisation du catalogue
 -- ============================================================================
 -- Exécuter avec : psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/scripts/reset.sql
 --

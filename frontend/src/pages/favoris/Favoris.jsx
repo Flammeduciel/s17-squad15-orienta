@@ -1,4 +1,4 @@
-/* Favoris — route /favoris (ticket P3).
+/* Favoris - route /favoris (ticket P3).
    Maquette : template/index.html. */
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';

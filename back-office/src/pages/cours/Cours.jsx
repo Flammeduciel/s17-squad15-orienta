@@ -1,4 +1,4 @@
-/* Cours — route /admin/cours (ticket P19).
+/* Cours - route /admin/cours (ticket P19).
    Maquette : template/back-office.html. */
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -22,8 +22,8 @@ import { errorMessage, matches, niveau, pageOf } from '../../utils/format';
 
 const PER_PAGE = 10;
 
-// Libellé d'une formation dans les listes : « Sage-femme — ISD ».
-const programLabel = (program) => `${program.name} — ${program.institute.short_name}`;
+// Libellé d'une formation dans les listes : « Sage-femme - ISD ».
+const programLabel = (program) => `${program.name} - ${program.institute.short_name}`;
 
 function Cours() {
   const toast = useToast();
@@ -406,7 +406,7 @@ function Cours() {
                                 <small style={{ color: 'var(--muted)' }}>
                                   {course.programs
                                     .slice(0, 2)
-                                    .map((item) => `${item.program_name} — ${item.institute_short_name}`)
+                                    .map((item) => `${item.program_name} - ${item.institute_short_name}`)
                                     .join(' · ')}
                                   {count > 2 ? ' …' : ''}
                                 </small>

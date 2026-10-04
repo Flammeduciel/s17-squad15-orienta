@@ -1,4 +1,4 @@
-/* Formulaire formation — routes /admin/formations/nouvelle et /admin/formations/:id (ticket P15).
+/* Formulaire formation - routes /admin/formations/nouvelle et /admin/formations/:id (ticket P15).
    Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
 import { useState } from 'react';
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
@@ -191,7 +191,7 @@ function ProgramForm({ program, lists, onClose, onSaved }) {
               <select id="f-dip" value={form.degree_id} onChange={onDegree}>
                 {lists.degrees.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.name} — {ans(item.duration)}
+                    {item.name} ({ans(item.duration)})
                   </option>
                 ))}
               </select>
@@ -208,7 +208,7 @@ function ProgramForm({ program, lists, onClose, onSaved }) {
               <select id="f-inst" name="institute_id" value={form.institute_id} onChange={onChange}>
                 {lists.institutes.map((institute) => (
                   <option key={institute.id} value={institute.id}>
-                    {institute.short_name} — {institute.name}
+                    {institute.short_name} - {institute.name}
                   </option>
                 ))}
               </select>
@@ -328,7 +328,7 @@ function ProgramForm({ program, lists, onClose, onSaved }) {
                       }
                     />
                     Série {series.code}
-                    {series.label ? ` — ${series.label}` : ''}
+                    {series.label ? ` (${series.label})` : ''}
                   </label>
                 ))}
               </div>
@@ -436,8 +436,8 @@ function ProgramForm({ program, lists, onClose, onSaved }) {
           <div className="fld">
             <label htmlFor="f-statut">Statut</label>
             <select id="f-statut" name="status" value={form.status} onChange={onChange}>
-              <option value="published">Publiée — visible sur le site public</option>
-              <option value="draft">Brouillon — invisible du public</option>
+              <option value="published">Publiée : visible sur le site public</option>
+              <option value="draft">Brouillon : invisible du public</option>
             </select>
           </div>
         </fieldset>

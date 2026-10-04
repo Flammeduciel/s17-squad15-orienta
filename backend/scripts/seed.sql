@@ -1,5 +1,5 @@
 -- ============================================================================
--- ORIENTA BRAZZAVILLE — Données de démonstration (seed)
+-- ORIENTA BRAZZAVILLE - Données de démonstration (seed)
 -- ============================================================================
 -- Exécuter avec : psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/scripts/seed.sql
 -- Insère le même jeu de démonstration que les maquettes (template/) :
@@ -9,7 +9,7 @@
 --
 -- Nomenclature alignée sur backend/scripts/migrate.sql (noms anglais).
 --
--- ATTENTION — ce seed est à exécuter UNE SEULE FOIS, sur une base fraîchement
+-- ATTENTION - ce seed est à exécuter UNE SEULE FOIS, sur une base fraîchement
 -- migrée. Un garde-fou ci-dessous le fait échouer proprement si la base
 -- contient déjà des instituts, plutôt que de mélanger démonstration et données
 -- réelles.
@@ -43,7 +43,7 @@ INSERT INTO domains (id, name, color, icon) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Diplômes (4) — la durée des études est portée par le diplôme.
+-- Diplômes (4) - la durée des études est portée par le diplôme.
 -- ---------------------------------------------------------------------------
 INSERT INTO degrees (name, duration) VALUES
     ('BTS', 2),
@@ -180,7 +180,7 @@ JOIN degrees d ON d.name = v.degree
 ORDER BY v.pos;
 
 -- ---------------------------------------------------------------------------
--- Tarifs par niveau — un montant par année d'études du diplôme.
+-- Tarifs par niveau - un montant par année d'études du diplôme.
 -- ---------------------------------------------------------------------------
 INSERT INTO program_fees (program_id, year, amount)
 SELECT p.id, g.year, v.tuition
@@ -190,7 +190,7 @@ JOIN degrees d ON d.id = p.degree_id
 CROSS JOIN generate_series(1, d.duration) AS g(year);
 
 -- ---------------------------------------------------------------------------
--- Séries du bac admises par formation — une ligne par lettre.
+-- Séries du bac admises par formation - une ligne par lettre.
 -- ---------------------------------------------------------------------------
 INSERT INTO program_bac_series (program_id, series_id)
 SELECT p.id, s.id

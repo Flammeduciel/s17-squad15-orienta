@@ -20,7 +20,7 @@ const PROGRAM_FILTERS = [
 ];
 
 /**
- * `GET /institutes` — liste des instituts.
+ * `GET /institutes` - liste des instituts.
  *
  * Sans critère de formation, tous les instituts sont renvoyés (filtrés par
  * arrondissement, agrément et recherche `q` sur leur nom). Avec un critère de
@@ -56,7 +56,7 @@ async function listInstitutes(req, res) {
   return res.json({ total: items.length, items });
 }
 
-/** `GET /institutes/:id` — fiche d'un institut, avec ses formations publiées. */
+/** `GET /institutes/:id` - fiche d'un institut, avec ses formations publiées. */
 async function getInstitute(req, res) {
   const institute = await institutes.findById(req.valid.params.id);
   if (!institute) throw httpError(...NOT_FOUND);
@@ -68,7 +68,7 @@ function publishedPrograms(instituteId) {
   return programService.search({ institute_id: instituteId, status: 'published' });
 }
 
-/** `GET /districts` — les 9 arrondissements, avec leur nombre de formations publiées. */
+/** `GET /districts` - les 9 arrondissements, avec leur nombre de formations publiées. */
 async function listDistricts(req, res) {
   const counts = await institutes.countByDistrict();
   res.json(
@@ -107,7 +107,7 @@ async function updateInstitute(req, res) {
   res.json({ ...(await institutes.findById(id)), programs: await publishedPrograms(id) });
 }
 
-/** `DELETE /admin/institutes/:id` — supprime aussi les formations de l'institut. */
+/** `DELETE /admin/institutes/:id` - supprime aussi les formations de l'institut. */
 async function deleteInstitute(req, res) {
   const found = await institutes.remove(req.valid.params.id);
   if (!found) throw httpError(...NOT_FOUND);

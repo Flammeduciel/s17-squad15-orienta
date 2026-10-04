@@ -1,4 +1,4 @@
-/* Domaines d'insertion — route /admin/domaines (ticket P23).
+/* Domaines d'insertion - route /admin/domaines (ticket P23).
    Maquette : template/back-office.html. */
 import {
   createDomain,

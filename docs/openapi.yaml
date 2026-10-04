@@ -1,7 +1,7 @@
 openapi: 3.0.3
 
 # ============================================================================
-# API ORIENTA — Contrat d'API officiel (V1)
+# API ORIENTA - Contrat d'API officiel (V1)
 # ----------------------------------------------------------------------------
 # Source de vérité unique pour le backend, le frontend public et le back-office.
 # Toute modification de ce fichier passe par une PR revue par le lead dev,
@@ -18,7 +18,7 @@ info:
   title: API Orienta
   version: 2.0.0
   description: |
-    API de la plateforme **Orienta** — orientation des nouveaux bacheliers vers
+    API de la plateforme **Orienta** - orientation des nouveaux bacheliers vers
     les instituts privés de Brazzaville (MVP V1, périmètre Brazzaville).
 
     **Rappels de cadrage :**
@@ -50,14 +50,14 @@ servers:
 
 tags:
   - name: Public
-    description: Consultation libre — site étudiant (frontend)
+    description: Consultation libre - site étudiant (frontend)
   - name: Contact
     description: Formulaire public de contact d'un institut
   - name: Auth
     description: Authentification Squad (back-office)
   - name: Admin
-    description: CRUD back-office — authentification Bearer requise
-  - name: Admin — Référentiels
+    description: CRUD back-office - authentification Bearer requise
+  - name: Admin - Référentiels
     description: Diplômes, séries du bac, domaines d'insertion, débouchés et cours
 
 security: []
@@ -128,7 +128,7 @@ paths:
         Sans critère, renvoie tous les instituts de la plateforme (liste
         exhaustive). Avec un critère de formation (`q`, domaine, diplôme,
         débouché, durée, budget, série…), renvoie les instituts qui proposent au
-        moins une formation publiée correspondante — ou dont le nom, le sigle ou
+        moins une formation publiée correspondante - ou dont le nom, le sigle ou
         l'arrondissement correspond à `q`.
       parameters:
         - $ref: "#/components/parameters/Q"
@@ -238,7 +238,7 @@ paths:
     get:
       tags: [Public]
       summary: Lister les débouchés
-      description: Liste triée des débouchés portés par au moins une formation publiée — pour le filtre « débouché visé ».
+      description: Liste triée des débouchés portés par au moins une formation publiée - pour le filtre « débouché visé ».
       responses:
         "200":
           description: Débouchés avec nombre de formations associées
@@ -327,14 +327,14 @@ paths:
           description: Session terminée
 
   # --------------------------------------------------------------------------
-  # ADMIN (back-office — Bearer requis)
+  # ADMIN (back-office - Bearer requis)
   # --------------------------------------------------------------------------
   /admin/indicators:
     get:
       tags: [Admin]
       summary: KPI du dashboard
       description: |
-        Les 5 indicateurs officiels du dashboard Squad (EX-07) — cette liste est
+        Les 5 indicateurs officiels du dashboard Squad (EX-07) - cette liste est
         LA référence unique (elle doit être identique partout : FRD, back-office).
         Correspond à la vue SQL `indicators`.
       security:
@@ -583,7 +583,7 @@ paths:
     post:
       tags: [Admin]
       summary: Téléverser une image d'institut
-      description: Upload multipart (image des cartes ou bannière de la fiche — EX-04). L'adresse renvoyée se met dans `image_url` ou `banner_url` de l'institut. Formats acceptés JPEG/PNG/WebP, 2 Mo maximum.
+      description: Upload multipart (image des cartes ou bannière de la fiche - EX-04). L'adresse renvoyée se met dans `image_url` ou `banner_url` de l'institut. Formats acceptés JPEG/PNG/WebP, 2 Mo maximum.
       security:
         - bearerAuth: []
       requestBody:
@@ -613,13 +613,13 @@ paths:
           $ref: "#/components/responses/Unauthorized"
 
   # --------------------------------------------------------------------------
-  # ADMIN — RÉFÉRENTIELS (EX-08)
+  # ADMIN - RÉFÉRENTIELS (EX-08)
   # Lecture : routes publiques /degrees, /bac-series, /domains, /careers.
   # Une suppression est refusée (409) tant que l'élément est utilisé.
   # --------------------------------------------------------------------------
   /admin/degrees:
     post:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Créer un diplôme
       security:
         - bearerAuth: []
@@ -643,7 +643,7 @@ paths:
 
   /admin/degrees/{id}:
     put:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Modifier un diplôme
       description: |
         Changer `duration` s'applique à toutes les formations qui délivrent ce
@@ -673,7 +673,7 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
     delete:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Supprimer un diplôme
       security:
         - bearerAuth: []
@@ -691,7 +691,7 @@ paths:
 
   /admin/bac-series:
     post:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Créer une série du bac
       security:
         - bearerAuth: []
@@ -715,7 +715,7 @@ paths:
 
   /admin/bac-series/{id}:
     put:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Modifier une série du bac
       security:
         - bearerAuth: []
@@ -741,7 +741,7 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
     delete:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Supprimer une série du bac
       security:
         - bearerAuth: []
@@ -759,7 +759,7 @@ paths:
 
   /admin/domains:
     post:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Créer un domaine d'insertion
       description: L'identifiant (slug) est généré par le backend et ne change plus ensuite.
       security:
@@ -784,7 +784,7 @@ paths:
 
   /admin/domains/{id}:
     put:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Modifier un domaine d'insertion
       description: Renommer un domaine ne touche ni ses formations ni ses débouchés.
       security:
@@ -811,7 +811,7 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
     delete:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Supprimer un domaine d'insertion
       description: Refusé (409) tant qu'une formation ou un débouché y est rattaché.
       security:
@@ -830,7 +830,7 @@ paths:
 
   /admin/careers:
     get:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Lister tous les débouchés
       description: Contrairement à `/careers`, inclut les débouchés qui ne sont rattachés à aucune formation publiée.
       security:
@@ -846,7 +846,7 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
     post:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Créer un débouché
       security:
         - bearerAuth: []
@@ -870,7 +870,7 @@ paths:
 
   /admin/careers/{id}:
     put:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Modifier un débouché
       security:
         - bearerAuth: []
@@ -896,7 +896,7 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
     delete:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Supprimer un débouché
       security:
         - bearerAuth: []
@@ -914,7 +914,7 @@ paths:
 
   /admin/courses:
     get:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Lister le catalogue de cours
       security:
         - bearerAuth: []
@@ -938,7 +938,7 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
     post:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Créer un cours
       description: Le cours peut être rattaché d'emblée à une ou plusieurs formations, ou rester seul au catalogue.
       security:
@@ -963,7 +963,7 @@ paths:
 
   /admin/courses/{id}:
     put:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Modifier un cours et ses rattachements
       description: "`programs` remplace la liste complète des formations rattachées."
       security:
@@ -990,7 +990,7 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
     delete:
-      tags: [Admin — Référentiels]
+      tags: [Admin - Référentiels]
       summary: Supprimer un cours du catalogue
       description: Le cours est retiré du programme de toutes les formations qui le portaient.
       security:
@@ -1076,7 +1076,7 @@ components:
     DegreeId:
       name: degree_id
       in: query
-      description: Identifiants des diplômes délivrés (voir `/degrees`), séparés par des virgules — `degree_id=1,3`
+      description: Identifiants des diplômes délivrés (voir `/degrees`), séparés par des virgules - `degree_id=1,3`
       style: form
       explode: false
       schema:
@@ -1094,7 +1094,7 @@ components:
     Duration:
       name: duration
       in: query
-      description: Durées des études en années (celle du diplôme), séparées par des virgules — `duration=2,3`
+      description: Durées des études en années (celle du diplôme), séparées par des virgules - `duration=2,3`
       style: form
       explode: false
       schema:
@@ -1186,7 +1186,7 @@ components:
 
     District:
       type: object
-      description: Vue agrégée — les 9 arrondissements sont fixes ; les comptes viennent de `institutes.district`
+      description: Vue agrégée - les 9 arrondissements sont fixes ; les comptes viennent de `institutes.district`
       required: [name, institute_count, program_count]
       properties:
         name: { $ref: "#/components/schemas/DistrictName" }
@@ -1366,7 +1366,7 @@ components:
     # ---------------------------------------------------------------- Programs
     ProgramFee:
       type: object
-      description: Table `program_fees` — frais d'une année d'études
+      description: Table `program_fees` - frais d'une année d'études
       required: [year, amount]
       properties:
         year: { type: integer, minimum: 1, example: 1 }
@@ -1387,7 +1387,7 @@ components:
           properties:
             id: { type: integer, example: 2 }
             name: { type: string, example: Licence }
-        duration: { type: integer, example: 3, description: Années d'études — celle du diplôme }
+        duration: { type: integer, example: 3, description: Années d'études - celle du diplôme }
         tuition: { type: integer, example: 650000, description: "Frais de 1re année, en FCFA (raccourci de `fees[0].amount`)" }
         fees:
           type: array
@@ -1535,7 +1535,7 @@ components:
 
     Indicators:
       type: object
-      description: Vue SQL `indicators` — KPI du dashboard, liste de référence unique
+      description: Vue SQL `indicators` - KPI du dashboard, liste de référence unique
       required: [nb_institutes, nb_programs, nb_districts_covered, nb_degrees, nb_careers]
       properties:
         nb_institutes: { type: integer, example: 8, description: Établissements }

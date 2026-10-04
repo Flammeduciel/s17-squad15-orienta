@@ -1,4 +1,4 @@
-/* Connexion — route /connexion (ticket P1).
+/* Connexion - route /connexion (ticket P1).
    Maquette : template/back-office.html. */
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -18,7 +18,7 @@ function Connexion() {
   const passwordRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'Connexion — Orienta Brazzaville';
+    document.title = 'Connexion - Orienta Brazzaville';
   }, []);
 
   // Déjà connecté (ou connexion réussie) : retour à la page demandée, sinon tableau de bord.

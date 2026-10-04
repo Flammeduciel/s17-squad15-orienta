@@ -3,7 +3,7 @@ const bacSeries = require('../models/bacSeries');
 
 const NOT_FOUND = [404, 'SERIE_INTROUVABLE', 'Aucune série ne correspond à cet identifiant.'];
 
-/** `GET /bac-series` — liste des séries du bac. */
+/** `GET /bac-series` - liste des séries du bac. */
 async function listBacSeries(req, res) {
   res.json(await bacSeries.findAll());
 }
@@ -30,7 +30,7 @@ async function updateBacSeries(req, res) {
   res.json(series);
 }
 
-/** `DELETE /admin/bac-series/:id` — refusé tant qu'une formation admet cette série. */
+/** `DELETE /admin/bac-series/:id` - refusé tant qu'une formation admet cette série. */
 async function deleteBacSeries(req, res) {
   const { id } = req.valid.params;
   const series = await bacSeries.findById(id);

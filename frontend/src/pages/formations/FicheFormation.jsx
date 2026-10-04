@@ -1,4 +1,4 @@
-/* Fiche formation — route /formations/:id (ticket P4).
+/* Fiche formation - route /formations/:id (ticket P4).
    Maquette : template/index.html. */
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -278,7 +278,7 @@ function FicheFormation() {
               </div>
             </div>
             <a className="btn wa" href={whatsappLink(institute, waMessage)} target="_blank" rel="noopener">
-              WhatsApp — message pré-rempli
+              WhatsApp (message pré-rempli)
             </a>
             <div className="phone">
               <div>
@@ -290,7 +290,7 @@ function FicheFormation() {
               </a>
             </div>
             {institute.email && (
-              <a className="btn line" href={mailLink(institute, `Demande d'informations — ${program.name}`)}>
+              <a className="btn line" href={mailLink(institute, `Demande d'informations - ${program.name}`)}>
                 Écrire par e-mail
               </a>
             )}
