@@ -6,6 +6,7 @@ const domainRoutes = require('./routes/domains');
 const degreeRoutes = require('./routes/degrees');
 const bacSeriesRoutes = require('./routes/bacSeries');
 const careerRoutes = require('./routes/careers');
+const instituteRoutes = require('./routes/institutes');
 const { requireAuth } = require('./middlewares/auth');
 const { notFound, errorHandler } = require('./middlewares/errors');
 const { uploadDir } = require('./config/env');
@@ -52,6 +53,7 @@ app.use(domainRoutes);
 app.use(degreeRoutes);
 app.use(bacSeriesRoutes);
 app.use(careerRoutes);
+app.use(instituteRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
