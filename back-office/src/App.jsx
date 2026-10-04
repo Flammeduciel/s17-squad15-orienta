@@ -4,7 +4,6 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import Compte from './pages/compte/Compte.jsx'
 import Connexion from './pages/connexion/Connexion.jsx'
-import ResetPassword from './pages/connexion/ResetPassword.jsx'
 import Cours from './pages/cours/Cours.jsx'
 import FormulaireFormation from './pages/formations/FormulaireFormation.jsx'
 import ListeFormations from './pages/formations/ListeFormations.jsx'
@@ -27,7 +26,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path={ROUTES.connexion} element={<Connexion />} />
-          <Route path={ROUTES.reinitialisation} element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<BackOfficeLayout />}>

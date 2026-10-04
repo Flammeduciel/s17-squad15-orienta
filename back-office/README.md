@@ -57,15 +57,14 @@ reload();
 ```
 
 Pour travailler sans lancer l'API, mettre `VITE_USE_MOCK_AUTH=true` dans `.env` :
-la connexion passe alors par un faux backend (`squad` / `orienta2026`). Les pages
+la connexion passe alors par un faux backend (`squad@orienta.cg` / `orienta2026`). Les pages
 du catalogue, elles, ont besoin de la vraie API.
 
 ## Les pages
 
 | Fichier | Page | Route | Ticket |
 |---|---|---|---|
-| `pages/connexion/Connexion.jsx` | Connexion, mot de passe oublié | `/connexion` | P1 |
-| `pages/connexion/ResetPassword.jsx` | Nouveau mot de passe, ouvert depuis le lien reçu par e-mail | `/reinitialiser-mot-de-passe` | P1 |
+| `pages/connexion/Connexion.jsx` | Connexion par adresse e-mail et mot de passe | `/connexion` | P1 |
 | `pages/compte/Compte.jsx` | Compte | `/compte` | P10 |
 | `pages/tableau-de-bord/TableauDeBord.jsx` | Tableau de bord | `/admin` | P11 |
 | `pages/formations/ListeFormations.jsx` | Liste des formations | `/admin/formations` | P14 |

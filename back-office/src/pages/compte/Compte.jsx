@@ -43,8 +43,8 @@ function Compte() {
                 <b>{user.nom}</b>
               </div>
               <div>
-                <span>Identifiant</span>
-                <b>{user.login}</b>
+                <span>Adresse e-mail</span>
+                <b>{user.email}</b>
               </div>
               <div>
                 <span>Rôle</span>
@@ -71,18 +71,6 @@ function Compte() {
                 <Icon name="moon" />
                 Basculer le thème
               </button>
-            </div>
-          </div>
-
-          <div className="panel">
-            <header>
-              <h2>Mot de passe</h2>
-            </header>
-            <div className="pad" style={{ display: 'grid', gap: 12 }}>
-              <p style={muted}>
-                Pour changer de mot de passe, déconnectez-vous puis utilisez « Mot de passe oublié » sur l'écran de
-                connexion : un lien de réinitialisation est envoyé par e-mail.
-              </p>
             </div>
           </div>
 

@@ -5,7 +5,7 @@ import Logo from '../Logo';
 import { ACCOUNT_ITEM, NAV_GROUPS } from './navConfig';
 
 export default function Sidebar({ open, user, onLogout, onNavigate }) {
-  const name = user?.nom ?? user?.login ?? 'Squad';
+  const name = user?.nom ?? user?.email ?? 'Squad';
   const initials = name.slice(0, 2).toUpperCase();
 
   return (
