@@ -130,9 +130,11 @@
   place-items: center;
 }
 
-.sugg .ic svg {
+.sugg .ic svg,
+.sugg .ic .icon {
   width: 18px;
   height: 18px;
+  font-size: 15px;
 }
 
 .sugg small {
@@ -185,9 +187,11 @@
   opacity: .85;
 }
 
-.cat svg {
+.cat svg,
+.cat .icon {
   width: 26px;
   height: 26px;
+  font-size: 22px;
 }
 
 .cat:hover {
@@ -226,11 +230,13 @@
   text-align: left;
 }
 
-.acc svg {
+.acc svg,
+.acc .icon {
   flex: none;
   width: 24px;
   height: 24px;
   color: var(--green);
+  font-size: 20px;
 }
 
 .acc b {

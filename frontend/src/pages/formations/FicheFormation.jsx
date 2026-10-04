@@ -101,7 +101,7 @@ function FicheFormation() {
             <div className="cover" style={{ background: 'none', aspectRatio: 'auto', height: '100%' }}>
               <div className="pat" />
               <div className="blob" />
-              <Icon name={domain.id} className="big" />
+              <Icon name={domain.icon} className="big" />
               <span className="inst">{institute.short_name}</span>
             </div>
           </div>

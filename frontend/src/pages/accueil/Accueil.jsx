@@ -136,7 +136,7 @@ function Accueil() {
               aria-pressed={filters.domain === domain.id}
               onClick={() => change({ domain: domain.id })}
             >
-              <Icon name={domain.id} />
+              <Icon name={domain.icon} />
               {domain.name}
             </button>
           ))}

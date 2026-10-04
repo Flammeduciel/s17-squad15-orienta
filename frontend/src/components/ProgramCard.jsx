@@ -30,7 +30,7 @@ export default function ProgramCard({ program }) {
           <div className="cover" style={{ background: domain.color }}>
             <div className="pat" />
             <div className="blob" />
-            <Icon name={domain.id} className="big" />
+            <Icon name={domain.icon} className="big" />
             <span className="inst">{institute.short_name}</span>
           </div>
           <span className="dip" style={degreeStyle}>
