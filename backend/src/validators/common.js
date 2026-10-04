@@ -51,4 +51,17 @@ const requiredText = (max) =>
     .min(1, 'est obligatoire.')
     .max(max, `ne doit pas dépasser ${max} caractères.`);
 
-module.exports = { id, idParams, booleanQuery, positiveIntQuery, requiredText };
+/**
+ * Texte facultatif : absent, vide ou `null` deviennent `null`.
+ *
+ * @param {number} max Longueur maximale.
+ */
+const optionalText = (max) =>
+  z
+    .string({ error: 'doit être un texte.' })
+    .trim()
+    .max(max, `ne doit pas dépasser ${max} caractères.`)
+    .nullish()
+    .transform((value) => value || null);
+
+module.exports = { id, idParams, booleanQuery, positiveIntQuery, requiredText, optionalText };

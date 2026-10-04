@@ -4,19 +4,10 @@
  * @module validators/institutes
  */
 const { z } = require('zod');
-const { requiredText, booleanQuery } = require('./common');
+const { requiredText, optionalText, booleanQuery, id, positiveIntQuery } = require('./common');
 const DISTRICTS = require('../utils/districts');
 
 const district = z.enum(DISTRICTS, { error: 'doit être un des 9 arrondissements de Brazzaville.' });
-
-/** Texte facultatif : absent, vide ou `null` deviennent `null`. */
-const optionalText = (max) =>
-  z
-    .string({ error: 'doit être un texte.' })
-    .trim()
-    .max(max, `ne doit pas dépasser ${max} caractères.`)
-    .nullish()
-    .transform((value) => value || null);
 
 /** Date facultative au format `AAAA-MM-JJ`. */
 const optionalDate = z.iso
@@ -24,11 +15,24 @@ const optionalDate = z.iso
   .nullish()
   .transform((value) => value || null);
 
-/** Paramètres de recherche de `GET /institutes`. */
+/**
+ * Paramètres de recherche de `GET /institutes`. Les critères qui portent sur
+ * les formations (domaine, diplôme, débouché…) sont les mêmes que ceux de
+ * `GET /programs`.
+ */
 const institutesQuery = z.object({
   q: z.string().trim().optional(),
   district: district.optional(),
   accredited: booleanQuery,
+  domain_id: z.string().trim().optional(),
+  degree_id: id.optional(),
+  career_id: id.optional(),
+  duration: positiveIntQuery.optional(),
+  max_tuition: positiveIntQuery.optional(),
+  bac_series: z.string().trim().optional(),
+  evening: booleanQuery,
+  internship: booleanQuery,
+  installments: booleanQuery,
 });
 
 /** Corps de la création et de la modification d'un institut. */
@@ -72,4 +76,4 @@ const instituteBody = z
     { path: ['start_date'], message: 'ne peut pas précéder la clôture des inscriptions.' },
   );
 
-module.exports = { institutesQuery, instituteBody };
+module.exports = { district, institutesQuery, instituteBody };
