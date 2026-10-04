@@ -26,9 +26,11 @@ back-office/src/
 ├── assets/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
 ├── api/           # Appels à l'API : client HTTP, authentification, session
-├── components/    # Composants partagés : coquille (menu, barre), icônes, garde de session
+├── components/    # Composants partagés : coquille (menu, barre), icônes, garde de session,
+│                  # Status, Pagination, ConfirmDialog, ErrorBoundary
 ├── context/       # États partagés entre pages : session, messages éphémères
-├── hooks/         # Thème clair / sombre
+├── hooks/         # useFetch (lecture de l'API), useTheme (clair / sombre)
+├── utils/         # Mise en forme des montants, dates et durées
 └── pages/         # Un dossier par page ou groupe de pages, avec ses fichiers déjà créés
 ```
 
@@ -38,9 +40,15 @@ routes sont déjà branchées dans `App.jsx`, il n'y a pas à y toucher.
 
 ## Session et appels à l'API
 
-- `api/http.js` fournit `request(chemin, { method, body })`. Il ajoute tout seul
+- `api/http.js` fournit `request(chemin, { method, params, body })`. Il ajoute tout seul
   le jeton de session (`Authorization: Bearer …`) : une page n'a rien à faire
-  pour être authentifiée.
+  pour être authentifiée. `body` est un objet (envoyé en JSON) ou un `FormData`
+  (dépôt d'image sur `/admin/images`). Les paramètres vides sont ignorés.
+- Pour lire une ressource : `useFetch('/institutes', { page, per_page })` renvoie
+  `{ data, loading, error, reload }`. `<Status loading />` et
+  `<Status error={error} onRetry={reload} />` affichent l'attente ou l'échec.
+- `Pagination` (pied de tableau) et `ConfirmDialog` (confirmation avant suppression)
+  suivent la maquette ; `utils/format.js` met en forme montants, dates et durées.
 - Une erreur de l'API devient une `ApiError` avec `status` (statut HTTP),
   `code` (code du contrat, ex. `ELEMENT_UTILISE`) et `message`.
 - Si l'API refuse le jeton (expiré), la session est fermée et l'utilisateur
