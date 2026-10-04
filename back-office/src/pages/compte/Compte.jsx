@@ -9,9 +9,15 @@ import { ROUTES } from '../../routes'
 import Icon from '../../components/Icon'
 import { formatDate } from '../../utils/date'
 
-   
+   // juste si l'api n'est pas encore prete
+function formatDate(iso) {
+  const d = iso ? new Date(iso) : null
+  if (!d || Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
 function Compte() {
-  return  const { user, logout } = useAuth()
+  const { user, logout } = useAuth()
   const { toggle } = useTheme()
   const toast = useToast()
   const navigate = useNavigate()
