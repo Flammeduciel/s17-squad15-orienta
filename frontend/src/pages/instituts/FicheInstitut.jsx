@@ -47,6 +47,9 @@ function FicheInstitut() {
   );
   const waMessage = `Bonjour ${institute.short_name}, je souhaite obtenir des informations sur vos formations.`;
 
+  // Bannière de la fiche ; sans bannière, on reprend l'image des cartes.
+  const banner = institute.banner_url || institute.image_url;
+
   return (
     <div className="wrap detail">
       <Link className="back" to={ROUTES.accueil}>
@@ -66,8 +69,8 @@ function FicheInstitut() {
       </div>
 
       <div className="dcover" style={{ background: institute.color, position: 'relative' }}>
-        {institute.image_url ? (
-          <img src={imageUrl(institute.image_url)} alt="" style={photoStyle} />
+        {banner ? (
+          <img src={imageUrl(banner)} alt="" style={photoStyle} />
         ) : (
           <span className="big-sigle">{institute.short_name}</span>
         )}

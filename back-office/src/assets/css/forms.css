@@ -154,6 +154,11 @@ legend {
   background: var(--soft);
 }
 
+/* Aperçu en largeur, pour la bannière de la fiche. */
+.logoedit .ap.wide {
+  width: 208px;
+}
+
 .logoedit .ap img {
   width: 100%;
   height: 100%;

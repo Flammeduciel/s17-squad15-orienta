@@ -38,6 +38,7 @@ function toForm(institute) {
     description: institute?.description ?? '',
     benefits: (institute?.benefits ?? []).join('\n'),
     image_url: institute?.image_url ?? null,
+    banner_url: institute?.banner_url ?? null,
   };
 }
 
@@ -57,9 +58,46 @@ function validate(form) {
   return errors;
 }
 
+// Champ d'image du formulaire : aperçu, bouton pour choisir un fichier, bouton
+// pour retirer l'image. wide : aperçu en largeur, pour la bannière.
+function ImageField({ label, hint, url, placeholder, color, wide, onPick, onRemove }) {
+  const fileInput = useRef(null);
+
+  const onChange = (event) => {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (file) onPick(file);
+  };
+
+  return (
+    <div className="fld" style={{ marginTop: 16 }}>
+      <label>{label}</label>
+      <div className="logoedit" role="group" aria-label={label}>
+        <div className={`ap${wide ? ' wide' : ''}`} style={{ background: url ? '#fff' : (color ?? '#5E6B64') }}>
+          {url ? <img src={imageUrl(url)} alt={`Aperçu : ${label}`} /> : placeholder}
+        </div>
+        <div className="cmd">
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="btn line sm" type="button" onClick={() => fileInput.current.click()}>
+              <Icon name="upload" />
+              {url ? "Changer l'image" : 'Choisir une image'}
+            </button>
+            {url && (
+              <button className="btn ghost sm" type="button" onClick={onRemove}>
+                Retirer
+              </button>
+            )}
+          </div>
+          <span className="hint">{hint}</span>
+        </div>
+      </div>
+      <input type="file" accept={IMAGE_TYPES.join(',')} hidden ref={fileInput} onChange={onChange} />
+    </div>
+  );
+}
+
 function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
   const toast = useToast();
-  const fileInput = useRef(null);
   const [form, setForm] = useState(() => ({
     ...toForm(institute),
     district: institute?.district ?? districts[0],
@@ -80,11 +118,9 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
     </div>
   );
 
-  // L'image est déposée dès qu'elle est choisie ; son adresse part avec le reste à l'enregistrement.
-  const onImage = async (event) => {
-    const file = event.target.files[0];
-    event.target.value = '';
-    if (!file) return;
+  // Une image est déposée dès qu'elle est choisie ; son adresse part avec le reste
+  // à l'enregistrement. key : 'image_url' (cartes) ou 'banner_url' (bannière).
+  const onImage = async (key, file) => {
     if (!IMAGE_TYPES.includes(file.type)) {
       toast('Format non accepté : utilisez JPEG, PNG ou WebP.', true);
       return;
@@ -95,7 +131,7 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
     }
     try {
       const { url } = await uploadImage(file);
-      setForm((current) => ({ ...current, image_url: url }));
+      setForm((current) => ({ ...current, [key]: url }));
       toast("Image prête. Enregistrez la fiche pour l'appliquer.");
     } catch (err) {
       toast(errorMessage(err), true);
@@ -121,6 +157,7 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
       whatsapp: form.whatsapp.replace(/\D/g, ''),
       email: form.email.trim() || null,
       image_url: form.image_url,
+      banner_url: form.banner_url,
       description: form.description.trim() || null,
       benefits: form.benefits
         .split('\n')
@@ -229,7 +266,7 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
         </fieldset>
 
         <fieldset>
-          <legend>Présentation et image</legend>
+          <legend>Présentation et images</legend>
           <div className="fld">
             <label htmlFor="i-description">Description</label>
             <textarea
@@ -250,44 +287,25 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
               onChange={onChange}
             />
           </div>
-          <div className="fld" style={{ marginTop: 16 }}>
-            <label id="logo-label">Image de l'institut</label>
-            <div className="logoedit" role="group" aria-labelledby="logo-label">
-              <div
-                className="ap"
-                style={{
-                  background: form.image_url ? '#fff' : (institute?.color ?? '#5E6B64'),
-                }}
-              >
-                {form.image_url ? (
-                  <img src={imageUrl(form.image_url)} alt="Aperçu de l'image" />
-                ) : (
-                  form.short_name || 'IMAGE'
-                )}
-              </div>
-              <div className="cmd">
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="btn line sm" type="button" onClick={() => fileInput.current.click()}>
-                    <Icon name="upload" />
-                    {form.image_url ? "Changer l'image" : 'Choisir une image'}
-                  </button>
-                  {form.image_url && (
-                    <button
-                      className="btn ghost sm"
-                      type="button"
-                      onClick={() => setForm({ ...form, image_url: null })}
-                    >
-                      Retirer
-                    </button>
-                  )}
-                </div>
-                <span className="hint">
-                  JPEG, PNG ou WebP, 2 Mo maximum. L'image est affichée sur la fiche publique de l'institut.
-                </span>
-              </div>
-            </div>
-            <input type="file" accept={IMAGE_TYPES.join(',')} hidden ref={fileInput} onChange={onImage} />
-          </div>
+          <ImageField
+            label="Image des cartes"
+            hint="JPEG, PNG ou WebP, 2 Mo maximum. Affichée sur les cartes de l'institut, dans les listes du site public."
+            url={form.image_url}
+            placeholder={form.short_name || 'IMAGE'}
+            color={institute?.color}
+            onPick={(file) => onImage('image_url', file)}
+            onRemove={() => setForm({ ...form, image_url: null })}
+          />
+          <ImageField
+            wide
+            label="Bannière de la fiche"
+            hint="Grande image en largeur, affichée en haut de la fiche publique de l'institut. Sans bannière, l'image des cartes est utilisée."
+            url={form.banner_url}
+            placeholder="BANNIÈRE"
+            color={institute?.color}
+            onPick={(file) => onImage('banner_url', file)}
+            onRemove={() => setForm({ ...form, banner_url: null })}
+          />
         </fieldset>
 
         {apiError && (
