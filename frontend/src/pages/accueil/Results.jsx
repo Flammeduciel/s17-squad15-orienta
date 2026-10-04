@@ -11,37 +11,35 @@ import { MAX_BUDGET, activeCount, instituteResults, programMatches, programsWith
 
 // Colonne de résultats de l'accueil : compteur, tri, rappels de filtres, grille.
 // La grille change selon la vue choisie : instituts, formations, diplômes ou débouchés.
-// Pendant le chargement, elle affiche des cartes fantômes ; en cas d'échec,
-// un message avec un bouton pour réessayer.
-export default function Results({ data, loading, error, onRetry, onOpenFilters }) {
+// found contient les formations et les instituts renvoyés par l'API pour la
+// recherche en cours. Pendant le premier chargement, la grille affiche des cartes
+// fantômes ; en cas d'échec, un message avec un bouton pour réessayer.
+export default function Results({ data, found, loading, searching, error, onRetry, onOpenFilters }) {
   const { filters, change, resetFilters } = useSearch();
   const { view } = filters;
   const domain = data.domains.find((item) => item.id === filters.domain);
   const inDomain = domain ? ` en ${domain.name}` : '';
 
-  // Formations qui correspondent aux filtres, dans l'ordre de tri choisi.
-  const programs = data.programs.filter((program) => programMatches(program, filters));
-  if (filters.sort === 'tuition_asc') programs.sort((a, b) => a.tuition - b.tuition);
-  if (filters.sort === 'tuition_desc') programs.sort((a, b) => b.tuition - a.tuition);
-  if (filters.sort === 'duration') programs.sort((a, b) => a.duration - b.duration || a.tuition - b.tuition);
+  // L'API a déjà appliqué le mot recherché, les critères simples et le tri ;
+  // il reste les listes à choix multiples (arrondissements, diplômes…).
+  const programs = found.programs.filter((program) => programMatches(program, filters));
 
   let label;
   let content = null;
 
   if (view === 'inst') {
-    const institutes = instituteResults(data.institutes, data.programs, filters);
+    const institutes = instituteResults(found.institutes, found.programs, filters);
     label = `${pluriel(institutes.length, 'institut')}${inDomain} à Brazzaville`;
     content = institutes.map((institute) => {
-      // On affiche ses formations correspondantes ; s'il n'y en a pas, toutes ses formations.
-      const all = data.programs.filter((program) => program.institute.id === institute.id);
-      const hits = all.filter((program) => programMatches(program, filters));
-      const shown = hits.length ? hits : all;
+      // On affiche ses formations correspondantes ; s'il n'y en a pas (institut
+      // trouvé par son nom), le total et les diplômes donnés par l'API.
+      const hits = programs.filter((program) => program.institute.id === institute.id);
       return (
         <InstituteCard
           key={institute.id}
           institute={institute}
-          programCount={shown.length}
-          degrees={[...new Set(shown.map((program) => program.degree.name))]}
+          programCount={hits.length || institute.program_count}
+          degrees={hits.length ? [...new Set(hits.map((program) => program.degree.name))] : institute.degrees}
         />
       );
     });
@@ -54,7 +52,7 @@ export default function Results({ data, loading, error, onRetry, onOpenFilters }
     const key = isDegree ? 'degrees' : 'careers';
     const names = isDegree ? data.degrees.map((degree) => degree.name) : data.careers;
     const tiles = names
-      .map((name) => ({ name, programs: programsWith(data.programs, filters, key, name) }))
+      .map((name) => ({ name, programs: programsWith(found.programs, filters, key, name) }))
       .filter((tile) => tile.programs.length > 0);
     label = isDegree
       ? `${pluriel(tiles.length, 'diplôme')} préparé${tiles.length > 1 ? 's' : ''} à Brazzaville`
@@ -144,7 +142,7 @@ export default function Results({ data, loading, error, onRetry, onOpenFilters }
         ))}
       </div>
 
-      <div className="grid" aria-busy={loading}>
+      <div className="grid" aria-busy={loading || searching}>
         {loading ? (
           <SkeletonCards />
         ) : error ? (

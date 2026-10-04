@@ -1,7 +1,7 @@
 /* Liste des instituts — route /admin/instituts (ticket P16).
    Maquette : template/back-office.html. */
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { deleteInstitute, getDistricts, getInstitute, getInstitutes, getPrograms } from '../../api/catalogue';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Icon from '../../components/Icon';
@@ -225,6 +225,10 @@ function ListeInstituts() {
           </>
         )}
       </div>
+
+      {/* Formulaire d'ajout ou de modification : il s'ouvre en fenêtre sur cette liste
+          (routes /admin/instituts/nouveau et /admin/instituts/:id). */}
+      <Outlet context={{ reloadList: reload }} />
 
       {toDelete && (
         <ConfirmDialog

@@ -1,7 +1,7 @@
 /* Formulaire formation — routes /admin/formations/nouvelle et /admin/formations/:id (ticket P15).
-   Maquette : template/back-office.html. */
+   Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import {
   createProgram,
   getBacSeries,
@@ -13,7 +13,7 @@ import {
   getPrograms,
   updateProgram,
 } from '../../api/catalogue';
-import Icon from '../../components/Icon';
+import Modal from '../../components/Modal';
 import PageState from '../../components/PageState';
 import { useToast } from '../../context/toast-context';
 import { useApi } from '../../hooks/useApi';
@@ -53,7 +53,9 @@ function toForm(program, lists) {
     fees: program.fees.map((fee) => String(fee.amount)),
     evening: program.evening,
     installments: program.installments,
-    bac_series_ids: lists.bacSeries.filter((series) => program.bac_series.includes(series.code)).map((series) => series.id),
+    bac_series_ids: lists.bacSeries
+      .filter((series) => program.bac_series.includes(series.code))
+      .map((series) => series.id),
     admission_requirements: program.admission_requirements ?? '',
     career_ids: lists.careers.filter((career) => program.careers.includes(career.name)).map((career) => career.id),
     status: program.status,
@@ -73,13 +75,16 @@ function resizeFees(fees, duration) {
 // Ajoute l'identifiant à la liste s'il n'y est pas, l'enlève sinon.
 const toggle = (list, id) => (list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
 
-function ProgramForm({ program, lists }) {
+function ProgramForm({ program, lists, onClose, onSaved }) {
   const toast = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState(() => {
     const initial = toForm(program, lists);
     const degree = lists.degrees.find((item) => item.id === initial.degree_id);
-    return { ...initial, fees: resizeFees(initial.fees, degree?.duration ?? 1) };
+    return {
+      ...initial,
+      fees: resizeFees(initial.fees, degree?.duration ?? 1),
+    };
   });
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
@@ -97,7 +102,11 @@ function ProgramForm({ program, lists }) {
   // Changer de diplôme change le nombre d'années, donc le nombre de montants.
   const onDegree = (event) => {
     const next = lists.degrees.find((item) => item.id === Number(event.target.value));
-    setForm({ ...form, degree_id: next.id, fees: resizeFees(form.fees, next.duration) });
+    setForm({
+      ...form,
+      degree_id: next.id,
+      fees: resizeFees(form.fees, next.duration),
+    });
   };
 
   const onFee = (index, value) => {
@@ -139,7 +148,7 @@ function ProgramForm({ program, lists }) {
       if (program) {
         await updateProgram(program.id, body);
         toast('Formation mise à jour.');
-        navigate(ROUTES.formations);
+        onSaved();
       } else {
         // Une formation neuve n'a pas encore de programme : on enchaîne sur ses cours.
         const created = await createProgram(body);
@@ -153,22 +162,15 @@ function ProgramForm({ program, lists }) {
   };
 
   return (
-    <>
-      <div className="pagehead">
-        <div>
-          <Link className="btn ghost sm" to={ROUTES.formations}>
-            <Icon name="back" />
-            Retour à la liste
-          </Link>
-          <h1 style={{ marginTop: 10 }}>{program ? 'Modifier la formation' : 'Ajouter une formation'}</h1>
-          <p>
-            {program
-              ? 'Les modifications sont reprises par le site public.'
-              : "Renseignez l'intitulé, le diplôme visé et l'institut qui porte la formation."}
-          </p>
-        </div>
-      </div>
-
+    <Modal
+      title={program ? 'Modifier la formation' : 'Ajouter une formation'}
+      subtitle={
+        program
+          ? 'Les modifications sont reprises par le site public.'
+          : "Renseignez l'intitulé, le diplôme visé et l'institut qui porte la formation."
+      }
+      onClose={onClose}
+    >
       <form className="form" onSubmit={onSubmit} noValidate>
         <fieldset>
           <legend>Identification</legend>
@@ -211,8 +213,8 @@ function ProgramForm({ program, lists }) {
                 ))}
               </select>
               <span className="hint">
-                {instituteCount} formation{instituteCount > 1 ? 's' : ''} déjà rattachée{instituteCount > 1 ? 's' : ''} à
-                cet institut.
+                {instituteCount} formation{instituteCount > 1 ? 's' : ''} déjà rattachée{instituteCount > 1 ? 's' : ''}{' '}
+                à cet institut.
               </span>
             </div>
             <div className="fld">
@@ -318,7 +320,12 @@ function ProgramForm({ program, lists }) {
                     <input
                       type="checkbox"
                       checked={form.bac_series_ids.includes(series.id)}
-                      onChange={() => setForm({ ...form, bac_series_ids: toggle(form.bac_series_ids, series.id) })}
+                      onChange={() =>
+                        setForm({
+                          ...form,
+                          bac_series_ids: toggle(form.bac_series_ids, series.id),
+                        })
+                      }
                     />
                     Série {series.code}
                     {series.label ? ` — ${series.label}` : ''}
@@ -364,7 +371,12 @@ function ProgramForm({ program, lists }) {
                     <input
                       type="checkbox"
                       checked={form.career_ids.includes(career.id)}
-                      onChange={() => setForm({ ...form, career_ids: toggle(form.career_ids, career.id) })}
+                      onChange={() =>
+                        setForm({
+                          ...form,
+                          career_ids: toggle(form.career_ids, career.id),
+                        })
+                      }
                     />
                     {career.name}
                   </label>
@@ -440,19 +452,23 @@ function ProgramForm({ program, lists }) {
           <button className="btn" type="submit" disabled={submitting}>
             {program ? 'Enregistrer les modifications' : 'Créer la formation'}
           </button>
-          <Link className="btn line" to={ROUTES.formations}>
+          <button className="btn line" type="button" onClick={onClose}>
             Annuler
-          </Link>
+          </button>
         </div>
       </form>
-    </>
+    </Modal>
   );
 }
 
-// La page charge d'abord les référentiels et la formation, puis affiche le
-// formulaire : celui-ci peut ainsi partir directement des bonnes valeurs.
+// Route /admin/formations/nouvelle ou /admin/formations/:id : le formulaire
+// s'ouvre dans une fenêtre, par-dessus la liste des formations. Les référentiels
+// et la formation sont chargés d'abord, pour partir directement des bonnes valeurs.
 function FormulaireFormation() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  // La liste, affichée derrière, fournit de quoi se recharger après un enregistrement.
+  const { reloadList } = useOutletContext();
   const { data, loading, error } = useApi(async () => {
     const [degrees, domains, bacSeries, careers, institutes, programs, program] = await Promise.all([
       getDegrees(),
@@ -463,22 +479,47 @@ function FormulaireFormation() {
       getPrograms(),
       id ? getProgram(id) : null,
     ]);
-    return { lists: { degrees, domains, bacSeries, careers, institutes, programs }, program };
+    return {
+      lists: { degrees, domains, bacSeries, careers, institutes, programs },
+      program,
+    };
   }, [id]);
 
-  if (!data || loading) return <PageState loading={loading} error={error} />;
-  if (data.lists.institutes.length === 0 || data.lists.degrees.length === 0) {
+  const close = () => navigate(ROUTES.formations);
+  const title = id ? 'Modifier la formation' : 'Ajouter une formation';
+
+  if (!data || loading) {
     return (
-      <div className="empty">
-        <h3>Il manque un institut ou un diplôme</h3>
-        <p>Une formation appartient à un institut et délivre un diplôme : créez-les d'abord.</p>
-        <Link className="btn line" to={ROUTES.instituts}>
-          Voir les instituts
-        </Link>
-      </div>
+      <Modal title={title} onClose={close}>
+        <PageState loading={loading} error={error} />
+      </Modal>
     );
   }
-  return <ProgramForm key={id ?? 'nouvelle'} program={data.program} lists={data.lists} />;
+  if (data.lists.institutes.length === 0 || data.lists.degrees.length === 0) {
+    return (
+      <Modal title={title} size="medium" onClose={close}>
+        <div className="empty">
+          <h3>Il manque un institut ou un diplôme</h3>
+          <p>Une formation appartient à un institut et délivre un diplôme : créez-les d'abord.</p>
+          <Link className="btn line" to={ROUTES.instituts}>
+            Voir les instituts
+          </Link>
+        </div>
+      </Modal>
+    );
+  }
+  return (
+    <ProgramForm
+      key={id ?? 'nouvelle'}
+      program={data.program}
+      lists={data.lists}
+      onClose={close}
+      onSaved={() => {
+        reloadList();
+        close();
+      }}
+    />
+  );
 }
 
 export default FormulaireFormation

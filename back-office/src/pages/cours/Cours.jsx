@@ -13,6 +13,7 @@ import {
 } from '../../api/catalogue';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Icon from '../../components/Icon';
+import Modal from '../../components/Modal';
 import PageState from '../../components/PageState';
 import Pager from '../../components/Pager';
 import { useToast } from '../../context/toast-context';
@@ -74,10 +75,14 @@ function Cours() {
   };
   const startEdit = (course) => {
     setName(course.name);
-    setLinks(course.programs.map((item) => ({ program_id: item.program_id, year: item.year })));
+    setLinks(
+      course.programs.map((item) => ({
+        program_id: item.program_id,
+        year: item.year,
+      })),
+    );
     setFormError('');
     setEditing(course);
-    window.scrollTo(0, 0);
   };
 
   // --- Lignes « formation + année » du formulaire
@@ -109,7 +114,9 @@ function Cours() {
     try {
       if (editing === 'new') {
         await createCourse(body);
-        toast(`« ${cleanName} » ajouté${links.length ? ` et rattaché à ${links.length} formation(s)` : ' au catalogue'}.`);
+        toast(
+          `« ${cleanName} » ajouté${links.length ? ` et rattaché à ${links.length} formation(s)` : ' au catalogue'}.`,
+        );
         // Le formulaire reste ouvert sur les mêmes formations, pour enchaîner les cours.
         setName('');
       } else {
@@ -173,99 +180,108 @@ function Cours() {
         <div>
           <h1>Cours</h1>
           <p>
-            {courses.length} cours au catalogue. Un même cours peut être rattaché à plusieurs formations, chacune
-            avec son année d'études.
+            {courses.length} cours au catalogue. Un même cours peut être rattaché à plusieurs formations, chacune avec
+            son année d'études.
           </p>
         </div>
-        {!editing && (
-          <button className="btn" type="button" onClick={startAdd}>
-            <Icon name="plus" />
-            Ajouter un cours
-          </button>
-        )}
+        <button className="btn" type="button" onClick={startAdd}>
+          <Icon name="plus" />
+          Ajouter un cours
+        </button>
       </div>
 
+      {/* L'ajout et la modification se font dans une fenêtre, par-dessus la liste. */}
       {editing && (
-        <form className="form" onSubmit={onSubmit} noValidate>
-          <fieldset>
-            <legend>{editing === 'new' ? 'Ajouter un cours' : 'Modifier le cours'}</legend>
-            <div className="row">
-              <div className={`fld${formError ? ' bad' : ''}`}>
-                <label htmlFor="c-nom">Intitulé du cours</label>
-                <input
-                  id="c-nom"
-                  autoFocus
-                  placeholder="ex. Français"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-                {formError && (
-                  <span className="err" role="alert">
-                    {formError}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="row" style={{ marginTop: 16 }}>
-              <div className="fld">
-                <label>Formations rattachées</label>
-                <div>
-                  {links.map((link, index) => (
-                    <div className="lien" key={index}>
-                      <select
-                        className="lien-forme"
-                        aria-label="Formation"
-                        value={link.program_id}
-                        onChange={(event) => changeLink(index, { program_id: Number(event.target.value) })}
-                      >
-                        {programs.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {programLabel(item)} ({item.degree.name})
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        className="lien-annee"
-                        aria-label="Année d'études"
-                        value={link.year}
-                        onChange={(event) => changeLink(index, { year: Number(event.target.value) })}
-                      >
-                        {yearOptions(link.program_id)}
-                      </select>
-                      <button
-                        className="act del"
-                        type="button"
-                        title="Retirer cette formation"
-                        aria-label="Retirer cette formation"
-                        onClick={() => removeLink(index)}
-                      >
-                        <Icon name="x" />
-                      </button>
-                    </div>
-                  ))}
+        <Modal title={editing === 'new' ? 'Ajouter un cours' : 'Modifier le cours'} onClose={() => setEditing(null)}>
+          <form className="form" onSubmit={onSubmit} noValidate>
+            <fieldset>
+              <legend>Cours et formations</legend>
+              <div className="row">
+                <div className={`fld${formError ? ' bad' : ''}`}>
+                  <label htmlFor="c-nom">Intitulé du cours</label>
+                  <input
+                    id="c-nom"
+                    autoFocus
+                    placeholder="ex. Français"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                  {formError && (
+                    <span className="err" role="alert">
+                      {formError}
+                    </span>
+                  )}
                 </div>
-                {programs.length > 0 && (
-                  <button className="btn line sm" type="button" onClick={addLink}>
-                    <Icon name="plus" />
-                    Rattacher à une formation
-                  </button>
-                )}
-                <span className="hint" style={{ display: 'block' }}>
-                  Les années proposées viennent du diplôme de chaque formation. Un cours sans formation reste au
-                  catalogue.
-                </span>
               </div>
+              <div className="row" style={{ marginTop: 16 }}>
+                <div className="fld">
+                  <label>Formations rattachées</label>
+                  <div>
+                    {links.map((link, index) => (
+                      <div className="lien" key={index}>
+                        <select
+                          className="lien-forme"
+                          aria-label="Formation"
+                          value={link.program_id}
+                          onChange={(event) =>
+                            changeLink(index, {
+                              program_id: Number(event.target.value),
+                            })
+                          }
+                        >
+                          {programs.map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {programLabel(item)} ({item.degree.name})
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          className="lien-annee"
+                          aria-label="Année d'études"
+                          value={link.year}
+                          onChange={(event) =>
+                            changeLink(index, {
+                              year: Number(event.target.value),
+                            })
+                          }
+                        >
+                          {yearOptions(link.program_id)}
+                        </select>
+                        <button
+                          className="act del"
+                          type="button"
+                          title="Retirer cette formation"
+                          aria-label="Retirer cette formation"
+                          onClick={() => removeLink(index)}
+                        >
+                          <Icon name="x" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {programs.length > 0 && (
+                    <button className="btn line sm" type="button" onClick={addLink}>
+                      <Icon name="plus" />
+                      Rattacher à une formation
+                    </button>
+                  )}
+                  <span className="hint" style={{ display: 'block' }}>
+                    Les années proposées viennent du diplôme de chaque formation. Un cours sans formation reste au
+                    catalogue.
+                  </span>
+                </div>
+              </div>
+            </fieldset>
+            <div className="formfoot">
+              <button className="btn" type="submit">
+                {editing === 'new' ? 'Ajouter le cours' : 'Enregistrer les modifications'}
+              </button>
+              <button className="btn line" type="button" onClick={() => setEditing(null)}>
+                {editing === 'new' ? 'Terminer' : 'Annuler'}
+              </button>
             </div>
-          </fieldset>
-          <div className="formfoot">
-            <button className="btn" type="submit">
-              {editing === 'new' ? 'Ajouter le cours' : 'Enregistrer les modifications'}
-            </button>
-            <button className="btn line" type="button" onClick={() => setEditing(null)}>
-              {editing === 'new' ? 'Terminer' : 'Annuler'}
-            </button>
-          </div>
-        </form>
+          </form>
+        </Modal>
       )}
 
       <div className="panel">
@@ -370,7 +386,9 @@ function Cours() {
                               <>
                                 <br />
                                 <small style={{ color: 'var(--muted)' }}>
-                                  aussi dans {count - 1} autre{count > 2 ? 's' : ''} formation{count > 2 ? 's' : ''}
+                                  aussi dans {count - 1} autre
+                                  {count > 2 ? 's' : ''} formation
+                                  {count > 2 ? 's' : ''}
                                 </small>
                               </>
                             )}

@@ -83,3 +83,33 @@
   margin: 14px 0;
   text-align: left;
 }
+
+/* Fenêtre de formulaire : plus large qu'une confirmation, et défilante quand
+   son contenu dépasse la hauteur de l'écran. */
+.modal .mbox.medium,
+.modal .mbox.large {
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  text-align: left;
+  gap: 18px;
+}
+
+.modal .mbox.medium {
+  max-width: 640px;
+}
+
+.modal .mbox.large {
+  max-width: 960px;
+}
+
+.mbox .mhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mbox.medium .fld,
+.mbox.large .fld {
+  margin: 0;
+}

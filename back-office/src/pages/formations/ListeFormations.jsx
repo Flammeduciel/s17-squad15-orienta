@@ -1,7 +1,7 @@
 /* Liste des formations — route /admin/formations (ticket P14).
    Maquette : template/back-office.html. */
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Outlet } from 'react-router-dom';
 import { deleteProgram, getDomains, getPrograms } from '../../api/catalogue';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Icon from '../../components/Icon';
@@ -221,6 +221,10 @@ function ListeFormations() {
           </>
         )}
       </div>
+
+      {/* Formulaire d'ajout ou de modification : il s'ouvre en fenêtre sur cette liste
+          (routes /admin/formations/nouvelle et /admin/formations/:id). */}
+      <Outlet context={{ reloadList: reload }} />
 
       {toDelete && (
         <ConfirmDialog

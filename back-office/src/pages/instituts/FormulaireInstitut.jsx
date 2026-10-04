@@ -1,7 +1,7 @@
 /* Formulaire institut — routes /admin/instituts/nouveau et /admin/instituts/:id (ticket P17).
-   Maquette : template/back-office.html. */
+   Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
 import { useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import {
   createInstitute,
   getDistricts,
@@ -11,6 +11,7 @@ import {
   uploadImage,
 } from '../../api/catalogue';
 import Icon from '../../components/Icon';
+import Modal from '../../components/Modal';
 import PageState from '../../components/PageState';
 import { useToast } from '../../context/toast-context';
 import { useApi } from '../../hooks/useApi';
@@ -56,11 +57,13 @@ function validate(form) {
   return errors;
 }
 
-function InstituteForm({ institute, districts, linked }) {
+function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
   const toast = useToast();
-  const navigate = useNavigate();
   const fileInput = useRef(null);
-  const [form, setForm] = useState(() => ({ ...toForm(institute), district: institute?.district ?? districts[0] }));
+  const [form, setForm] = useState(() => ({
+    ...toForm(institute),
+    district: institute?.district ?? districts[0],
+  }));
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -137,7 +140,7 @@ function InstituteForm({ institute, districts, linked }) {
         await createInstitute(body);
         toast('Institut ajouté au catalogue.');
       }
-      navigate(ROUTES.instituts);
+      onSaved();
     } catch (err) {
       // Nom ou sigle déjà pris (409), champ refusé (400) : l'API dit pourquoi.
       setApiError(errorMessage(err));
@@ -146,33 +149,26 @@ function InstituteForm({ institute, districts, linked }) {
   };
 
   return (
-    <>
-      <div className="pagehead">
-        <div>
-          <Link className="btn ghost sm" to={ROUTES.instituts}>
-            <Icon name="back" />
-            Retour à la liste
-          </Link>
-          <h1 style={{ marginTop: 10 }}>{institute ? `Modifier ${institute.short_name}` : 'Ajouter un institut'}</h1>
-          <p>
-            {institute
-              ? 'La fiche publique reprend ces informations.'
-              : 'Un institut doit être rattaché à un arrondissement de Brazzaville.'}
-          </p>
-        </div>
-        {linked.length > 0 && (
-          <span className="badge ok">
-            {linked.length} formation{linked.length > 1 ? 's' : ''} rattachée{linked.length > 1 ? 's' : ''}
-          </span>
-        )}
-      </div>
-
+    <Modal
+      title={institute ? `Modifier ${institute.short_name}` : 'Ajouter un institut'}
+      subtitle={
+        institute
+          ? 'La fiche publique reprend ces informations.'
+          : 'Un institut doit être rattaché à un arrondissement de Brazzaville.'
+      }
+      onClose={onClose}
+    >
       <form className="form" onSubmit={onSubmit} noValidate>
         <fieldset>
           <legend>Identité</legend>
           <div className="row two">
-            {field('name', 'Nom complet', { placeholder: 'ex. Institut Supérieur de Gestion du Fleuve' })}
-            {field('short_name', 'Sigle', { placeholder: 'ex. ISGF', maxLength: 12 })}
+            {field('name', 'Nom complet', {
+              placeholder: 'ex. Institut Supérieur de Gestion du Fleuve',
+            })}
+            {field('short_name', 'Sigle', {
+              placeholder: 'ex. ISGF',
+              maxLength: 12,
+            })}
           </div>
           <div className="row two" style={{ marginTop: 16 }}>
             <div className="fld">
@@ -190,11 +186,22 @@ function InstituteForm({ institute, districts, linked }) {
         <fieldset>
           <legend>Contact</legend>
           <div className="row two">
-            {field('phone', 'Téléphone', { placeholder: '+242 …', inputMode: 'tel' })}
-            {field('whatsapp', 'WhatsApp', { placeholder: '24206…', inputMode: 'numeric' }, 'Format international, sans le +.')}
+            {field('phone', 'Téléphone', {
+              placeholder: '+242 …',
+              inputMode: 'tel',
+            })}
+            {field(
+              'whatsapp',
+              'WhatsApp',
+              { placeholder: '24206…', inputMode: 'numeric' },
+              'Format international, sans le +.',
+            )}
           </div>
           <div className="row" style={{ marginTop: 16 }}>
-            {field('email', 'Adresse électronique', { type: 'email', placeholder: 'contact@institut.cg' })}
+            {field('email', 'Adresse électronique', {
+              type: 'email',
+              placeholder: 'contact@institut.cg',
+            })}
           </div>
         </fieldset>
 
@@ -207,10 +214,16 @@ function InstituteForm({ institute, districts, linked }) {
               { placeholder: 'ex. N° 047/MESRTI/2009' },
               "Laisser vide si l'institut n'est pas agréé : il apparaîtra sans badge.",
             )}
-            {field('registration_fee', "Frais d'inscription (FCFA)", { type: 'number', min: 0, step: 1000 })}
+            {field('registration_fee', "Frais d'inscription (FCFA)", {
+              type: 'number',
+              min: 0,
+              step: 1000,
+            })}
           </div>
           <div className="row two" style={{ marginTop: 16 }}>
-            {field('registration_deadline', 'Clôture des inscriptions', { type: 'date' })}
+            {field('registration_deadline', 'Clôture des inscriptions', {
+              type: 'date',
+            })}
             {field('start_date', 'Rentrée', { type: 'date' })}
           </div>
         </fieldset>
@@ -240,7 +253,12 @@ function InstituteForm({ institute, districts, linked }) {
           <div className="fld" style={{ marginTop: 16 }}>
             <label id="logo-label">Image de l'institut</label>
             <div className="logoedit" role="group" aria-labelledby="logo-label">
-              <div className="ap" style={{ background: form.image_url ? '#fff' : (institute?.color ?? '#5E6B64') }}>
+              <div
+                className="ap"
+                style={{
+                  background: form.image_url ? '#fff' : (institute?.color ?? '#5E6B64'),
+                }}
+              >
                 {form.image_url ? (
                   <img src={imageUrl(form.image_url)} alt="Aperçu de l'image" />
                 ) : (
@@ -254,7 +272,11 @@ function InstituteForm({ institute, districts, linked }) {
                     {form.image_url ? "Changer l'image" : 'Choisir une image'}
                   </button>
                   {form.image_url && (
-                    <button className="btn ghost sm" type="button" onClick={() => setForm({ ...form, image_url: null })}>
+                    <button
+                      className="btn ghost sm"
+                      type="button"
+                      onClick={() => setForm({ ...form, image_url: null })}
+                    >
                       Retirer
                     </button>
                   )}
@@ -278,9 +300,9 @@ function InstituteForm({ institute, districts, linked }) {
           <button className="btn" type="submit" disabled={submitting}>
             {institute ? 'Enregistrer les modifications' : "Créer l'institut"}
           </button>
-          <Link className="btn line" to={ROUTES.instituts}>
+          <button className="btn line" type="button" onClick={onClose}>
             Annuler
-          </Link>
+          </button>
           <span className="sp" style={{ color: 'var(--muted)', fontSize: '13.5px' }}>
             {linked.length > 0 &&
               `Cet institut porte ${linked.length} formation(s) : elles seront retirées du catalogue public s'il est supprimé.`}
@@ -325,14 +347,18 @@ function InstituteForm({ institute, districts, linked }) {
           </div>
         </div>
       )}
-    </>
+    </Modal>
   );
 }
 
-// La page charge d'abord les données, puis affiche le formulaire : celui-ci
-// peut ainsi partir directement des valeurs de l'institut.
+// Route /admin/instituts/nouveau ou /admin/instituts/:id : le formulaire s'ouvre
+// dans une fenêtre, par-dessus la liste des instituts. Les données sont chargées
+// d'abord, pour que le formulaire parte directement des valeurs de l'institut.
 function FormulaireInstitut() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  // La liste, affichée derrière, fournit de quoi se recharger après un enregistrement.
+  const { reloadList } = useOutletContext();
   const { data, loading, error } = useApi(async () => {
     const [districts, programs, institute] = await Promise.all([
       getDistricts(),
@@ -342,12 +368,30 @@ function FormulaireInstitut() {
     return { districts, programs, institute };
   }, [id]);
 
-  if (!data || loading) return <PageState loading={loading} error={error} />;
+  const close = () => navigate(ROUTES.instituts);
 
-  const linked = data.institute
-    ? data.programs.filter((program) => program.institute.id === data.institute.id)
-    : [];
-  return <InstituteForm key={id ?? 'nouveau'} institute={data.institute} districts={data.districts} linked={linked} />;
+  if (!data || loading) {
+    return (
+      <Modal title={id ? "Modifier l'institut" : 'Ajouter un institut'} onClose={close}>
+        <PageState loading={loading} error={error} />
+      </Modal>
+    );
+  }
+
+  const linked = data.institute ? data.programs.filter((program) => program.institute.id === data.institute.id) : [];
+  return (
+    <InstituteForm
+      key={id ?? 'nouveau'}
+      institute={data.institute}
+      districts={data.districts}
+      linked={linked}
+      onClose={close}
+      onSaved={() => {
+        reloadList();
+        close();
+      }}
+    />
+  );
 }
 
 export default FormulaireInstitut

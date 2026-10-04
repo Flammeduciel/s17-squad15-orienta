@@ -4,13 +4,14 @@ import { ans, fcfa, normalize } from '../../utils/format';
 import { MAX_BUDGET, MIN_BUDGET, programsWith, toggleIn } from './filters';
 
 // Panneau de filtres de l'accueil. Sur mobile, il s'ouvre en feuille par le bas.
+// programs : formations trouvées par la recherche, pour les compteurs.
 // ready : faux tant que le catalogue n'est pas chargé ; les listes sont alors en attente.
-export default function FilterPanel({ data, ready, open, onClose }) {
+export default function FilterPanel({ data, programs, ready, open, onClose }) {
   const { filters, change, resetFilters } = useSearch();
   const [careerSearch, setCareerSearch] = useState('');
 
   // Nombre de formations qu'on obtiendrait en choisissant cette seule valeur.
-  const count = (key, value) => programsWith(data.programs, filters, key, value).length;
+  const count = (key, value) => programsWith(programs, filters, key, value).length;
 
   const careers = data.careers.filter((name) => normalize(name).includes(normalize(careerSearch)));
   const durations = [...new Set(data.degrees.map((degree) => degree.duration))].sort((a, b) => a - b);
