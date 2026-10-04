@@ -125,7 +125,7 @@ Créer une deuxième **Application** dans Dokploy :
 | Argument               | Valeur                                                              |
 | ---------------------- | ------------------------------------------------------------------- |
 | `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.orienta.exemple.com`     |
-| `VITE_SITE_URL`       | Facultatif. L'URL publique du site lui-même, sans slash final ; par défaut `https://orienta.flamme.work`. Elle alimente les balises de référencement et l'image d'aperçu des liens partagés |
+| `VITE_SITE_URL`       | L'URL publique du site lui-même, sans slash final, ex. `https://orienta.exemple.com` : elle alimente les balises de référencement et l'image d'aperçu des liens partagés |
 
 Aucune variable requise dans "Environment Settings" pour le frontend.
 
@@ -216,13 +216,12 @@ qu'à re-seeder.
 | Variable               | Requis | Type           | Exemple                                  |
 | ---------------------- | ------ | ---------------- | ------------------------------------------- |
 | `VITE_API_URL`        | Oui    | Build Argument | `https://api.orienta.exemple.com`         |
-| `VITE_SITE_URL`       | Non (frontend seulement) | Build Argument | `https://orienta.flamme.work` (valeur par défaut) |
+| `VITE_SITE_URL`       | Oui (frontend seulement) | Build Argument | `https://orienta.exemple.com` |
 
 `VITE_SITE_URL` est l'adresse publique du site, sans slash final. Elle est écrite
 dans les balises de référencement et de partage (adresse canonique, image
-d'aperçu `og-image.png`). Sans elle, le build utilise l'adresse de production
-écrite dans `frontend/vite.config.js` : ne la renseigner que si le site est
-servi sous un autre domaine.
+d'aperçu `og-image.png`). Sans elle, ces balises pointent vers `localhost` et
+l'aperçu du lien ne s'affiche pas sur WhatsApp ou Facebook.
 
 ## Dépannage
 
