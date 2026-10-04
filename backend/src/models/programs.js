@@ -93,10 +93,10 @@ async function findById(id) {
 }
 
 /**
- * Frais, séries et débouchés d'une liste de formations, en trois requêtes.
+ * Frais, séries, débouchés et cours d'une liste de formations, en quatre requêtes.
  *
  * @param {number[]} programIds
- * @returns {Promise<{ fees: object[], series: object[], careers: object[] }>}
+ * @returns {Promise<{ fees: object[], series: object[], careers: object[], courses: object[] }>}
  */
 async function findRelations(programIds) {
   const fees = await query(
@@ -115,7 +115,13 @@ async function findRelations(programIds) {
      WHERE pc.program_id = ANY($1) ORDER BY c.name`,
     [programIds],
   );
-  return { fees: fees.rows, series: series.rows, careers: careers.rows };
+  const courses = await query(
+    `SELECT pc.program_id, pc.year, c.name FROM program_courses pc
+     JOIN courses c ON c.id = pc.course_id
+     WHERE pc.program_id = ANY($1) ORDER BY pc.year, pc.position`,
+    [programIds],
+  );
+  return { fees: fees.rows, series: series.rows, careers: careers.rows, courses: courses.rows };
 }
 
 /** Cherche une autre formation du même nom dans le même institut. */
