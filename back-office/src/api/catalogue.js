@@ -35,6 +35,7 @@ export const updateCareer = (id, body) => put(`/admin/careers/${id}`, body);
 export const deleteCareer = (id) => del(`/admin/careers/${id}`);
 
 // --- Instituts
+export const getDistricts = () => request('/districts').then((list) => list.map((district) => district.name));
 export const getInstitutes = () => request('/institutes').then((data) => data.items);
 export const getInstitute = (id) => request(`/institutes/${id}`);
 export const createInstitute = (body) => post('/admin/institutes', body);
