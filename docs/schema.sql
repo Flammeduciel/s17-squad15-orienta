@@ -72,6 +72,7 @@ CREATE TABLE institutes (
     email                 VARCHAR(150),
     color                 VARCHAR(7) DEFAULT '#17693F',
     image_url             TEXT,
+    banner_url            TEXT,
     description           TEXT,
     benefits              TEXT[] NOT NULL DEFAULT '{}',
     registration_fee      INTEGER NOT NULL DEFAULT 0 CHECK (registration_fee >= 0),

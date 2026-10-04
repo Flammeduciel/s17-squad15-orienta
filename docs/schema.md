@@ -47,6 +47,7 @@ erDiagram
         VARCHAR email
         VARCHAR color
         TEXT image_url
+        TEXT banner_url
         TEXT description
         TEXT_ARRAY benefits
         INTEGER registration_fee
@@ -193,7 +194,8 @@ Private higher education institutes in Brazzaville.
 | whatsapp | VARCHAR(20) | WhatsApp number (international, no +) |
 | email | VARCHAR(150) | Contact email |
 | color | VARCHAR(7) | Cover color (hex) |
-| image_url | TEXT | Institute image (null → color cover) |
+| image_url | TEXT | Image shown on the institute cards (null → color cover) |
+| banner_url | TEXT | Wide image shown as the banner of the institute page (null → `image_url`, then color cover) |
 | description | TEXT | Presentation text |
 | benefits | TEXT[] | Optional advantages (library, grants…), one per element |
 | registration_fee | INTEGER | Registration fee in FCFA |

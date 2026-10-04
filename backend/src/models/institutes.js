@@ -19,7 +19,7 @@ const SUMMARY = `
 /* Colonnes de la fiche : `InstituteDetail`. Les dates sont renvoyées en texte
    `AAAA-MM-JJ` pour ne pas dépendre du fuseau horaire du serveur. */
 const DETAIL = `${SUMMARY},
-  i.address, i.phone, i.whatsapp, i.email, i.description, i.benefits,
+  i.banner_url, i.address, i.phone, i.whatsapp, i.email, i.description, i.benefits,
   to_char(i.registration_deadline, 'YYYY-MM-DD') AS registration_deadline,
   to_char(i.start_date, 'YYYY-MM-DD') AS start_date`;
 
@@ -82,6 +82,7 @@ function values(institute) {
     institute.email,
     institute.color,
     institute.image_url,
+    institute.banner_url,
     institute.description,
     institute.benefits,
     institute.registration_fee,
@@ -95,9 +96,9 @@ function values(institute) {
 async function create(institute) {
   const { rows } = await query(
     `INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, email, color,
-                             image_url, description, benefits, registration_fee,
+                             image_url, banner_url, description, benefits, registration_fee,
                              registration_deadline, start_date, accreditation_number)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, '#17693F'), $9, $10, $11, $12, $13, $14, $15)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, '#17693F'), $9, $10, $11, $12, $13, $14, $15, $16)
      RETURNING id`,
     values(institute),
   );
@@ -109,10 +110,10 @@ async function update(id, institute) {
   const { rowCount } = await query(
     `UPDATE institutes SET
        name = $1, short_name = $2, district = $3, address = $4, phone = $5, whatsapp = $6,
-       email = $7, color = COALESCE($8, color), image_url = $9, description = $10, benefits = $11,
-       registration_fee = $12, registration_deadline = $13, start_date = $14,
-       accreditation_number = $15, updated_at = NOW()
-     WHERE id = $16`,
+       email = $7, color = COALESCE($8, color), image_url = $9, banner_url = $10, description = $11,
+       benefits = $12, registration_fee = $13, registration_deadline = $14, start_date = $15,
+       accreditation_number = $16, updated_at = NOW()
+     WHERE id = $17`,
     [...values(institute), id],
   );
   return rowCount > 0;
