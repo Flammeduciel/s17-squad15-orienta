@@ -7,7 +7,7 @@ const institutes = require('../controllers/institutes');
 const { uploadImage } = require('../controllers/images');
 
 /**
- * Routes des instituts, des arrondissements et du dépôt d'image (bloc BK4).
+ * Routes des instituts et du dépôt d'image (bloc BK4).
  *
  * @type {import('express').Router}
  */
@@ -15,7 +15,6 @@ const router = express.Router();
 
 router.get('/institutes', validate({ query: institutesQuery }), institutes.listInstitutes);
 router.get('/institutes/:id', validate({ params: idParams }), institutes.getInstitute);
-router.get('/districts', institutes.listDistricts);
 
 router.post('/admin/institutes', validate({ body: instituteBody }), institutes.createInstitute);
 router.put('/admin/institutes/:id', validate({ params: idParams, body: instituteBody }), institutes.updateInstitute);

@@ -32,7 +32,7 @@ const SORTS = {
  * @param {'published'|'draft'} [filters.status]
  * @param {string} [filters.institute_id]
  * @param {string} [filters.domain_id]
- * @param {string[]} [filters.district] Un de ces arrondissements.
+ * @param {string[]} [filters.district_id] Un de ces arrondissements.
  * @param {string[]} [filters.degree_id] Un de ces diplômes.
  * @param {string[]} [filters.career_id] Au moins un de ces débouchés.
  * @param {number[]} [filters.duration] Une de ces durées.
@@ -57,7 +57,7 @@ async function findAll(filters) {
   if (filters.institute_id) add('p.institute_id = ?', filters.institute_id);
   if (filters.domain_id) add('p.domain_id = ?', filters.domain_id);
   // Critères à plusieurs valeurs : « = ANY(liste) » veut dire « une des valeurs de la liste ».
-  if (filters.district) add('i.district = ANY(?::text[])', filters.district);
+  if (filters.district_id) add('i.district_id = ANY(?::uuid[])', filters.district_id);
   if (filters.degree_id) add('p.degree_id = ANY(?::uuid[])', filters.degree_id);
   if (filters.duration) add('d.duration = ANY(?::int[])', filters.duration);
   if (filters.career_id) {
@@ -223,7 +223,7 @@ async function remove(id) {
 /** @returns {Promise<object>} Les 5 KPI du tableau de bord (vue `indicators`). */
 async function findIndicators() {
   const { rows } = await query(
-    `SELECT nb_institutes::int, nb_programs::int, nb_districts_covered::int,
+    `SELECT nb_institutes::int, nb_programs::int, nb_districts_covered::int, nb_districts::int,
             nb_degrees::int, nb_careers::int
      FROM indicators`,
   );

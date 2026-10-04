@@ -54,6 +54,29 @@ CREATE TABLE bac_series (
 );
 
 -- ---------------------------------------------------------------------------
+-- Table: cities (villes)
+-- ---------------------------------------------------------------------------
+CREATE TABLE cities (
+    id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name    VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- ---------------------------------------------------------------------------
+-- Table: districts (arrondissements)
+-- ---------------------------------------------------------------------------
+-- A district belongs to one city; two cities may have a district with the same
+-- name. A city still holding districts, or a district still holding institutes,
+-- cannot be deleted.
+CREATE TABLE districts (
+    id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    city_id   UUID NOT NULL REFERENCES cities(id),
+    name      VARCHAR(100) NOT NULL,
+    UNIQUE (city_id, name)
+);
+
+CREATE INDEX idx_districts_city ON districts(city_id);
+
+-- ---------------------------------------------------------------------------
 -- Table: institutes
 -- ---------------------------------------------------------------------------
 -- An institute is accredited when it has an accreditation number: `accredited`
@@ -62,9 +85,7 @@ CREATE TABLE institutes (
     id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name                  VARCHAR(200) NOT NULL UNIQUE,
     short_name            VARCHAR(20) NOT NULL UNIQUE,
-    district              VARCHAR(50) NOT NULL
-                          CHECK (district IN ('Makélékélé', 'Bacongo', 'Poto-Poto', 'Moungali', 'Ouenzé',
-                                              'Talangaï', 'Mfilou', 'Madibou', 'Djoué')),
+    district_id           UUID NOT NULL REFERENCES districts(id),
     address               VARCHAR(300),
     phone                 VARCHAR(20),
     whatsapp              VARCHAR(20),
@@ -84,7 +105,7 @@ CREATE TABLE institutes (
     CHECK (registration_deadline IS NULL OR start_date IS NULL OR start_date >= registration_deadline)
 );
 
-CREATE INDEX idx_institutes_district ON institutes(district);
+CREATE INDEX idx_institutes_district ON institutes(district_id);
 
 -- ---------------------------------------------------------------------------
 -- Table: programs (formations)
@@ -211,6 +232,7 @@ CREATE VIEW indicators AS
 SELECT
     (SELECT COUNT(*) FROM institutes) AS nb_institutes,
     (SELECT COUNT(*) FROM programs) AS nb_programs,
-    (SELECT COUNT(DISTINCT district) FROM institutes) AS nb_districts_covered,
+    (SELECT COUNT(DISTINCT district_id) FROM institutes) AS nb_districts_covered,
+    (SELECT COUNT(*) FROM districts) AS nb_districts,
     (SELECT COUNT(*) FROM degrees) AS nb_degrees,
     (SELECT COUNT(*) FROM careers) AS nb_careers;

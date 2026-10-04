@@ -1,6 +1,6 @@
 const httpError = require('../utils/httpError');
 const { matches } = require('../utils/text');
-const DISTRICTS = require('../utils/districts');
+const districts = require('../models/districts');
 const institutes = require('../models/institutes');
 const programService = require('../services/programs');
 
@@ -28,9 +28,9 @@ const PROGRAM_FILTERS = [
  * correspondante ; `program_count` et `degrees` ne comptent alors que celles-ci.
  */
 async function listInstitutes(req, res) {
-  const { q, district, accredited } = req.valid.query;
-  const all = await institutes.findAll({ district, accredited });
-  const byName = (institute) => matches(q || '', `${institute.name} ${institute.short_name} ${institute.district}`);
+  const { q, district_id, accredited } = req.valid.query;
+  const all = await institutes.findAll({ district_id, accredited });
+  const byName = (institute) => matches(q || '', `${institute.name} ${institute.short_name} ${institute.district} ${institute.city}`);
 
   const hasProgramFilter = PROGRAM_FILTERS.some((name) => Boolean(req.valid.query[name]));
   if (!hasProgramFilter && !q) {
@@ -68,19 +68,11 @@ function publishedPrograms(instituteId) {
   return programService.search({ institute_id: instituteId, status: 'published' });
 }
 
-/** `GET /districts` - les 9 arrondissements, avec leur nombre de formations publiées. */
-async function listDistricts(req, res) {
-  const counts = await institutes.countByDistrict();
-  res.json(
-    DISTRICTS.map((name) => {
-      const found = counts.find((count) => count.name === name);
-      return {
-        name,
-        institute_count: found ? found.institute_count : 0,
-        program_count: found ? found.program_count : 0,
-      };
-    }),
-  );
+/** Refuse un arrondissement qui n'existe pas. */
+async function checkDistrict(districtId) {
+  if (!(await districts.findById(districtId))) {
+    throw httpError(400, 'PARAMETRE_INVALIDE', "« district_id » : cet arrondissement n'existe pas.");
+  }
 }
 
 /** Refuse un nom ou un sigle déjà porté par un autre institut. */
@@ -93,6 +85,7 @@ async function checkUnique(body, currentId) {
 
 /** `POST /admin/institutes` */
 async function createInstitute(req, res) {
+  await checkDistrict(req.valid.body.district_id);
   await checkUnique(req.valid.body, null);
   const id = await institutes.create(req.valid.body);
   res.status(201).json({ ...(await institutes.findById(id)), programs: [] });
@@ -101,6 +94,7 @@ async function createInstitute(req, res) {
 /** `PUT /admin/institutes/:id` */
 async function updateInstitute(req, res) {
   const { id } = req.valid.params;
+  await checkDistrict(req.valid.body.district_id);
   await checkUnique(req.valid.body, id);
   const found = await institutes.update(id, req.valid.body);
   if (!found) throw httpError(...NOT_FOUND);
@@ -117,7 +111,6 @@ async function deleteInstitute(req, res) {
 module.exports = {
   listInstitutes,
   getInstitute,
-  listDistricts,
   createInstitute,
   updateInstitute,
   deleteInstitute,

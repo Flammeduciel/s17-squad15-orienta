@@ -36,8 +36,9 @@ info:
     - Les montants sont exprimés en FCFA (entiers).
     - **Les identifiants sont des UUID** (`3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d`),
       générés par la base. Ils sont échangés sous forme de texte.
-    - `district` est stocké et renvoyé **avec ses accents** (`Makélékélé`, `Talangaï`, `Ouenzé`),
-      tel qu'il s'affiche.
+    - Les villes et leurs arrondissements sont gérés depuis le back-office. Un institut
+      est rattaché à un arrondissement (`district_id`) ; l'API renvoie aussi le nom de
+      l'arrondissement (`district`) et celui de sa ville (`city`).
 
     **Convention d'erreur :** toute erreur renvoie le schéma `Error`
     avec un code machine (`code`) et un message lisible (`message`).
@@ -58,7 +59,7 @@ tags:
   - name: Admin
     description: CRUD back-office - authentification Bearer requise
   - name: Admin - Référentiels
-    description: Diplômes, séries du bac, domaines d'insertion, débouchés et cours
+    description: Diplômes, séries du bac, domaines d'insertion, débouchés, cours, villes et arrondissements
 
 security: []
 
@@ -79,7 +80,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Q"
         - $ref: "#/components/parameters/DomainId"
-        - $ref: "#/components/parameters/District"
+        - $ref: "#/components/parameters/DistrictId"
         - $ref: "#/components/parameters/DegreeId"
         - $ref: "#/components/parameters/CareerId"
         - $ref: "#/components/parameters/Duration"
@@ -132,7 +133,7 @@ paths:
         l'arrondissement correspond à `q`.
       parameters:
         - $ref: "#/components/parameters/Q"
-        - $ref: "#/components/parameters/District"
+        - $ref: "#/components/parameters/DistrictId"
         - name: accredited
           in: query
           description: Uniquement les instituts agréés
@@ -221,10 +222,24 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/BacSeries" }
 
+  /cities:
+    get:
+      tags: [Public]
+      summary: Lister les villes
+      responses:
+        "200":
+          description: Villes avec leur nombre d'arrondissements
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/City" }
+
   /districts:
     get:
       tags: [Public]
-      summary: Lister les 9 arrondissements de Brazzaville
+      summary: Lister les arrondissements
+      description: Tous les arrondissements, classés par ville puis par nom - pour le filtre « arrondissement ».
       responses:
         "200":
           description: Arrondissements avec leur nombre d'instituts et de formations publiées
@@ -912,6 +927,144 @@ paths:
         "409":
           $ref: "#/components/responses/Conflict"
 
+  /admin/cities:
+    post:
+      tags: [Admin - Référentiels]
+      summary: Créer une ville
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CityInput" }
+      responses:
+        "201":
+          description: Ville créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/City" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/cities/{id}:
+    put:
+      tags: [Admin - Référentiels]
+      summary: Modifier une ville
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CityInput" }
+      responses:
+        "200":
+          description: Ville mise à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/City" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin - Référentiels]
+      summary: Supprimer une ville
+      description: Refusé (409) tant que la ville a des arrondissements.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      responses:
+        "204":
+          description: Ville supprimée
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/districts:
+    post:
+      tags: [Admin - Référentiels]
+      summary: Créer un arrondissement
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DistrictInput" }
+      responses:
+        "201":
+          description: Arrondissement créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/District" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/districts/{id}:
+    put:
+      tags: [Admin - Référentiels]
+      summary: Modifier un arrondissement
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DistrictInput" }
+      responses:
+        "200":
+          description: Arrondissement mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/District" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin - Référentiels]
+      summary: Supprimer un arrondissement
+      description: Refusé (409) tant qu'un institut se trouve dans l'arrondissement.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      responses:
+        "204":
+          description: Arrondissement supprimé
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
   /admin/courses:
     get:
       tags: [Admin - Référentiels]
@@ -1057,16 +1210,15 @@ components:
       in: query
       description: Identifiant du domaine d'insertion (voir `/domains`)
       schema: { $ref: "#/components/schemas/Uuid" }
-    District:
-      name: district
+    DistrictId:
+      name: district_id
       in: query
-      description: Un ou plusieurs des 9 arrondissements de Brazzaville, séparés par des virgules
+      description: Identifiants d'un ou plusieurs arrondissements (voir `/districts`), séparés par des virgules
       style: form
       explode: false
       schema:
         type: array
-        items: { $ref: "#/components/schemas/DistrictName" }
-      example: [Makélékélé, Bacongo]
+        items: { $ref: "#/components/schemas/Uuid" }
     DegreeId:
       name: degree_id
       in: query
@@ -1179,19 +1331,39 @@ components:
           description: Message lisible, en français
           example: "Aucune formation ne correspond à cet identifiant."
 
-    DistrictName:
-      type: string
-      description: Arrondissement de Brazzaville, avec ses accents (contrainte CHECK de `institutes.district`)
-      enum: [Makélékélé, Bacongo, Poto-Poto, Moungali, Ouenzé, Talangaï, Mfilou, Madibou, Djoué]
+    City:
+      type: object
+      description: Table `cities` + compte agrégé des arrondissements
+      required: [id, name, district_count]
+      properties:
+        id: { $ref: "#/components/schemas/Uuid" }
+        name: { type: string, example: Brazzaville }
+        district_count: { type: integer, example: 9, description: Arrondissements de la ville }
+
+    CityInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, maxLength: 100, example: Pointe-Noire }
 
     District:
       type: object
-      description: Vue agrégée - les 9 arrondissements sont fixes ; les comptes viennent de `institutes.district`
-      required: [name, institute_count, program_count]
+      description: Table `districts` + sa ville et les comptes agrégés
+      required: [id, name, city_id, city, institute_count, program_count]
       properties:
-        name: { $ref: "#/components/schemas/DistrictName" }
+        id: { $ref: "#/components/schemas/Uuid" }
+        name: { type: string, example: Makélékélé }
+        city_id: { $ref: "#/components/schemas/Uuid" }
+        city: { type: string, example: Brazzaville, description: Nom de la ville }
         institute_count: { type: integer, example: 2, description: Instituts de l'arrondissement }
         program_count: { type: integer, example: 5, description: Formations publiées de ces instituts }
+
+    DistrictInput:
+      type: object
+      required: [name, city_id]
+      properties:
+        name: { type: string, maxLength: 100, example: Makélékélé, description: Unique dans sa ville }
+        city_id: { $ref: "#/components/schemas/Uuid" }
 
     # ------------------------------------------------------------ Référentiels
     Domain:
@@ -1306,12 +1478,14 @@ components:
     InstituteSummary:
       type: object
       description: Colonnes `institutes` (sous-ensemble affiché en liste) + agrégats de ses formations publiées
-      required: [id, short_name, name, district, accredited, registration_fee, program_count, degrees]
+      required: [id, short_name, name, district_id, district, city, accredited, registration_fee, program_count, degrees]
       properties:
         id: { $ref: "#/components/schemas/Uuid" }
         short_name: { type: string, example: ISD }
         name: { type: string, example: "Institut de Santé du Djoué" }
-        district: { $ref: "#/components/schemas/DistrictName" }
+        district_id: { $ref: "#/components/schemas/Uuid" }
+        district: { type: string, example: Makélékélé, description: Nom de l'arrondissement }
+        city: { type: string, example: Brazzaville, description: Nom de la ville de l'arrondissement }
         accredited:
           type: boolean
           description: "`true` → badge bleu avec le numéro ; `false` → nom seul, sans badge"
@@ -1486,11 +1660,11 @@ components:
     InstituteInput:
       type: object
       description: Colonnes `institutes` en écriture
-      required: [name, short_name, district, address, phone, whatsapp, registration_fee]
+      required: [name, short_name, district_id, address, phone, whatsapp, registration_fee]
       properties:
         name: { type: string, example: "Institut de Santé du Djoué" }
         short_name: { type: string, maxLength: 20, example: ISD }
-        district: { $ref: "#/components/schemas/DistrictName" }
+        district_id: { $ref: "#/components/schemas/Uuid" }
         address: { type: string, example: "Route du Djoué, Makélékélé" }
         phone: { type: string, example: "+242 06 409 88 52" }
         whatsapp: { type: string, example: "242064098852" }
@@ -1535,13 +1709,14 @@ components:
     Indicators:
       type: object
       description: Vue SQL `indicators` - KPI du dashboard, liste de référence unique
-      required: [nb_institutes, nb_programs, nb_districts_covered, nb_degrees, nb_careers]
+      required: [nb_institutes, nb_programs, nb_districts_covered, nb_districts, nb_degrees, nb_careers]
       properties:
         nb_institutes: { type: integer, example: 8, description: Établissements }
         nb_programs: { type: integer, example: 26, description: Formations et filières }
         nb_districts_covered:
           type: integer
           example: 8
-          description: Sur 9 arrondissements au total
+          description: Arrondissements où se trouve au moins un institut
+        nb_districts: { type: integer, example: 9, description: Arrondissements enregistrés, toutes villes confondues }
         nb_degrees: { type: integer, example: 4, description: Diplômes délivrés }
         nb_careers: { type: integer, example: 65, description: Débouchés }

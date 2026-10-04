@@ -3,7 +3,8 @@
 -- ============================================================================
 -- Exécuter avec : psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/scripts/seed.sql
 -- Insère le même jeu de démonstration que les maquettes (template/) :
--- 10 domaines, 4 diplômes, 7 séries du bac, 8 instituts, 26 formations,
+-- 1 ville et ses 9 arrondissements, 10 domaines, 4 diplômes, 7 séries du bac,
+-- 8 instituts, 26 formations,
 -- 65 débouchés et 165 cours, avec les tarifs par niveau, les séries admises et
 -- le programme par année de chaque formation.
 --
@@ -74,13 +75,35 @@ INSERT INTO bac_series (code, label) VALUES
 ON CONFLICT (code) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
+-- Ville et arrondissements : Brazzaville et ses 9 arrondissements.
+-- ---------------------------------------------------------------------------
+INSERT INTO cities (name) VALUES ('Brazzaville')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO districts (city_id, name)
+SELECT c.id, v.name
+FROM cities c
+CROSS JOIN (VALUES
+    ('Makélékélé'), ('Bacongo'), ('Poto-Poto'), ('Moungali'), ('Ouenzé'),
+    ('Talangaï'), ('Mfilou'), ('Madibou'), ('Djoué')
+) AS v(name)
+WHERE c.name = 'Brazzaville'
+ON CONFLICT (city_id, name) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
 -- Instituts (8)
--- `district` : un des 9 arrondissements de Brazzaville, écrit comme dans les
--- maquettes (contrainte CHECK de migrate.sql). Un numéro d'agrément NULL
+-- La liste est posée dans une table temporaire, avec le nom de l'arrondissement :
+-- l'insertion retrouve ensuite son identifiant. Un numéro d'agrément NULL
 -- signifie « non agréé » : l'institut apparaît sans badge.
 -- ---------------------------------------------------------------------------
-INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, email, color, description,
-                         registration_fee, registration_deadline, start_date, accreditation_number) VALUES
+CREATE TEMP TABLE seed_institutes (
+    name TEXT, short_name TEXT, district TEXT, address TEXT, phone TEXT, whatsapp TEXT, email TEXT,
+    color TEXT, description TEXT, registration_fee INT, registration_deadline DATE, start_date DATE,
+    accreditation_number TEXT
+) ON COMMIT DROP;
+
+INSERT INTO seed_institutes (name, short_name, district, address, phone, whatsapp, email, color, description,
+                             registration_fee, registration_deadline, start_date, accreditation_number) VALUES
     ('Institut Supérieur de Gestion du Fleuve', 'ISGF', 'Poto-Poto', 'Avenue de la Paix, Poto-Poto',
      '+242 06 612 40 18', '242066124018', 'contact@isgf.cg', '#1E6B4A',
      'Spécialisé dans la gestion, la comptabilité et la banque depuis 2009. Cours en journée et en soirée.',
@@ -120,6 +143,14 @@ INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, em
      '+242 05 690 13 27', '242056901327', 'contact@isam.cg', '#4C7A1E',
      'Agronomie, environnement et tourisme, avec une ferme-école et un hôtel d''application.',
      35000, '2026-10-10', '2026-10-27', NULL);
+
+INSERT INTO institutes (name, short_name, district_id, address, phone, whatsapp, email, color, description,
+                        registration_fee, registration_deadline, start_date, accreditation_number)
+SELECT v.name, v.short_name, ds.id, v.address, v.phone, v.whatsapp, v.email, v.color, v.description,
+       v.registration_fee, v.registration_deadline, v.start_date, v.accreditation_number
+FROM seed_institutes v
+JOIN districts ds ON ds.name = v.district
+JOIN cities c ON c.id = ds.city_id AND c.name = 'Brazzaville';
 
 -- ---------------------------------------------------------------------------
 -- Formations (26)

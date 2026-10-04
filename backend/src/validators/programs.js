@@ -5,7 +5,6 @@
  */
 const { z } = require('zod');
 const { id, booleanQuery, positiveIntQuery, listQuery, requiredText, optionalText } = require('./common');
-const { district } = require('./institutes');
 
 /**
  * Paramètres de recherche de `GET /programs`. Arrondissement, diplôme,
@@ -14,7 +13,7 @@ const { district } = require('./institutes');
 const programsQuery = z.object({
   q: z.string().trim().optional(),
   domain_id: id.optional(),
-  district: listQuery(district).optional(),
+  district_id: listQuery(id).optional(),
   degree_id: listQuery(id).optional(),
   career_id: listQuery(id).optional(),
   duration: listQuery(positiveIntQuery).optional(),
