@@ -35,7 +35,7 @@ function Cours() {
   // L'adresse garde la formation filtrée : /admin/cours?formation=12.
   // « ajout=1 » ouvre d'emblée le formulaire (arrivée depuis une formation neuve).
   const [params, setParams] = useSearchParams();
-  const programId = Number(params.get('formation')) || null;
+  const programId = params.get('formation') || null;
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   // editing : null (liste seule), 'new' (ajout) ou le cours en cours de modification.
@@ -133,7 +133,7 @@ function Cours() {
 
   // --- Actions sur la formation filtrée
   const onAttach = async () => {
-    const course = courses.find((item) => item.id === Number(attach.courseId || free[0]?.id));
+    const course = courses.find((item) => item.id === (attach.courseId || free[0]?.id));
     if (!course) return;
     try {
       await linkCourse(program.id, course.id, Math.min(attach.year, program.duration));
@@ -225,7 +225,7 @@ function Cours() {
                           value={link.program_id}
                           onChange={(event) =>
                             changeLink(index, {
-                              program_id: Number(event.target.value),
+                              program_id: event.target.value,
                             })
                           }
                         >

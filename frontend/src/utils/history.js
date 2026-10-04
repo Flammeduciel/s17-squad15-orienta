@@ -35,4 +35,4 @@ export const recentIds = () => read(RECENT, []);
 export const popularIds = () =>
   Object.entries(read(VISITS, {}))
     .sort((a, b) => b[1] - a[1])
-    .map(([id]) => Number(id));
+    .map(([id]) => id);

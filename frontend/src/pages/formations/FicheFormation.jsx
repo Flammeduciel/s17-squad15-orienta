@@ -191,7 +191,6 @@ function FicheFormation() {
                 {(master ? DOSSIER_MASTER : DOSSIER_BAC).map((piece) => (
                   <li key={piece}>{piece}</li>
                 ))}
-                {domain.id === 'sante' && <li>Certificat médical et carnet de vaccination</li>}
               </ul>
             </section>
 
