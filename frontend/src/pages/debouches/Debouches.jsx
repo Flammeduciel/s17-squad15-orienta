@@ -8,7 +8,7 @@ import PageState from '../../components/PageState';
 import ProgramCard from '../../components/ProgramCard';
 import { useApi } from '../../hooks/useApi';
 import { ROUTES } from '../../routes';
-import { pluriel } from '../../utils/format';
+import { pluriel, lieu } from '../../utils/format';
 
 // Le débouché demandé et les formations publiées qui y mènent.
 async function loadCareer(id) {
@@ -43,7 +43,7 @@ function Debouches() {
             <div>
               <h1>{career.name}</h1>
               <p className="sub">
-                {pluriel(programs.length, 'formation')} à Brazzaville{' '}
+                {pluriel(programs.length, 'formation')} {lieu(programs.map((program) => program.institute.city))}{' '}
                 {programs.length > 1 ? 'mènent' : 'mène'} à ce débouché.
               </p>
             </div>

@@ -57,3 +57,12 @@ export const whatsappLink = (institute, message) =>
   `https://wa.me/${institute.whatsapp}?text=${encodeURIComponent(message)}`;
 export const mailLink = (institute, subject) =>
   `mailto:${institute.email}?subject=${encodeURIComponent(subject)}`;
+
+// Lieu couvert par une liste, d'après les villes qu'elle contient :
+// lieu(['Brazzaville', 'Brazzaville']) -> « à Brazzaville » ;
+// avec plusieurs villes -> « dans 2 villes ». Liste vide -> « ».
+export function lieu(cities) {
+  const names = [...new Set(cities)];
+  if (names.length === 0) return '';
+  return names.length === 1 ? `à ${names[0]}` : `dans ${names.length} villes`;
+}

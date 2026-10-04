@@ -61,7 +61,7 @@ function FicheInstitut() {
         <div>
           <h1>{institute.name}</h1>
           <p className="sub">
-            <b>{institute.short_name}</b> · {institute.district}, Brazzaville
+            <b>{institute.short_name}</b> · {institute.district}, {institute.city}
             {institute.accredited && ' · '}
             <AccreditationBadge institute={institute} />
           </p>
@@ -98,7 +98,9 @@ function FicheInstitut() {
           <div className="lines" style={{ maxWidth: 560 }}>
             <div>
               <span>Adresse</span>
-              <span>{institute.address}, Brazzaville</span>
+              <span>
+                {institute.address}, {institute.city}
+              </span>
             </div>
             <div>
               <span>Téléphone</span>

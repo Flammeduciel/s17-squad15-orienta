@@ -26,7 +26,9 @@ export default function InstituteCard({ institute, programCount, degrees }) {
         <div className="t">
           <h3>{institute.name}</h3>
         </div>
-        <p className="meta">{institute.district}, Brazzaville</p>
+        <p className="meta">
+          {institute.district}, {institute.city}
+        </p>
         <div style={{ marginTop: -6 }}>
           <AccreditationBadge institute={institute} />
         </div>

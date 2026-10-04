@@ -7,6 +7,7 @@ import { useApi } from '../../hooks/useApi';
 import { useDebounce } from '../../hooks/useDebounce';
 import { formationPath, institutPath } from '../../routes';
 import { normalize, pluriel } from '../../utils/format';
+import { districtLabel } from './filters';
 
 const NONE = { institutes: [], programs: [] };
 
@@ -82,7 +83,9 @@ export default function SearchBar({ data, onSearch }) {
                 </span>
                 <span>
                   {institute.name}
-                  <small>{institute.district}</small>
+                  <small>
+                    {institute.district}, {institute.city}
+                  </small>
                 </span>
               </button>
             ))}
@@ -122,9 +125,11 @@ export default function SearchBar({ data, onSearch }) {
           value={district}
           onChange={(event) => change({ districts: event.target.value ? [event.target.value] : [] })}
         >
-          <option value="">Tout Brazzaville</option>
+          <option value="">Tous</option>
           {data.districts.map((item) => (
-            <option key={item.name}>{item.name}</option>
+            <option key={item.id} value={item.id}>
+              {districtLabel(item, data.districts)}
+            </option>
           ))}
         </select>
       </div>

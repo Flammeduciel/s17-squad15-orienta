@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearch } from '../../context/search-context';
 import { ans, fcfa, normalize } from '../../utils/format';
-import { MAX_BUDGET, MIN_BUDGET, toggleIn } from './filters';
+import { MAX_BUDGET, MIN_BUDGET, districtLabel, toggleIn } from './filters';
 
 // Panneau de filtres de l'accueil. Sur mobile, il s'ouvre en feuille par le bas.
 // Chaque case porte le nombre de formations du catalogue pour cette valeur.
@@ -30,13 +30,13 @@ export default function FilterPanel({ data, ready, open, onClose }) {
           </p>
         )}
         {data.districts.map((district) => (
-          <label className="check" key={district.name}>
+          <label className="check" key={district.id}>
             <input
               type="checkbox"
-              checked={filters.districts.includes(district.name)}
-              onChange={() => change({ districts: toggleIn(filters.districts, district.name) })}
+              checked={filters.districts.includes(district.id)}
+              onChange={() => change({ districts: toggleIn(filters.districts, district.id) })}
             />
-            {district.name}
+            {districtLabel(district, data.districts)}
             <span className="n">{district.program_count}</span>
           </label>
         ))}

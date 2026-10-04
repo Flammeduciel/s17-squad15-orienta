@@ -210,7 +210,7 @@ function FicheFormation() {
                     <AccreditationBadge institute={institute} />
                   </div>
                   <p style={{ marginTop: 6 }}>
-                    <Icon name="pin" size={14} /> {institute.address}, Brazzaville
+                    <Icon name="pin" size={14} /> {institute.address}, {institute.city}
                   </p>
                 </div>
               </div>

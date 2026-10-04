@@ -14,6 +14,7 @@ import Icon from '../../components/Icon';
 import { useSearch } from '../../context/search-context';
 import { useApi } from '../../hooks/useApi';
 import { useDebounce } from '../../hooks/useDebounce';
+import { lieu } from '../../utils/format';
 import FilterPanel from './FilterPanel';
 import { searchParams } from './filters';
 import Results from './Results';
@@ -81,6 +82,9 @@ function Accueil() {
     scrollToResults();
   };
 
+  // « à Brazzaville » tant qu'une seule ville est enregistrée.
+  const place = loaded ? lieu(data.districts.map((district) => district.city)) : '';
+
   // Les quatre accès de l'accueil (EX-09) : chacun change ce que la grille affiche.
   const access = [
     { view: 'inst', icon: 'building', label: 'Instituts', total: sum(data.districts, 'institute_count') },
@@ -114,7 +118,9 @@ function Accueil() {
                 <span>
                   <b>{item.label}</b>
                   {/* Tant que le catalogue n'est pas là, le compte est remplacé par « … ». */}
-                  <small>{loaded ? item.total : '…'} à Brazzaville</small>
+                  <small>
+                    {loaded ? item.total : '…'} {place}
+                  </small>
                 </span>
               </button>
             ))}
