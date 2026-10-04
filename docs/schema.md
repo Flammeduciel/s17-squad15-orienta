@@ -22,6 +22,7 @@ erDiagram
         VARCHAR id PK
         VARCHAR name UK
         VARCHAR color
+        VARCHAR icon
     }
 
     degrees {
@@ -155,6 +156,7 @@ careers, and form the category bar of the public site.
 | id | VARCHAR(20) PK | Stable slug (ex: `gestion`, `info`, `sante`); renaming a domain never changes it |
 | name | VARCHAR(100) UNIQUE | Display name |
 | color | VARCHAR(7) | Hex color for the program covers |
+| icon | VARCHAR(40) | Font Awesome icon name without the `fa-` prefix (ex: `stethoscope`), chosen in the back-office; default `shapes` |
 
 A domain still used by a program or a career cannot be deleted.
 

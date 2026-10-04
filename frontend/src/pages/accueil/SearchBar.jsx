@@ -102,7 +102,7 @@ export default function SearchBar({ data, onSearch }) {
             {programs.map((program) => (
               <button key={program.id} type="button" onClick={() => navigate(formationPath(program.id))}>
                 <span className="ic">
-                  <Icon name={program.domain.id} />
+                  <Icon name={program.domain.icon} />
                 </span>
                 <span>
                   {program.name}

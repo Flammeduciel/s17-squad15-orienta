@@ -31,7 +31,9 @@ CREATE TABLE users (
 CREATE TABLE domains (
     id      VARCHAR(20) PRIMARY KEY,
     name    VARCHAR(100) NOT NULL UNIQUE,
-    color   VARCHAR(7) NOT NULL
+    color   VARCHAR(7) NOT NULL,
+    -- Font Awesome icon name, without the "fa-" prefix (ex: 'stethoscope').
+    icon    VARCHAR(40) NOT NULL DEFAULT 'shapes'
 );
 
 -- ---------------------------------------------------------------------------

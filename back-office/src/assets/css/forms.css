@@ -245,3 +245,35 @@ legend {
   display: grid;
   gap: 3px;
 }
+
+/* Champ qui occupe toute la largeur d'une rangée à deux colonnes. */
+.form .row .fld.full {
+  grid-column: 1 / -1;
+}
+
+/* Choix d'une icône : une grille de boutons, celui qui est choisi est en vert. */
+.iconpick {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 8px;
+}
+
+.iconpick button {
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.iconpick button:hover {
+  border-color: var(--green);
+}
+
+.iconpick button[aria-pressed="true"] {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
