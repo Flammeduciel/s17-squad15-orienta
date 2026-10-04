@@ -4,6 +4,7 @@ const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const { requireAuth } = require('./middlewares/auth');
 const { notFound, errorHandler } = require('./middlewares/errors');
+const districtsRoutes = require("./routes/districts");
 const { uploadDir } = require('./config/env');
 
 /**
@@ -42,7 +43,8 @@ app.use(authRoutes);
 // Tout ce qui commence par /admin exige une session Squad : les routes
 // d'administration des blocs suivants sont protégées sans rien ajouter.
 app.use('/admin', requireAuth);
-
+// BK4 — instituts.
+app.use(districtsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
