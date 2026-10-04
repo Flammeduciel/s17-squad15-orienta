@@ -56,7 +56,7 @@ export default function Referentiel({ config }) {
       setFormError('Ce champ est obligatoire.');
       return;
     }
-    const body = config.toBody({ ...form, [config.nameKey]: name });
+    const body = config.toBody({ ...form, [config.nameKey]: name }, data);
     try {
       if (editing === 'new') {
         await config.create(body);
@@ -148,7 +148,7 @@ export default function Referentiel({ config }) {
           <div className="pad">
             <div className="empty">
               <h3>{config.aucun}</h3>
-              <p>Ajoutez-en pour pouvoir les rattacher aux formations.</p>
+              <p>{config.emptyHint ?? 'Ajoutez-en pour pouvoir les rattacher aux formations.'}</p>
             </div>
           </div>
         ) : (
@@ -158,7 +158,7 @@ export default function Referentiel({ config }) {
                 <tr>
                   <th>{config.nameLabel}</th>
                   <th>{config.column}</th>
-                  <th className="num">Formations</th>
+                  <th className="num">{config.usageLabel ?? 'Formations'}</th>
                   <th />
                 </tr>
               </thead>

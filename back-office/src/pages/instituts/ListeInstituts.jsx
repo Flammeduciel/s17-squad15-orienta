@@ -10,7 +10,7 @@ import Pager from '../../components/Pager';
 import { useToast } from '../../context/toast-context';
 import { useApi } from '../../hooks/useApi';
 import { ROUTES } from '../../routes';
-import { errorMessage, fcfa, imageUrl, matches, pageOf } from '../../utils/format';
+import { errorMessage, fcfa, imageUrl, matches, pageOf, pluriel } from '../../utils/format';
 
 const PER_PAGE = 6;
 
@@ -38,9 +38,9 @@ function ListeInstituts() {
   const programCount = (id) => data.programs.filter((program) => program.institute.id === id).length;
 
   const rows = data.institutes.filter((institute) => {
-    const text = `${institute.name} ${institute.short_name} ${institute.district} ${institute.address}`;
+    const text = `${institute.name} ${institute.short_name} ${institute.district} ${institute.city} ${institute.address}`;
     if (!matches(search, text)) return false;
-    if (district && institute.district !== district) return false;
+    if (district && institute.district_id !== district) return false;
     if (accredited === 'oui' && !institute.accredited) return false;
     if (accredited === 'non' && institute.accredited) return false;
     return true;
@@ -78,8 +78,8 @@ function ListeInstituts() {
         <div>
           <h1>Instituts</h1>
           <p>
-            {data.institutes.length} instituts référencés sur les {data.districts.length} arrondissements de
-            Brazzaville.
+            {pluriel(data.institutes.length, 'institut')} référencé{data.institutes.length > 1 ? 's' : ''}, pour{' '}
+            {pluriel(data.districts.length, 'arrondissement')} enregistré{data.districts.length > 1 ? 's' : ''}.
           </p>
         </div>
         <Link className="btn" to={`${ROUTES.instituts}/nouveau`}>
@@ -108,8 +108,10 @@ function ListeInstituts() {
               onChange={(event) => filter(setDistrict)(event.target.value)}
             >
               <option value="">Tous les arrondissements</option>
-              {data.districts.map((name) => (
-                <option key={name}>{name}</option>
+              {data.districts.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name} ({item.city})
+                </option>
               ))}
             </select>
             <div className="seg" role="group" aria-label="Filtrer par agrément">
@@ -177,7 +179,11 @@ function ListeInstituts() {
                           </span>
                         </div>
                       </td>
-                      <td>{institute.district}</td>
+                      <td>
+                        {institute.district}
+                        <br />
+                        <small style={{ color: 'var(--muted)' }}>{institute.city}</small>
+                      </td>
                       <td>
                         <small>{institute.phone}</small>
                         <br />

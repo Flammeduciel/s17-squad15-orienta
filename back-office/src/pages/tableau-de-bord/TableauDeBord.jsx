@@ -1,7 +1,7 @@
 /* Tableau de bord - route /admin (ticket P11).
    Maquette : template/back-office.html. */
 import { Link } from 'react-router-dom';
-import { getDistricts, getDomains, getIndicators, getInstitutes, getPrograms } from '../../api/catalogue';
+import { getDomains, getIndicators, getInstitutes, getPrograms } from '../../api/catalogue';
 import Icon from '../../components/Icon';
 import PageState from '../../components/PageState';
 import { useApi } from '../../hooks/useApi';
@@ -29,19 +29,18 @@ const addLink = { justifyContent: 'flex-start' };
 
 function TableauDeBord() {
   const { data, loading, error } = useApi(async () => {
-    const [indicators, programs, institutes, domains, districts] = await Promise.all([
+    const [indicators, programs, institutes, domains] = await Promise.all([
       getIndicators(),
       getPrograms(),
       getInstitutes(),
       getDomains(),
-      getDistricts(),
     ]);
-    return { indicators, programs, institutes, domains, districts };
+    return { indicators, programs, institutes, domains };
   }, []);
 
   if (!data) return <PageState loading={loading} error={error} />;
 
-  const { indicators, programs, institutes, domains, districts } = data;
+  const { indicators, programs, institutes, domains } = data;
   const drafts = programs.filter((program) => program.status !== 'published').length;
   const notAccredited = institutes.filter((institute) => !institute.accredited).length;
   const average = programs.reduce((sum, program) => sum + program.tuition, 0) / Math.max(1, programs.length);
@@ -73,7 +72,7 @@ function TableauDeBord() {
         <Stat value={indicators.nb_institutes} label="Établissements" icon="building" />
         <Stat value={indicators.nb_programs} label="Formations et filières" icon="cap" tone="blue" />
         <Stat
-          value={`${indicators.nb_districts_covered} / ${districts.length}`}
+          value={`${indicators.nb_districts_covered} / ${indicators.nb_districts}`}
           label="Arrondissements couverts"
           icon="pin"
         />

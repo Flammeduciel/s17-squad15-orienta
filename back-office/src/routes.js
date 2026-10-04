@@ -11,4 +11,6 @@ export const ROUTES = {
   debouches: '/admin/debouches',
   series: '/admin/series',
   domaines: '/admin/domaines',
+  villes: '/admin/villes',
+  arrondissements: '/admin/arrondissements',
 };
