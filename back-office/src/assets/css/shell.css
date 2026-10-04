@@ -1,0 +1,266 @@
+/**
+ * assets/css/shell.css
+ * ---------------------------------------------------------------------------
+ * Coquille du back-office : menu latéral, barre supérieure, fil d'Ariane, zone de page, pied.
+ */
+
+.shell {
+  display: grid;
+  grid-template-columns: 270px minmax(0,1fr);
+  min-height: 100vh;
+}
+
+.side {
+  background: var(--card);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.brand .mk {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+.brand b {
+  font: 800 20px/1.1 var(--display);
+  color: var(--green);
+  display: block;
+}
+
+.brand small {
+  display: block;
+  font: 600 11.5px/1.3 var(--body);
+  color: var(--muted);
+  margin-top: 2px;
+  letter-spacing: .02em;
+}
+
+.navgroup {
+  padding: 18px 12px 2px;
+}
+
+.navgroup h4 {
+  margin: 0 0 8px 10px;
+  font: 800 11px/1 var(--body);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+
+.navitem {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: 600 15px/1.3 var(--body);
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.navitem svg {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  color: var(--muted);
+}
+
+.navitem:hover {
+  background: var(--soft);
+}
+
+.navitem[aria-current="page"] {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.navitem[aria-current="page"] svg {
+  color: var(--green);
+}
+
+.navitem .ct {
+  margin-left: auto;
+  background: var(--heart);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 99px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 6px;
+}
+
+.sidefoot {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding: 14px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.sidefoot .who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 10px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font: 800 14px var(--display);
+  flex: none;
+}
+
+.sidefoot .who b {
+  font-size: 14px;
+  display: block;
+  line-height: 1.2;
+}
+
+.sidefoot .who small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sidefoot .navitem {
+  font-size: 14px;
+  padding: 9px 12px;
+}
+
+.main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: 13px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.crumbs a {
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+}
+
+.crumbs b {
+  color: var(--ink);
+}
+
+.crumbs .sep {
+  opacity: .5;
+}
+
+.baractions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconbtn {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 99px;
+  padding: 9px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 14px var(--body);
+}
+
+.iconbtn:hover {
+  background: var(--soft);
+}
+
+.iconbtn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.burger {
+  display: none;
+}
+
+.page {
+  padding: 26px 28px 90px;
+  display: grid;
+  gap: 22px;
+  align-content: start;
+  max-width: 1400px;
+}
+
+.pagehead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pagehead h1 {
+  font: 800 clamp(24px,3vw,32px)/1.1 var(--display);
+  letter-spacing: -.01em;
+}
+
+.pagehead p {
+  color: var(--muted);
+  margin-top: 6px;
+  max-width: 70ch;
+}
+
+.foot {
+  padding: 22px 28px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13.5px;
+}

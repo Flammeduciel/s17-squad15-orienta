@@ -1,0 +1,1565 @@
+openapi: 3.0.3
+
+# ============================================================================
+# API ORIENTA — Contrat d'API officiel (V1)
+# ----------------------------------------------------------------------------
+# Source de vérité unique pour le backend, le frontend public et le back-office.
+# Toute modification de ce fichier passe par une PR revue par le lead dev,
+# puis est annoncée à toute la Squad. Aucune modification silencieuse.
+#
+# Nomenclature : les noms de champs reprennent les colonnes de la base
+# (docs/schema.sql), sans alias. Les tables de liaison sont exposées comme des
+# listes dans la ressource qui les porte : `program_fees` -> `fees`,
+# `program_bac_series` -> `bac_series`, `program_careers` -> `careers`,
+# `program_courses` -> `years` / `courses`.
+# ============================================================================
+
+info:
+  title: API Orienta
+  version: 2.0.0
+  description: |
+    API de la plateforme **Orienta** — orientation des nouveaux bacheliers vers
+    les instituts privés de Brazzaville (MVP V1, périmètre Brazzaville).
+
+    **Rappels de cadrage :**
+    - L'accès public est totalement libre : aucun compte utilisateur côté étudiant.
+    - L'administration (routes `/admin` + `/auth`) est réservée à la Squad (authentification Bearer).
+      Il n'y a pas d'inscription : les comptes sont ouverts par un SuperAdmin.
+    - Un institut est agréé quand il a un numéro d'agrément : `accredited` en est déduit.
+      Agréé → badge bleu avec le numéro ; non agréé → le nom seul, sans badge (EX-05 / EX-14).
+    - La durée des études appartient au **diplôme** : une formation dure le nombre d'années
+      de son diplôme. Les frais (`fees`) et le programme (`years`) ont une entrée par année.
+    - Les **cours** forment un catalogue partagé : un même cours peut être rattaché à
+      plusieurs formations, chacune avec son année d'études.
+    - Le site public ne voit que les formations `published` ; les brouillons (`draft`)
+      n'apparaissent que sur les routes `/admin`.
+    - Les montants sont exprimés en FCFA (entiers).
+    - **Les identifiants sont des entiers** (colonnes `SERIAL` en base), sauf ceux des
+      domaines, qui sont des slugs stables (`sante`, `info`…).
+    - `district` est stocké et renvoyé **avec ses accents** (`Makélékélé`, `Talangaï`, `Ouenzé`),
+      tel qu'il s'affiche.
+
+    **Convention d'erreur :** toute erreur renvoie le schéma `Error`
+    avec un code machine (`code`) et un message lisible (`message`).
+
+servers:
+  - url: http://localhost:4000
+    description: Développement local
+  - url: https://api-orienta.flamme.work
+    description: Production
+
+tags:
+  - name: Public
+    description: Consultation libre — site étudiant (frontend)
+  - name: Contact
+    description: Formulaire public de contact d'un institut
+  - name: Auth
+    description: Authentification Squad (back-office)
+  - name: Admin
+    description: CRUD back-office — authentification Bearer requise
+  - name: Admin — Référentiels
+    description: Diplômes, séries du bac, domaines d'insertion, débouchés et cours
+
+security: []
+
+paths:
+  # --------------------------------------------------------------------------
+  # PUBLIC
+  # --------------------------------------------------------------------------
+  /programs:
+    get:
+      tags: [Public]
+      summary: Rechercher des formations
+      description: |
+        Recherche multi-critères parmi les formations publiées. Le paramètre `q`
+        cherche dans le nom de la formation, les débouchés, les cours, le diplôme,
+        le domaine, le nom et le sigle de l'institut (insensible à la casse et aux
+        accents). Sans résultat, la réponse est une liste vide (`total: 0`) : le
+        frontend affiche alors « Résultat introuvable » (EX-13).
+      parameters:
+        - $ref: "#/components/parameters/Q"
+        - $ref: "#/components/parameters/DomainId"
+        - $ref: "#/components/parameters/District"
+        - $ref: "#/components/parameters/DegreeId"
+        - $ref: "#/components/parameters/CareerId"
+        - $ref: "#/components/parameters/Duration"
+        - $ref: "#/components/parameters/MaxTuition"
+        - $ref: "#/components/parameters/BacSeries"
+        - $ref: "#/components/parameters/Evening"
+        - $ref: "#/components/parameters/Internship"
+        - $ref: "#/components/parameters/Installments"
+        - name: sort
+          in: query
+          description: Ordre de tri des résultats (`tuition` = frais de 1re année)
+          schema:
+            type: string
+            enum: [relevance, tuition_asc, tuition_desc, duration]
+            default: relevance
+      responses:
+        "200":
+          description: Liste des formations correspondant aux critères
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramList" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /programs/{id}:
+    get:
+      tags: [Public]
+      summary: Consulter une formation
+      description: Une formation en brouillon répond 404 sur cette route publique.
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      responses:
+        "200":
+          description: Fiche détaillée de la formation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramDetail" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /institutes:
+    get:
+      tags: [Public]
+      summary: Lister les instituts
+      description: |
+        Sans critère, renvoie tous les instituts de la plateforme (liste
+        exhaustive). Avec un critère de formation (`q`, domaine, diplôme,
+        débouché, durée, budget, série…), renvoie les instituts qui proposent au
+        moins une formation publiée correspondante — ou dont le nom, le sigle ou
+        l'arrondissement correspond à `q`.
+      parameters:
+        - $ref: "#/components/parameters/Q"
+        - $ref: "#/components/parameters/District"
+        - name: accredited
+          in: query
+          description: Uniquement les instituts agréés
+          schema: { type: boolean, default: false }
+        - $ref: "#/components/parameters/DomainId"
+        - $ref: "#/components/parameters/DegreeId"
+        - $ref: "#/components/parameters/CareerId"
+        - $ref: "#/components/parameters/Duration"
+        - $ref: "#/components/parameters/MaxTuition"
+        - $ref: "#/components/parameters/BacSeries"
+        - $ref: "#/components/parameters/Evening"
+        - $ref: "#/components/parameters/Internship"
+        - $ref: "#/components/parameters/Installments"
+      responses:
+        "200":
+          description: Liste des instituts
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [total, items]
+                properties:
+                  total: { type: integer, example: 8 }
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/InstituteSummary" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /institutes/{id}:
+    get:
+      tags: [Public]
+      summary: Consulter la fiche d'un institut
+      description: |
+        Fiche complète de l'établissement, incluant ses formations publiées avec
+        leurs diplômes, débouchés, tarifs par niveau et conditions d'admission
+        (US-04 / EX-04).
+      parameters:
+        - $ref: "#/components/parameters/IdInstitut"
+      responses:
+        "200":
+          description: Fiche détaillée de l'institut
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InstituteDetail" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /domains:
+    get:
+      tags: [Public]
+      summary: Lister les domaines d'insertion
+      responses:
+        "200":
+          description: Domaines gérés par la Squad (barre de catégories du site)
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Domain" }
+
+  /degrees:
+    get:
+      tags: [Public]
+      summary: Lister les diplômes
+      responses:
+        "200":
+          description: Diplômes avec leur durée et le nombre de formations publiées
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Degree" }
+
+  /bac-series:
+    get:
+      tags: [Public]
+      summary: Lister les séries du baccalauréat
+      description: Alimente le filtre « Ma série du bac ».
+      responses:
+        "200":
+          description: Séries du bac
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BacSeries" }
+
+  /districts:
+    get:
+      tags: [Public]
+      summary: Lister les 9 arrondissements de Brazzaville
+      responses:
+        "200":
+          description: Arrondissements avec nombre de formations disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/District" }
+
+  /careers:
+    get:
+      tags: [Public]
+      summary: Lister les débouchés
+      description: Liste triée des débouchés portés par au moins une formation publiée — pour le filtre « débouché visé ».
+      responses:
+        "200":
+          description: Débouchés avec nombre de formations associées
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Career" }
+
+  # --------------------------------------------------------------------------
+  # CONTACT (formulaire public)
+  # --------------------------------------------------------------------------
+  /contact:
+    post:
+      tags: [Contact]
+      summary: Envoyer une question à un institut
+      description: |
+        Transmet la question d'un bachelier au secrétariat de l'institut
+        (e-mail) sans créer de compte, et envoie un accusé de réception au
+        bachelier (EX-06). La demande est tracée dans `contact_requests` ; le
+        back-office n'a pas de boîte de réception.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContactRequestInput" }
+            example:
+              program_id: 12
+              name: Grâce Mabiala
+              email: grace.mabiala@email.com
+              message: Reste-t-il des places pour la rentrée ?
+      responses:
+        "202":
+          description: Demande acceptée et mise en file d'envoi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [received]
+                properties:
+                  received: { type: boolean, example: true }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # --------------------------------------------------------------------------
+  # AUTH (back-office)
+  # --------------------------------------------------------------------------
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Connexion Squad
+      description: Authentifie un membre de la Squad et renvoie un token JWT pour les routes `/admin` (EX-16).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginInput" }
+            example:
+              username: squad
+              password: orienta2026
+      responses:
+        "200":
+          description: Token d'authentification
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LoginResponse" }
+        "401":
+          description: Identifiants incorrects
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: IDENTIFIANTS_INVALIDES
+                message: "Identifiant ou mot de passe incorrect."
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Déconnexion
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Session terminée
+
+  /auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Demander un lien de réinitialisation du mot de passe
+      description: |
+        « Mot de passe oublié » (EX-17). Envoie un lien de réinitialisation à
+        l'adresse si elle correspond à un compte (`users.email`) — jamais le mot
+        de passe lui-même. La réponse est la même que le compte existe ou non.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email, example: "squad@exemple.cg" }
+      responses:
+        "202":
+          description: Demande prise en compte
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /auth/password-reset/confirm:
+    post:
+      tags: [Auth]
+      summary: Choisir un nouveau mot de passe
+      description: Le `token` vient du lien reçu par e-mail ; il est signé et expire.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, format: password, minLength: 8 }
+      responses:
+        "204":
+          description: Mot de passe modifié
+        "400":
+          description: Lien invalide ou expiré, ou mot de passe trop court
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # --------------------------------------------------------------------------
+  # ADMIN (back-office — Bearer requis)
+  # --------------------------------------------------------------------------
+  /admin/indicators:
+    get:
+      tags: [Admin]
+      summary: KPI du dashboard
+      description: |
+        Les 5 indicateurs officiels du dashboard Squad (EX-07) — cette liste est
+        LA référence unique (elle doit être identique partout : FRD, back-office).
+        Correspond à la vue SQL `indicators`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Indicateurs de pilotage
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Indicators" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /admin/programs:
+    get:
+      tags: [Admin]
+      summary: Lister les formations (brouillons compris)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Q"
+        - $ref: "#/components/parameters/DomainId"
+        - name: status
+          in: query
+          schema: { type: string, enum: [published, draft] }
+      responses:
+        "200":
+          description: Formations du catalogue
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramList" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Admin]
+      summary: Créer une formation
+      description: |
+        La durée n'est pas saisie : elle vient du diplôme (`degree_id`). `fees`
+        doit compter un montant par année du diplôme. Les cours ne font pas partie
+        de cette écriture : ils se rattachent ensuite depuis le catalogue
+        (`/admin/programs/{id}/courses/{course_id}` ou `/admin/courses`).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProgramInput" }
+      responses:
+        "201":
+          description: Formation créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramDetail" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: L'institut propose déjà une formation avec ce nom
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/programs/{id}:
+    get:
+      tags: [Admin]
+      summary: Consulter une formation (brouillon compris)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      responses:
+        "200":
+          description: Fiche détaillée de la formation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramDetail" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Admin]
+      summary: Modifier une formation
+      description: |
+        Changer de diplôme change la durée : les cours rattachés à une année qui
+        n'existe plus sont ramenés sur la dernière année.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProgramInput" }
+      responses:
+        "200":
+          description: Formation mise à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramDetail" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Admin]
+      summary: Supprimer une formation
+      description: Ses tarifs, séries, débouchés et rattachements de cours disparaissent avec elle ; les cours restent au catalogue.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+      responses:
+        "204":
+          description: Formation supprimée
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /admin/programs/{id}/courses/{course_id}:
+    put:
+      tags: [Admin]
+      summary: Rattacher un cours du catalogue à une formation
+      description: Crée le rattachement, ou change son année s'il existe déjà.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+        - $ref: "#/components/parameters/IdCours"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [year]
+              properties:
+                year: { type: integer, minimum: 1, example: 1, description: "Année d'études, au plus la durée du diplôme" }
+      responses:
+        "200":
+          description: Programme de la formation à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProgramDetail" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Admin]
+      summary: Retirer un cours d'une formation
+      description: Le cours reste au catalogue et dans ses autres formations.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdFormation"
+        - $ref: "#/components/parameters/IdCours"
+      responses:
+        "204":
+          description: Cours retiré de la formation
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /admin/institutes:
+    post:
+      tags: [Admin]
+      summary: Créer un institut
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstituteInput" }
+      responses:
+        "201":
+          description: Institut créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InstituteDetail" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Nom ou sigle déjà utilisé par un autre institut
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /admin/institutes/{id}:
+    put:
+      tags: [Admin]
+      summary: Modifier un institut
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdInstitut"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InstituteInput" }
+      responses:
+        "200":
+          description: Institut mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InstituteDetail" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Admin]
+      summary: Supprimer un institut
+      description: |
+        Supprime l'institut **et ses formations** (cascade en base). Le
+        back-office annonce le nombre de formations concernées et demande
+        confirmation avant d'appeler cette route.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdInstitut"
+      responses:
+        "204":
+          description: Institut et formations rattachées supprimés
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /admin/images:
+    post:
+      tags: [Admin]
+      summary: Téléverser une image d'institut
+      description: Upload multipart (image de la fiche — EX-04). Formats acceptés JPEG/PNG/WebP, 2 Mo maximum.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Image enregistrée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url: { type: string, example: "/uploads/institutes/4-isd-2026.jpg" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # --------------------------------------------------------------------------
+  # ADMIN — RÉFÉRENTIELS (EX-08)
+  # Lecture : routes publiques /degrees, /bac-series, /domains, /careers.
+  # Une suppression est refusée (409) tant que l'élément est utilisé.
+  # --------------------------------------------------------------------------
+  /admin/degrees:
+    post:
+      tags: [Admin — Référentiels]
+      summary: Créer un diplôme
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DegreeInput" }
+      responses:
+        "201":
+          description: Diplôme créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Degree" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/degrees/{id}:
+    put:
+      tags: [Admin — Référentiels]
+      summary: Modifier un diplôme
+      description: |
+        Changer `duration` s'applique à toutes les formations qui délivrent ce
+        diplôme : leurs frais sont ajustés au nouveau nombre d'années, et les
+        cours des années retirées sont ramenés sur la dernière année.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DegreeInput" }
+      responses:
+        "200":
+          description: Diplôme mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Degree" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin — Référentiels]
+      summary: Supprimer un diplôme
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      responses:
+        "204":
+          description: Diplôme supprimé
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/bac-series:
+    post:
+      tags: [Admin — Référentiels]
+      summary: Créer une série du bac
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BacSeriesInput" }
+      responses:
+        "201":
+          description: Série créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BacSeries" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/bac-series/{id}:
+    put:
+      tags: [Admin — Référentiels]
+      summary: Modifier une série du bac
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BacSeriesInput" }
+      responses:
+        "200":
+          description: Série mise à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BacSeries" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin — Référentiels]
+      summary: Supprimer une série du bac
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      responses:
+        "204":
+          description: Série supprimée
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/domains:
+    post:
+      tags: [Admin — Référentiels]
+      summary: Créer un domaine d'insertion
+      description: L'identifiant (slug) est généré par le backend et ne change plus ensuite.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DomainInput" }
+      responses:
+        "201":
+          description: Domaine créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Domain" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/domains/{id}:
+    put:
+      tags: [Admin — Référentiels]
+      summary: Modifier un domaine d'insertion
+      description: Renommer un domaine ne touche ni ses formations ni ses débouchés.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdDomaine"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DomainInput" }
+      responses:
+        "200":
+          description: Domaine mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Domain" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin — Référentiels]
+      summary: Supprimer un domaine d'insertion
+      description: Refusé (409) tant qu'une formation ou un débouché y est rattaché.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdDomaine"
+      responses:
+        "204":
+          description: Domaine supprimé
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/careers:
+    get:
+      tags: [Admin — Référentiels]
+      summary: Lister tous les débouchés
+      description: Contrairement à `/careers`, inclut les débouchés qui ne sont rattachés à aucune formation publiée.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Débouchés du référentiel
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Career" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Admin — Référentiels]
+      summary: Créer un débouché
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CareerInput" }
+      responses:
+        "201":
+          description: Débouché créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Career" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/careers/{id}:
+    put:
+      tags: [Admin — Référentiels]
+      summary: Modifier un débouché
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CareerInput" }
+      responses:
+        "200":
+          description: Débouché mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Career" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin — Référentiels]
+      summary: Supprimer un débouché
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      responses:
+        "204":
+          description: Débouché supprimé
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/courses:
+    get:
+      tags: [Admin — Référentiels]
+      summary: Lister le catalogue de cours
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Recherche dans le nom du cours
+          schema: { type: string }
+        - name: program_id
+          in: query
+          description: Uniquement les cours rattachés à cette formation
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Cours avec leurs formations rattachées
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Course" }
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Admin — Référentiels]
+      summary: Créer un cours
+      description: Le cours peut être rattaché d'emblée à une ou plusieurs formations, ou rester seul au catalogue.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseInput" }
+      responses:
+        "201":
+          description: Cours créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /admin/courses/{id}:
+    put:
+      tags: [Admin — Référentiels]
+      summary: Modifier un cours et ses rattachements
+      description: "`programs` remplace la liste complète des formations rattachées."
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CourseInput" }
+      responses:
+        "200":
+          description: Cours mis à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Course" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      tags: [Admin — Référentiels]
+      summary: Supprimer un cours du catalogue
+      description: Le cours est retiré du programme de toutes les formations qui le portaient.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdReferentiel"
+      responses:
+        "204":
+          description: Cours supprimé
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+# =============================================================================
+# COMPOSANTS
+# =============================================================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdFormation:
+      name: id
+      in: path
+      required: true
+      description: Identifiant numérique de la formation (colonne `programs.id`, SERIAL)
+      schema: { type: integer, minimum: 1 }
+      example: 12
+    IdInstitut:
+      name: id
+      in: path
+      required: true
+      description: Identifiant numérique de l'institut (colonne `institutes.id`, SERIAL)
+      schema: { type: integer, minimum: 1 }
+      example: 4
+    IdCours:
+      name: course_id
+      in: path
+      required: true
+      description: Identifiant numérique du cours (colonne `courses.id`, SERIAL)
+      schema: { type: integer, minimum: 1 }
+      example: 57
+    IdReferentiel:
+      name: id
+      in: path
+      required: true
+      description: Identifiant numérique de l'élément (colonne `id`, SERIAL)
+      schema: { type: integer, minimum: 1 }
+      example: 3
+    IdDomaine:
+      name: id
+      in: path
+      required: true
+      description: Slug du domaine (colonne `domains.id`)
+      schema: { type: string }
+      example: sante
+    Q:
+      name: q
+      in: query
+      description: Recherche plein-texte (institut, filière, diplôme, débouché, cours)
+      schema: { type: string }
+      example: infirmier
+    DomainId:
+      name: domain_id
+      in: query
+      description: Slug du domaine d'insertion (voir `/domains`)
+      schema: { type: string }
+      example: sante
+    District:
+      name: district
+      in: query
+      description: Un des 9 arrondissements de Brazzaville
+      schema: { $ref: "#/components/schemas/DistrictName" }
+      example: Makélékélé
+    DegreeId:
+      name: degree_id
+      in: query
+      description: Identifiant du diplôme délivré (voir `/degrees`)
+      schema: { type: integer, minimum: 1 }
+    CareerId:
+      name: career_id
+      in: query
+      description: Identifiant du débouché visé (voir `/careers`)
+      schema: { type: integer, minimum: 1 }
+    Duration:
+      name: duration
+      in: query
+      description: Durée des études en années (celle du diplôme)
+      schema: { type: integer, minimum: 1, maximum: 5 }
+    MaxTuition:
+      name: max_tuition
+      in: query
+      description: Budget maximum par an (FCFA), comparé aux frais de 1re année
+      schema: { type: integer, minimum: 0 }
+      example: 500000
+    BacSeries:
+      name: bac_series
+      in: query
+      description: |
+        Code de la série du bac du bachelier (voir `/bac-series`). Une formation
+        sans série rattachée est ouverte à toutes les séries.
+      schema: { type: string }
+      example: D
+    Evening:
+      name: evening
+      in: query
+      description: Uniquement les formations avec cours du soir
+      schema: { type: boolean, default: false }
+    Internship:
+      name: internship
+      in: query
+      description: Uniquement les formations avec stage inclus
+      schema: { type: boolean, default: false }
+    Installments:
+      name: installments
+      in: query
+      description: Uniquement les formations payables en tranches
+      schema: { type: boolean, default: false }
+
+  responses:
+    Unauthorized:
+      description: Token manquant ou invalide
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            code: NON_AUTORISE
+            message: "Authentification Squad requise."
+    BadRequest:
+      description: Paramètre ou champ invalide
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            code: PARAMETRE_INVALIDE
+            message: "« max_tuition » doit être un nombre entier positif."
+    NotFound:
+      description: Ressource introuvable
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            code: FORMATION_INTROUVABLE
+            message: "Aucune formation ne correspond à cet identifiant."
+    Conflict:
+      description: Nom déjà pris, ou élément encore utilisé
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            code: ELEMENT_UTILISE
+            message: "« BTS » est utilisé par 12 formations : modifiez-les d'abord."
+
+  schemas:
+    # ------------------------------------------------------------------ Commun
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Code machine stable (ne jamais l'afficher tel quel à l'utilisateur)
+          example: FORMATION_INTROUVABLE
+        message:
+          type: string
+          description: Message lisible, en français
+          example: "Aucune formation ne correspond à cet identifiant."
+
+    DistrictName:
+      type: string
+      description: Arrondissement de Brazzaville, avec ses accents (contrainte CHECK de `institutes.district`)
+      enum: [Makélékélé, Bacongo, Poto-Poto, Moungali, Ouenzé, Talangaï, Mfilou, Madibou, Djoué]
+
+    District:
+      type: object
+      description: Vue agrégée — les 9 arrondissements sont fixes ; le compte vient de `institutes.district`
+      required: [name, program_count]
+      properties:
+        name: { $ref: "#/components/schemas/DistrictName" }
+        program_count: { type: integer, example: 5 }
+
+    # ------------------------------------------------------------ Référentiels
+    Domain:
+      type: object
+      description: Table `domains`
+      required: [id, name, color]
+      properties:
+        id: { type: string, example: sante, description: Slug stable }
+        name: { type: string, example: "Santé" }
+        color: { type: string, example: "#B03352", description: Couleur de la couverture (hex) }
+
+    DomainInput:
+      type: object
+      required: [name, color]
+      properties:
+        name: { type: string, example: "Santé" }
+        color: { type: string, pattern: "^#[0-9A-Fa-f]{6}$", example: "#B03352" }
+
+    Degree:
+      type: object
+      description: Table `degrees` + compte agrégé des formations
+      required: [id, name, duration, program_count]
+      properties:
+        id: { type: integer, example: 2 }
+        name: { type: string, example: Licence }
+        duration: { type: integer, minimum: 1, maximum: 5, example: 3, description: Durée des études en années }
+        program_count: { type: integer, example: 10 }
+
+    DegreeInput:
+      type: object
+      required: [name, duration]
+      properties:
+        name: { type: string, example: Licence }
+        duration: { type: integer, minimum: 1, maximum: 5, example: 3 }
+
+    BacSeries:
+      type: object
+      description: Table `bac_series`
+      required: [id, code]
+      properties:
+        id: { type: integer, example: 4 }
+        code: { type: string, example: D }
+        label: { type: string, nullable: true, example: Sciences }
+
+    BacSeriesInput:
+      type: object
+      required: [code]
+      properties:
+        code: { type: string, maxLength: 10, example: D }
+        label: { type: string, nullable: true, example: Sciences }
+
+    Career:
+      type: object
+      description: Table `careers` + compte agrégé depuis `program_careers`
+      required: [id, name, domain_id, program_count]
+      properties:
+        id: { type: integer, example: 43 }
+        name: { type: string, example: Infirmier }
+        domain_id: { type: string, example: sante, description: Domaine d'insertion }
+        program_count: { type: integer, example: 1 }
+
+    CareerInput:
+      type: object
+      required: [name, domain_id]
+      properties:
+        name: { type: string, example: Infirmier }
+        domain_id: { type: string, example: sante }
+
+    Course:
+      type: object
+      description: Table `courses` + rattachements `program_courses`
+      required: [id, name, programs]
+      properties:
+        id: { type: integer, example: 57 }
+        name: { type: string, example: "Français" }
+        programs:
+          type: array
+          description: Formations qui portent ce cours, avec l'année d'études
+          items:
+            type: object
+            required: [program_id, program_name, institute_short_name, year]
+            properties:
+              program_id: { type: integer, example: 12 }
+              program_name: { type: string, example: "Sciences infirmières" }
+              institute_short_name: { type: string, example: ISD }
+              year: { type: integer, minimum: 1, example: 1 }
+
+    CourseInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, example: "Français" }
+        programs:
+          type: array
+          description: Rattachements ; une formation ne peut y figurer qu'une fois
+          default: []
+          items:
+            type: object
+            required: [program_id, year]
+            properties:
+              program_id: { type: integer, example: 12 }
+              year: { type: integer, minimum: 1, example: 1, description: Au plus la durée du diplôme de la formation }
+
+    # --------------------------------------------------------------- Instituts
+    InstituteSummary:
+      type: object
+      description: Colonnes `institutes` (sous-ensemble affiché en liste) + agrégats de ses formations publiées
+      required: [id, short_name, name, district, accredited, registration_fee, program_count, degrees]
+      properties:
+        id: { type: integer, example: 4 }
+        short_name: { type: string, example: ISD }
+        name: { type: string, example: "Institut de Santé du Djoué" }
+        district: { $ref: "#/components/schemas/DistrictName" }
+        accredited:
+          type: boolean
+          description: "`true` → badge bleu avec le numéro ; `false` → nom seul, sans badge"
+        accreditation_number:
+          type: string
+          nullable: true
+          example: "N° 156/MESRTI/2012"
+          description: Recopié du document officiel ; null si l'institut n'est pas agréé
+        color: { type: string, example: "#B03352", nullable: true }
+        image_url:
+          type: string
+          nullable: true
+          example: "/uploads/institutes/4-isd-2026.jpg"
+          description: Image de l'institut (EX-04) ; null → couverture de couleur
+        registration_fee: { type: integer, example: 75000, description: FCFA }
+        program_count: { type: integer, example: 4, description: "Formations publiées (correspondant aux filtres, s'il y en a)" }
+        degrees:
+          type: array
+          description: Noms des diplômes délivrés par ces formations
+          items: { type: string }
+          example: ["Licence", "BTS"]
+
+    InstituteDetail:
+      description: Colonnes `institutes` + `programs` rattachés
+      allOf:
+        - $ref: "#/components/schemas/InstituteSummary"
+        - type: object
+          required: [benefits, programs]
+          properties:
+            address: { type: string, example: "Route du Djoué, Makélékélé", nullable: true }
+            phone: { type: string, example: "+242 06 409 88 52", nullable: true }
+            whatsapp: { type: string, example: "242064098852", nullable: true, description: Numéro international sans « + » (pour wa.me) }
+            email: { type: string, format: email, example: "contact@isd.cg", nullable: true }
+            description: { type: string, example: "Métiers paramédicaux, avec stages encadrés dans des centres de santé de Brazzaville.", nullable: true }
+            benefits:
+              type: array
+              description: Avantages optionnels de l'institut
+              items: { type: string }
+              example: ["Bibliothèque", "Bourses"]
+            registration_deadline: { type: string, format: date, example: "2026-09-27", nullable: true }
+            start_date: { type: string, format: date, example: "2026-10-20", nullable: true }
+            programs:
+              type: array
+              description: Formations publiées de cet institut (jointure sur `programs.institute_id`)
+              items: { $ref: "#/components/schemas/ProgramSummary" }
+
+    # ---------------------------------------------------------------- Programs
+    ProgramFee:
+      type: object
+      description: Table `program_fees` — frais d'une année d'études
+      required: [year, amount]
+      properties:
+        year: { type: integer, minimum: 1, example: 1 }
+        amount: { type: integer, example: 650000, description: FCFA par an }
+
+    ProgramSummary:
+      type: object
+      description: Colonnes `programs` enrichies de leurs relations
+      required: [id, name, status, degree, duration, tuition, fees, bac_series, careers, domain, institute]
+      properties:
+        id: { type: integer, example: 12 }
+        name: { type: string, example: "Sciences infirmières" }
+        status: { type: string, enum: [published, draft], description: Toujours `published` sur les routes publiques }
+        degree:
+          type: object
+          description: Diplôme délivré (table `degrees`)
+          required: [id, name]
+          properties:
+            id: { type: integer, example: 2 }
+            name: { type: string, example: Licence }
+        duration: { type: integer, example: 3, description: Années d'études — celle du diplôme }
+        tuition: { type: integer, example: 650000, description: "Frais de 1re année, en FCFA (raccourci de `fees[0].amount`)" }
+        fees:
+          type: array
+          description: Tarifs par niveau, un par année d'études
+          items: { $ref: "#/components/schemas/ProgramFee" }
+        bac_series:
+          type: array
+          description: Codes des séries admises ; liste vide = la série n'est pas un critère
+          items: { type: string }
+          example: ["C", "D"]
+        admission_requirements: { type: string, nullable: true, example: "Étude de dossier et entretien" }
+        evening: { type: boolean, example: false }
+        internship_months: { type: integer, example: 6, description: Durée du stage en mois ; 0 = aucun }
+        installments: { type: boolean, example: true, description: Paiement en plusieurs fois possible }
+        careers:
+          type: array
+          description: Débouchés (table `careers` via `program_careers`)
+          items: { type: string }
+          example: ["Infirmier", "Agent de santé communautaire"]
+        domain: { $ref: "#/components/schemas/Domain" }
+        institute: { $ref: "#/components/schemas/InstituteSummary" }
+
+    ProgramYear:
+      type: object
+      description: Une année du programme, construite depuis `program_courses`
+      required: [year, label, courses]
+      properties:
+        year: { type: integer, example: 1 }
+        label: { type: string, example: "1re année", description: "Libellé d'affichage : « 1re année », « 2e année »… (« M1 », « M2 » pour un Master)" }
+        courses:
+          type: array
+          description: Cours de l'année, dans l'ordre de `program_courses.position`
+          items: { type: string }
+          example: ["Anatomie et physiologie", "Soins infirmiers de base"]
+
+    ProgramDetail:
+      description: Colonnes `programs` + programme par année
+      allOf:
+        - $ref: "#/components/schemas/ProgramSummary"
+        - type: object
+          required: [courses, years]
+          properties:
+            description: { type: string, nullable: true, description: Présentation courte de la formation }
+            courses:
+              type: array
+              description: Liste plate des cours (les années sont regroupées dans `years`)
+              items: { type: string }
+            years:
+              type: array
+              description: Programme découpé par année ; une année sans cours est omise
+              items: { $ref: "#/components/schemas/ProgramYear" }
+
+    ProgramList:
+      type: object
+      required: [total, items]
+      properties:
+        total: { type: integer, example: 1 }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ProgramSummary" }
+
+    # --------------------------------------------------------------- Écritures
+    ProgramInput:
+      type: object
+      description: |
+        Colonnes `programs` en écriture, avec ses tarifs, séries et débouchés.
+        Diplômes, séries et débouchés sont choisis dans les référentiels : ils ne
+        sont jamais créés à la volée.
+      required: [name, institute_id, domain_id, degree_id, fees, career_ids]
+      properties:
+        name: { type: string, example: "Sciences infirmières" }
+        institute_id: { type: integer, example: 4 }
+        domain_id: { type: string, example: sante }
+        degree_id: { type: integer, example: 2 }
+        description: { type: string, nullable: true }
+        admission_requirements: { type: string, nullable: true }
+        fees:
+          type: array
+          description: Montants par année, dans l'ordre (1re année d'abord) ; autant que d'années du diplôme
+          items: { type: integer, minimum: 1 }
+          example: [650000, 650000, 680000]
+        bac_series_ids:
+          type: array
+          description: Séries admises ; vide = pas de critère de série
+          default: []
+          items: { type: integer }
+        career_ids:
+          type: array
+          minItems: 1
+          items: { type: integer }
+          example: [43, 44]
+        evening: { type: boolean, default: false }
+        internship_months: { type: integer, minimum: 0, maximum: 12, default: 0 }
+        installments: { type: boolean, default: false }
+        status: { type: string, enum: [published, draft], default: published }
+
+    InstituteInput:
+      type: object
+      description: Colonnes `institutes` en écriture
+      required: [name, short_name, district, address, phone, whatsapp, registration_fee]
+      properties:
+        name: { type: string, example: "Institut de Santé du Djoué" }
+        short_name: { type: string, maxLength: 20, example: ISD }
+        district: { $ref: "#/components/schemas/DistrictName" }
+        address: { type: string, example: "Route du Djoué, Makélékélé" }
+        phone: { type: string, example: "+242 06 409 88 52" }
+        whatsapp: { type: string, example: "242064098852" }
+        email: { type: string, format: email, nullable: true, example: "contact@isd.cg" }
+        color: { type: string, nullable: true, example: "#B03352", description: Attribuée par le backend si absente }
+        image_url: { type: string, nullable: true, example: null, description: URL renvoyée par `/admin/images` }
+        description: { type: string, nullable: true, example: "Métiers paramédicaux..." }
+        benefits: { type: array, items: { type: string }, default: [] }
+        registration_fee: { type: integer, minimum: 0, example: 75000 }
+        registration_deadline: { type: string, format: date, nullable: true, example: "2026-09-27" }
+        start_date: { type: string, format: date, nullable: true, example: "2026-10-20", description: Jamais avant `registration_deadline` }
+        accreditation_number: { type: string, nullable: true, example: "N° 156/MESRTI/2012", description: null = institut non agréé }
+
+    # --------------------------------------------------------------- Divers
+    ContactRequestInput:
+      type: object
+      description: Colonnes `contact_requests`
+      required: [program_id, name, email, message]
+      properties:
+        program_id: { type: integer, example: 12 }
+        name: { type: string, example: "Grâce Mabiala" }
+        email: { type: string, format: email, example: "grace.mabiala@email.com" }
+        message: { type: string, example: "Reste-t-il des places pour la rentrée ?" }
+
+    LoginInput:
+      type: object
+      description: Colonnes `users` (`username` + `password_hash` vérifié en bcrypt)
+      required: [username, password]
+      properties:
+        username: { type: string, example: squad }
+        password: { type: string, format: password, example: orienta2026 }
+
+    LoginResponse:
+      type: object
+      required: [token, name, role]
+      properties:
+        token: { type: string, description: "JWT à envoyer en `Authorization: Bearer <token>`" }
+        name: { type: string, example: "Squad", description: Colonne `users.name` }
+        role: { type: string, example: superadmin, description: Colonne `users.role` }
+
+    Indicators:
+      type: object
+      description: Vue SQL `indicators` — KPI du dashboard, liste de référence unique
+      required: [nb_institutes, nb_programs, nb_districts_covered, nb_degrees, nb_careers]
+      properties:
+        nb_institutes: { type: integer, example: 8, description: Établissements }
+        nb_programs: { type: integer, example: 26, description: Formations et filières }
+        nb_districts_covered:
+          type: integer
+          example: 8
+          description: Sur 9 arrondissements au total
+        nb_degrees: { type: integer, example: 4, description: Diplômes délivrés }
+        nb_careers: { type: integer, example: 65, description: Débouchés }
