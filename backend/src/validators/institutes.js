@@ -24,7 +24,7 @@ const institutesQuery = z.object({
   q: z.string().trim().optional(),
   district: listQuery(district).optional(),
   accredited: booleanQuery,
-  domain_id: z.string().trim().optional(),
+  domain_id: id.optional(),
   degree_id: listQuery(id).optional(),
   career_id: listQuery(id).optional(),
   duration: listQuery(positiveIntQuery).optional(),

@@ -29,7 +29,12 @@ END $$;
 -- Domaines d'insertion (10)
 -- ---------------------------------------------------------------------------
 -- L'icône est un nom Font Awesome, sans le préfixe « fa- ».
-INSERT INTO domains (id, name, color, icon) VALUES
+-- Les identifiants sont des UUID générés par la base : ce seed ne les connaît
+-- pas d'avance. Chaque domaine reçoit donc ici un code court (`gestion`,
+-- `info`…), qui n'existe que dans ce fichier et sert à le désigner plus bas.
+CREATE TEMP TABLE seed_domains (code TEXT, name TEXT, color TEXT, icon TEXT) ON COMMIT DROP;
+
+INSERT INTO seed_domains (code, name, color, icon) VALUES
     ('gestion', 'Gestion & Finance', '#1E6B4A', 'chart-line'),
     ('info', 'Informatique', '#2B51A3', 'laptop-code'),
     ('sante', 'Santé', '#B03352', 'stethoscope'),
@@ -39,8 +44,11 @@ INSERT INTO domains (id, name, color, icon) VALUES
     ('logi', 'Transport & Logistique', '#0D6F7C', 'truck'),
     ('droit', 'Droit & Administration', '#7A2E2E', 'scale-balanced'),
     ('agro', 'Agronomie & Environnement', '#4C7A1E', 'leaf'),
-    ('hotel', 'Hôtellerie & Tourisme', '#B5562A', 'hotel')
-ON CONFLICT (id) DO NOTHING;
+    ('hotel', 'Hôtellerie & Tourisme', '#B5562A', 'hotel');
+
+INSERT INTO domains (name, color, icon)
+SELECT name, color, icon FROM seed_domains
+ON CONFLICT (name) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
 -- Diplômes (4) - la durée des études est portée par le diplôme.
@@ -119,16 +127,17 @@ INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, em
 -- formations, leurs tarifs par niveau et leurs séries admises. `pos` garde
 -- l'ordre de la liste. Dans ce jeu, chaque intitulé de formation est unique :
 -- les sections suivantes s'en servent comme clé.
+--   domain     : code du domaine, donné plus haut dans seed_domains.
 --   duration   : rappel de la durée du diplôme, vérifié plus bas.
 --   tuition    : frais annuels, identiques pour chaque niveau dans ce jeu.
 --   bac_series : lettres des séries admises ; NULL = pas de critère de série.
 -- ---------------------------------------------------------------------------
 CREATE TEMP TABLE seed_programs (
-    pos SERIAL, institute TEXT, domain_id TEXT, name TEXT, degree TEXT, duration INT, tuition INT,
+    pos SERIAL, institute TEXT, domain TEXT, name TEXT, degree TEXT, duration INT, tuition INT,
     bac_series TEXT, evening BOOLEAN, internship_months INT, installments BOOLEAN
 ) ON COMMIT DROP;
 
-INSERT INTO seed_programs (institute, domain_id, name, degree, duration, tuition, bac_series, evening, internship_months, installments) VALUES
+INSERT INTO seed_programs (institute, domain, name, degree, duration, tuition, bac_series, evening, internship_months, installments) VALUES
     -- ISGF (gestion)
     ('Institut Supérieur de Gestion du Fleuve', 'gestion', 'Comptabilité et gestion des entreprises', 'BTS',        2, 420000, 'BCDG',   TRUE,  3, TRUE),
     ('Institut Supérieur de Gestion du Fleuve', 'gestion', 'Banque et assurance',                    'Licence pro', 3, 520000, 'BCD',    FALSE, 4, TRUE),
@@ -173,10 +182,12 @@ BEGIN
 END $$;
 
 INSERT INTO programs (institute_id, domain_id, degree_id, name, evening, internship_months, installments, status)
-SELECT i.id, v.domain_id, d.id, v.name, v.evening, v.internship_months, v.installments, 'published'
+SELECT i.id, dom.id, d.id, v.name, v.evening, v.internship_months, v.installments, 'published'
 FROM seed_programs v
 JOIN institutes i ON i.name = v.institute
 JOIN degrees d ON d.name = v.degree
+JOIN seed_domains sd ON sd.code = v.domain
+JOIN domains dom ON dom.name = sd.name
 ORDER BY v.pos;
 
 -- ---------------------------------------------------------------------------
@@ -236,9 +247,11 @@ FROM (VALUES
 CROSS JOIN LATERAL UNNEST(m.careers) AS career_name;
 
 INSERT INTO careers (name, domain_id)
-SELECT DISTINCT ON (pc.career_name) pc.career_name, v.domain_id
+SELECT DISTINCT ON (pc.career_name) pc.career_name, dom.id
 FROM seed_program_careers pc
 JOIN seed_programs v ON v.name = pc.program_name
+JOIN seed_domains sd ON sd.code = v.domain
+JOIN domains dom ON dom.name = sd.name
 ORDER BY pc.career_name, v.pos
 ON CONFLICT (name) DO NOTHING;
 

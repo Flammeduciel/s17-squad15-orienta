@@ -13,7 +13,7 @@ async function findAll() {
      FROM degrees d
      LEFT JOIN programs p ON p.degree_id = d.id
      GROUP BY d.id
-     ORDER BY d.id`,
+     ORDER BY d.name`,
   );
   return rows;
 }
@@ -40,7 +40,7 @@ async function create({ name, duration }) {
  * Modifie un diplôme. Sa durée s'applique à toutes ses formations : on ajuste
  * donc, dans la même transaction, leurs frais et leur programme.
  *
- * @param {number} id
+ * @param {string} id
  * @param {{ name: string, duration: number }} degree
  */
 async function update(id, { name, duration }) {

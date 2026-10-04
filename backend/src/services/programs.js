@@ -73,7 +73,7 @@ async function search(filters) {
 }
 
 /**
- * @param {number} id
+ * @param {string} id
  * @returns {Promise<object|null>} `ProgramDetail` du contrat, ou `null`.
  */
 async function getDetail(id) {

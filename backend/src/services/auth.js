@@ -38,7 +38,7 @@ async function checkPassword(password, passwordHash) {
 }
 
 /**
- * @param {{ id: number, role: string }} user
+ * @param {{ id: string, role: string }} user
  * @returns {string} Jeton de session, valable `JWT_EXPIRES_IN`.
  */
 function signSession(user) {
@@ -50,12 +50,12 @@ function signSession(user) {
 
 /**
  * @param {string} token
- * @returns {number|null} Identifiant du compte, ou `null` si le jeton est invalide ou expiré.
+ * @returns {string|null} Identifiant du compte, ou `null` si le jeton est invalide ou expiré.
  */
 function verifySession(token) {
   try {
     const payload = jwt.verify(token, jwtSecret);
-    return Number(payload.sub);
+    return payload.sub;
   } catch {
     return null;
   }

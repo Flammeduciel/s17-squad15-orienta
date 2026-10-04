@@ -37,14 +37,14 @@ async function findByName(name) {
 /**
  * Durée (celle du diplôme) des formations demandées.
  *
- * @param {number[]} programIds
- * @returns {Promise<{ id: number, name: string, duration: number }[]>}
+ * @param {string[]} programIds
+ * @returns {Promise<{ id: string, name: string, duration: number }[]>}
  */
 async function findProgramDurations(programIds) {
   const { rows } = await query(
     `SELECT p.id, p.name, d.duration FROM programs p
      JOIN degrees d ON d.id = p.degree_id
-     WHERE p.id = ANY($1)`,
+     WHERE p.id = ANY($1::uuid[])`,
     [programIds],
   );
   return rows;
@@ -61,8 +61,8 @@ async function insertLink(client, programId, courseId, year) {
 
 /**
  * @param {string} name
- * @param {{ program_id: number, year: number }[]} links Formations à rattacher.
- * @returns {Promise<number>} Identifiant du nouveau cours.
+ * @param {{ program_id: string, year: number }[]} links Formations à rattacher.
+ * @returns {Promise<string>} Identifiant du nouveau cours.
  */
 async function create(name, links) {
   return transaction(async (client) => {
@@ -78,15 +78,15 @@ async function create(name, links) {
  * Renomme un cours et remplace la liste de ses formations. Un rattachement
  * conservé garde sa place dans le programme ; seule son année peut changer.
  *
- * @param {number} id
+ * @param {string} id
  * @param {string} name
- * @param {{ program_id: number, year: number }[]} links
+ * @param {{ program_id: string, year: number }[]} links
  */
 async function update(id, name, links) {
   return transaction(async (client) => {
     await client.query('UPDATE courses SET name = $1 WHERE id = $2', [name, id]);
     const programIds = links.map((link) => link.program_id);
-    await client.query('DELETE FROM program_courses WHERE course_id = $1 AND NOT (program_id = ANY($2))', [id, programIds]);
+    await client.query('DELETE FROM program_courses WHERE course_id = $1 AND NOT (program_id = ANY($2::uuid[]))', [id, programIds]);
     for (const link of links) {
       const { rowCount } = await client.query(
         'UPDATE program_courses SET year = $1 WHERE program_id = $2 AND course_id = $3',

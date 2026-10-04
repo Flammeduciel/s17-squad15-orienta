@@ -21,7 +21,7 @@ const coursesQuery = z.object({
 const courseBody = z.object({
   name: requiredText(200),
   programs: z
-    .array(z.object({ program_id: z.number({ error: 'doit être un identifiant numérique.' }).int(), year }), {
+    .array(z.object({ program_id: id, year }), {
       error: 'doit être la liste des formations rattachées.',
     })
     .default([]),
@@ -35,7 +35,7 @@ const linkBody = z.object({ year });
 
 /** Corps de `POST /contact`. */
 const contactBody = z.object({
-  program_id: z.number({ error: 'doit être un identifiant numérique.' }).int('doit être un identifiant numérique.'),
+  program_id: id,
   name: requiredText(100),
   email: z.email({ error: "n'est pas une adresse e-mail valide." }),
   message: requiredText(2000),
