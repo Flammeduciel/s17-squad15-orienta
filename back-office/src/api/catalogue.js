@@ -34,8 +34,19 @@ export const createCareer = (body) => post('/admin/careers', body);
 export const updateCareer = (id, body) => put(`/admin/careers/${id}`, body);
 export const deleteCareer = (id) => del(`/admin/careers/${id}`);
 
+// --- Villes
+export const getCities = () => request('/cities');
+export const createCity = (body) => post('/admin/cities', body);
+export const updateCity = (id, body) => put(`/admin/cities/${id}`, body);
+export const deleteCity = (id) => del(`/admin/cities/${id}`);
+
+// --- Arrondissements (chacun avec le nom de sa ville : { id, name, city_id, city })
+export const getDistricts = () => request('/districts');
+export const createDistrict = (body) => post('/admin/districts', body);
+export const updateDistrict = (id, body) => put(`/admin/districts/${id}`, body);
+export const deleteDistrict = (id) => del(`/admin/districts/${id}`);
+
 // --- Instituts
-export const getDistricts = () => request('/districts').then((list) => list.map((district) => district.name));
 export const getInstitutes = () => request('/institutes').then((data) => data.items);
 export const getInstitute = (id) => request(`/institutes/${id}`);
 export const createInstitute = (body) => post('/admin/institutes', body);

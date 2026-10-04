@@ -5,9 +5,6 @@
  */
 const { z } = require('zod');
 const { requiredText, optionalText, booleanQuery, id, positiveIntQuery, listQuery } = require('./common');
-const DISTRICTS = require('../utils/districts');
-
-const district = z.enum(DISTRICTS, { error: 'doit être un des 9 arrondissements de Brazzaville.' });
 
 /** Date facultative au format `AAAA-MM-JJ`. */
 const optionalDate = z.iso
@@ -22,7 +19,7 @@ const optionalDate = z.iso
  */
 const institutesQuery = z.object({
   q: z.string().trim().optional(),
-  district: listQuery(district).optional(),
+  district_id: listQuery(id).optional(),
   accredited: booleanQuery,
   domain_id: id.optional(),
   degree_id: listQuery(id).optional(),
@@ -40,7 +37,7 @@ const instituteBody = z
   .object({
     name: requiredText(200),
     short_name: requiredText(20),
-    district,
+    district_id: id,
     address: requiredText(300),
     phone: requiredText(20),
     whatsapp: z
@@ -77,4 +74,4 @@ const instituteBody = z
     { path: ['start_date'], message: 'ne peut pas précéder la clôture des inscriptions.' },
   );
 
-module.exports = { district, institutesQuery, instituteBody };
+module.exports = { institutesQuery, instituteBody };

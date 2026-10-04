@@ -4,7 +4,7 @@ export const MAX_BUDGET = 800000;
 
 // Filtres de l'accueil, tous vides. « view » dit ce que la grille affiche :
 // 'inst' (instituts), 'form' (formations), 'dip' (diplômes) ou 'deb' (débouchés).
-// degrees et careers contiennent des identifiants ; districts, des noms.
+// districts, degrees et careers contiennent des identifiants.
 export const emptyFilters = () => ({
   q: '',
   domain: '',
@@ -27,7 +27,7 @@ export function searchParams(filters) {
   const params = {};
   if (filters.q) params.q = filters.q;
   if (filters.domain) params.domain_id = filters.domain;
-  if (filters.districts.length) params.district = filters.districts;
+  if (filters.districts.length) params.district_id = filters.districts;
   // Les vues Diplômes et Débouchés montrent toutes les valeurs possibles :
   // le filtre de leur propre liste n'est donc pas envoyé.
   if (filters.degrees.length && filters.view !== 'dip') params.degree_id = filters.degrees;
@@ -56,3 +56,10 @@ export const activeCount = (filters) =>
 // Ajoute la valeur à la liste si elle n'y est pas, l'enlève sinon.
 export const toggleIn = (list, value) =>
   list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
+
+// Nom d'un arrondissement dans les listes. Tant qu'une seule ville est
+// enregistrée, le nom suffit ; avec plusieurs, on précise la ville.
+export function districtLabel(district, districts) {
+  const severalCities = new Set(districts.map((item) => item.city)).size > 1;
+  return severalCities ? `${district.name} (${district.city})` : district.name;
+}

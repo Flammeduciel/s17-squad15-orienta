@@ -81,16 +81,16 @@ Le fichier `docs/openapi.yaml` est la source de vérité pour les 3 applications
 | GET | /programs/:id | Fiche détaillée d'une formation, programme par année |
 | GET | /institutes | Lister les instituts (mêmes filtres que les formations) |
 | GET | /institutes/:id | Fiche détaillée d'un institut |
-| GET | /domains, /degrees, /bac-series, /careers, /districts | Listes de référence pour les filtres |
+| GET | /domains, /degrees, /bac-series, /careers, /cities, /districts | Listes de référence pour les filtres |
 | POST | /contact | Envoyer une question à un institut |
 | POST | /auth/login | Connexion Squad (adresse e-mail et mot de passe) |
 | GET | /admin/indicators | Les 5 KPI du dashboard |
 | GET/POST/PUT/DELETE | /admin/programs | CRUD formations |
 | POST/PUT/DELETE | /admin/institutes | CRUD instituts |
 | GET/POST/PUT/DELETE | /admin/courses | Catalogue de cours, rattachés aux formations |
-| POST/PUT/DELETE | /admin/degrees, /admin/bac-series, /admin/domains, /admin/careers | CRUD des référentiels |
+| POST/PUT/DELETE | /admin/degrees, /admin/bac-series, /admin/domains, /admin/careers, /admin/cities, /admin/districts | CRUD des référentiels |
 
-Le contrat complet compte 43 opérations ; ce tableau n'en donne que les familles.
+Le contrat complet compte 48 opérations ; ce tableau n'en donne que les familles. Tous les identifiants sont des UUID.
 
 ## Rôles de l'équipe
 

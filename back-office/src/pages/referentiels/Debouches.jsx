@@ -33,7 +33,8 @@ const config = {
       </select>
     </div>
   ),
-  toBody: (form) => ({ name: form.name, domain_id: form.domain_id }),
+  // Sans choix dans la liste, c'est le premier domaine, celui qui est affiché.
+  toBody: (form, data) => ({ name: form.name, domain_id: form.domain_id || data.domains[0]?.id }),
   load: async () => {
     const [rows, domains] = await Promise.all([getCareers(), getDomains()]);
     return { rows, domains };

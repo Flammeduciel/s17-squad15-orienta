@@ -1,7 +1,7 @@
 /* Formulaire institut - routes /admin/instituts/nouveau et /admin/instituts/:id (ticket P17).
    Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
 import { useRef, useState } from 'react';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import {
   createInstitute,
   getDistricts,
@@ -26,7 +26,7 @@ function toForm(institute) {
   return {
     name: institute?.name ?? '',
     short_name: institute?.short_name ?? '',
-    district: institute?.district ?? '',
+    district_id: institute?.district_id ?? '',
     address: institute?.address ?? '',
     phone: institute?.phone ?? '',
     whatsapp: institute?.whatsapp ?? '',
@@ -100,7 +100,7 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
   const toast = useToast();
   const [form, setForm] = useState(() => ({
     ...toForm(institute),
-    district: institute?.district ?? districts[0],
+    district_id: institute?.district_id ?? districts[0].id,
   }));
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
@@ -151,7 +151,7 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
     const body = {
       name: form.name.trim(),
       short_name: form.short_name.trim().toUpperCase(),
-      district: form.district,
+      district_id: form.district_id,
       address: form.address.trim(),
       phone: form.phone.trim(),
       whatsapp: form.whatsapp.replace(/\D/g, ''),
@@ -191,7 +191,7 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
       subtitle={
         institute
           ? 'La fiche publique reprend ces informations.'
-          : 'Un institut doit être rattaché à un arrondissement de Brazzaville.'
+          : 'Un institut doit être rattaché à un arrondissement.'
       }
       onClose={onClose}
     >
@@ -210,9 +210,11 @@ function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
           <div className="row two" style={{ marginTop: 16 }}>
             <div className="fld">
               <label htmlFor="i-district">Arrondissement</label>
-              <select id="i-district" name="district" value={form.district} onChange={onChange}>
-                {districts.map((name) => (
-                  <option key={name}>{name}</option>
+              <select id="i-district" name="district_id" value={form.district_id} onChange={onChange}>
+                {districts.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({item.city})
+                  </option>
                 ))}
               </select>
             </div>
@@ -392,6 +394,20 @@ function FormulaireInstitut() {
     return (
       <Modal title={id ? "Modifier l'institut" : 'Ajouter un institut'} onClose={close}>
         <PageState loading={loading} error={error} />
+      </Modal>
+    );
+  }
+
+  if (data.districts.length === 0) {
+    return (
+      <Modal title="Ajouter un institut" size="medium" onClose={close}>
+        <div className="empty">
+          <h3>Aucun arrondissement enregistré</h3>
+          <p>Un institut est situé dans un arrondissement : créez d'abord une ville et ses arrondissements.</p>
+          <Link className="btn line" to={ROUTES.arrondissements}>
+            Voir les arrondissements
+          </Link>
+        </div>
       </Modal>
     );
   }

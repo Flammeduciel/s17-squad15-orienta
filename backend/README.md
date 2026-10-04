@@ -95,7 +95,8 @@ Un fichier par ressource dans `routes/`, `controllers/`, `models/` et
 |---|---|---|
 | Authentification | `auth` (+ `models/users`, `services/auth`, `services/mail`) | BK2 |
 | Domaines, diplômes, séries du bac, débouchés | `domains`, `degrees`, `bacSeries`, `careers` | BK3 |
-| Instituts, arrondissements, images | `institutes`, `images` (+ `middlewares/upload`) | BK4 |
+| Instituts, images | `institutes`, `images` (+ `middlewares/upload`) | BK4 |
+| Villes et arrondissements | `cities`, `districts` | - |
 | Formations, indicateurs | `programs` (+ `services/programs`) | BK5 |
 | Cours, contact | `courses`, `contact` | BK6 |
 

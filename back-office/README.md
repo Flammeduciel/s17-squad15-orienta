@@ -77,6 +77,8 @@ du catalogue, elles, ont besoin de la vraie API.
 | `pages/referentiels/Debouches.jsx` | Débouchés | `/admin/debouches` | P21 |
 | `pages/referentiels/SeriesBac.jsx` | Séries du bac | `/admin/series` | P22 |
 | `pages/referentiels/Domaines.jsx` | Domaines d'insertion | `/admin/domaines` | P23 |
+| `pages/referentiels/Villes.jsx` | Villes | `/admin/villes` | - |
+| `pages/referentiels/Arrondissements.jsx` | Arrondissements d'une ville | `/admin/arrondissements` | - |
 
 Un composant utilisé par une seule page reste dans le dossier de cette page ; il
 ne monte dans `components/` que lorsqu'une deuxième page en a besoin.

@@ -11,7 +11,9 @@ import FormulaireInstitut from './pages/instituts/FormulaireInstitut.jsx'
 import ListeInstituts from './pages/instituts/ListeInstituts.jsx'
 import Debouches from './pages/referentiels/Debouches.jsx'
 import Diplomes from './pages/referentiels/Diplomes.jsx'
+import Arrondissements from './pages/referentiels/Arrondissements.jsx'
 import Domaines from './pages/referentiels/Domaines.jsx'
+import Villes from './pages/referentiels/Villes.jsx'
 import SeriesBac from './pages/referentiels/SeriesBac.jsx'
 import TableauDeBord from './pages/tableau-de-bord/TableauDeBord.jsx'
 import { ROUTES } from './routes.js'
@@ -49,6 +51,8 @@ function App() {
               <Route path={ROUTES.debouches} element={<Debouches />} />
               <Route path={ROUTES.series} element={<SeriesBac />} />
               <Route path={ROUTES.domaines} element={<Domaines />} />
+              <Route path={ROUTES.villes} element={<Villes />} />
+              <Route path={ROUTES.arrondissements} element={<Arrondissements />} />
               <Route path={ROUTES.compte} element={<Compte />} />
             </Route>
           </Route>

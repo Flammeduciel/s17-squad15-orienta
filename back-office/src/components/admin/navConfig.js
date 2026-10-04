@@ -19,6 +19,8 @@ export const NAV_GROUPS = [
       { to: ROUTES.debouches, label: 'Débouchés', icon: 'brief' },
       { to: ROUTES.series, label: 'Séries du bac', icon: 'list' },
       { to: ROUTES.domaines, label: "Domaines d'insertion", icon: 'grid' },
+      { to: ROUTES.villes, label: 'Villes', icon: 'city' },
+      { to: ROUTES.arrondissements, label: 'Arrondissements', icon: 'pin' },
     ],
   },
 ];

@@ -7,9 +7,9 @@ import ProgramCard from '../../components/ProgramCard';
 import SkeletonCards from '../../components/SkeletonCards';
 import { useSearch } from '../../context/search-context';
 import { useApi } from '../../hooks/useApi';
-import { ans, fcfa, pluriel } from '../../utils/format';
+import { ans, fcfa, lieu, pluriel } from '../../utils/format';
 import { popularIds, recentIds } from '../../utils/history';
-import { MAX_BUDGET, activeCount } from './filters';
+import { MAX_BUDGET, activeCount, districtLabel } from './filters';
 
 // Formations déjà consultées par le visiteur, relues dans l'API par leur
 // identifiant. Une formation supprimée depuis est simplement ignorée.
@@ -30,6 +30,8 @@ export default function Results({ data, found, loading, searching, error, onRetr
   const { view } = filters;
   const domain = data.domains.find((item) => item.id === filters.domain);
   const inDomain = domain ? ` en ${domain.name}` : '';
+  // « à Brazzaville » tant qu'une seule ville est enregistrée.
+  const place = lieu(data.districts.map((district) => district.city));
   const visited = useApi(loadVisited, []).data ?? [];
 
   let label;
@@ -37,7 +39,7 @@ export default function Results({ data, found, loading, searching, error, onRetr
 
   if (view === 'inst') {
     // program_count et degrees ne comptent que les formations qui correspondent aux filtres.
-    label = `${pluriel(found.length, 'institut')}${inDomain} à Brazzaville`;
+    label = `${pluriel(found.length, 'institut')}${inDomain} ${place}`;
     content = found.map((institute) => (
       <InstituteCard
         key={institute.id}
@@ -47,7 +49,7 @@ export default function Results({ data, found, loading, searching, error, onRetr
       />
     ));
   } else if (view === 'form') {
-    label = `${pluriel(found.length, 'formation')}${inDomain} à Brazzaville`;
+    label = `${pluriel(found.length, 'formation')}${inDomain} ${place}`;
     content = found.map((program) => <ProgramCard key={program.id} program={program} />);
   } else {
     // Vues Diplômes et Débouchés : les formations trouvées sont regroupées en
@@ -65,7 +67,7 @@ export default function Results({ data, found, loading, searching, error, onRetr
       }))
       .filter((tile) => tile.programs.length > 0);
     label = isDegree
-      ? `${pluriel(tiles.length, 'diplôme')} préparé${tiles.length > 1 ? 's' : ''} à Brazzaville`
+      ? `${pluriel(tiles.length, 'diplôme')} préparé${tiles.length > 1 ? 's' : ''} ${place}`
       : `${pluriel(tiles.length, 'débouché')}${inDomain}`;
     if (tiles.length > 0) {
       content = (
@@ -97,7 +99,8 @@ export default function Results({ data, found, loading, searching, error, onRetr
   // Rappels des filtres actifs : un clic retire le filtre.
   const tags = [];
   if (filters.q) tags.push({ text: `« ${filters.q} »`, remove: { q: '' } });
-  // Débouchés et diplômes sont gardés par identifiant : leur nom vient des listes de référence.
+  // Débouchés, diplômes et arrondissements sont gardés par identifiant : leur nom
+  // vient des listes de référence.
   for (const id of filters.careers) {
     const career = data.careers.find((item) => item.id === id);
     if (career) tags.push({ text: career.name, remove: { careers: filters.careers.filter((item) => item !== id) } });
@@ -106,8 +109,14 @@ export default function Results({ data, found, loading, searching, error, onRetr
     const degree = data.degrees.find((item) => item.id === id);
     if (degree) tags.push({ text: degree.name, remove: { degrees: filters.degrees.filter((item) => item !== id) } });
   }
-  for (const value of filters.districts) {
-    tags.push({ text: value, remove: { districts: filters.districts.filter((item) => item !== value) } });
+  for (const id of filters.districts) {
+    const district = data.districts.find((item) => item.id === id);
+    if (district) {
+      tags.push({
+        text: districtLabel(district, data.districts),
+        remove: { districts: filters.districts.filter((item) => item !== id) },
+      });
+    }
   }
   for (const value of filters.durations) {
     tags.push({ text: ans(value), remove: { durations: filters.durations.filter((item) => item !== value) } });
