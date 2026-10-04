@@ -30,7 +30,7 @@ function toSummary(row, relations, institute) {
     internship_months: row.internship_months,
     installments: row.installments,
     careers: mine(relations.careers).map((career) => career.name),
-    domain: { id: row.domain_id, name: row.domain_name, color: row.domain_color },
+    domain: { id: row.domain_id, name: row.domain_name, color: row.domain_color, icon: row.domain_icon },
     institute,
   };
 }

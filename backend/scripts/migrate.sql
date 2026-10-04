@@ -60,8 +60,22 @@ ALTER TABLE users ALTER COLUMN role SET DEFAULT 'superadmin';
 CREATE TABLE IF NOT EXISTS domains (
     id      VARCHAR(20) PRIMARY KEY,
     name    VARCHAR(100) NOT NULL UNIQUE,
-    color   VARCHAR(7) NOT NULL
+    color   VARCHAR(7) NOT NULL,
+    -- Font Awesome icon name, without the "fa-" prefix (ex: 'stethoscope').
+    icon    VARCHAR(40) NOT NULL DEFAULT 'shapes'
 );
+
+-- Databases created before the icon column: add it, then give the ten original
+-- domains their icon. A domain whose icon was already chosen is left untouched.
+ALTER TABLE domains ADD COLUMN IF NOT EXISTS icon VARCHAR(40) NOT NULL DEFAULT 'shapes';
+
+UPDATE domains SET icon = v.icon
+FROM (VALUES
+    ('gestion', 'chart-line'), ('info', 'laptop-code'), ('sante', 'stethoscope'),
+    ('btp', 'helmet-safety'), ('petrole', 'oil-well'), ('com', 'bullhorn'),
+    ('logi', 'truck'), ('droit', 'scale-balanced'), ('agro', 'leaf'), ('hotel', 'hotel')
+) AS v(id, icon)
+WHERE domains.id = v.id AND domains.icon = 'shapes';
 
 -- ---------------------------------------------------------------------------
 -- Table: degrees (diplômes)

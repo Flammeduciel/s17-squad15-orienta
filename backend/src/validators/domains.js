@@ -15,6 +15,11 @@ const domainBody = z.object({
   color: z
     .string({ error: 'est obligatoire.' })
     .regex(/^#[0-9A-Fa-f]{6}$/, 'doit être une couleur au format #RRGGBB.'),
+  // Nom d'une icône Font Awesome, sans le préfixe « fa- » : `stethoscope`, `laptop-code`…
+  icon: z
+    .string({ error: 'doit être un nom d\'icône.' })
+    .regex(/^[a-z0-9-]{1,40}$/, 'doit être un nom d\'icône Font Awesome, comme « laptop-code ».')
+    .default('shapes'),
 });
 
 module.exports = { domainParams, domainBody };

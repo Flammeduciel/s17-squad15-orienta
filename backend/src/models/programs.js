@@ -11,7 +11,7 @@ const SELECT = `
   SELECT p.id, p.name, p.status, p.description, p.admission_requirements, p.evening,
          p.internship_months, p.installments, p.institute_id,
          d.id AS degree_id, d.name AS degree_name, d.duration,
-         dom.id AS domain_id, dom.name AS domain_name, dom.color AS domain_color,
+         dom.id AS domain_id, dom.name AS domain_name, dom.color AS domain_color, dom.icon AS domain_icon,
          (SELECT amount FROM program_fees f WHERE f.program_id = p.id AND f.year = 1) AS tuition
   FROM programs p
   JOIN degrees d ON d.id = p.degree_id

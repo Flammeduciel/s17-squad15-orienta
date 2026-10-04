@@ -1244,11 +1244,12 @@ components:
     Domain:
       type: object
       description: Table `domains`
-      required: [id, name, color]
+      required: [id, name, color, icon]
       properties:
         id: { type: string, example: sante, description: Slug stable }
         name: { type: string, example: "Santé" }
         color: { type: string, example: "#B03352", description: Couleur de la couverture (hex) }
+        icon: { type: string, example: stethoscope, description: "Nom de l'icône Font Awesome, sans le préfixe `fa-`" }
 
     DomainInput:
       type: object
@@ -1256,6 +1257,12 @@ components:
       properties:
         name: { type: string, example: "Santé" }
         color: { type: string, pattern: "^#[0-9A-Fa-f]{6}$", example: "#B03352" }
+        icon:
+          type: string
+          pattern: "^[a-z0-9-]{1,40}$"
+          default: shapes
+          example: stethoscope
+          description: "Nom de l'icône Font Awesome, sans le préfixe `fa-`"
 
     Degree:
       type: object

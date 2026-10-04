@@ -7,34 +7,34 @@ const { query } = require('../config/db');
 
 /** @returns {Promise<object[]>} Tous les domaines, par ordre alphabétique. */
 async function findAll() {
-  const { rows } = await query('SELECT id, name, color FROM domains ORDER BY name');
+  const { rows } = await query('SELECT id, name, color, icon FROM domains ORDER BY name');
   return rows;
 }
 
 /** @param {string} id Slug du domaine. */
 async function findById(id) {
-  const { rows } = await query('SELECT id, name, color FROM domains WHERE id = $1', [id]);
+  const { rows } = await query('SELECT id, name, color, icon FROM domains WHERE id = $1', [id]);
   return rows[0] || null;
 }
 
 /** @param {string} name Nom à chercher, sans tenir compte de la casse. */
 async function findByName(name) {
-  const { rows } = await query('SELECT id, name, color FROM domains WHERE lower(name) = lower($1)', [name]);
+  const { rows } = await query('SELECT id, name, color, icon FROM domains WHERE lower(name) = lower($1)', [name]);
   return rows[0] || null;
 }
 
-async function create({ id, name, color }) {
+async function create({ id, name, color, icon }) {
   const { rows } = await query(
-    'INSERT INTO domains (id, name, color) VALUES ($1, $2, $3) RETURNING id, name, color',
-    [id, name, color],
+    'INSERT INTO domains (id, name, color, icon) VALUES ($1, $2, $3, $4) RETURNING id, name, color, icon',
+    [id, name, color, icon],
   );
   return rows[0];
 }
 
-async function update(id, { name, color }) {
+async function update(id, { name, color, icon }) {
   const { rows } = await query(
-    'UPDATE domains SET name = $1, color = $2 WHERE id = $3 RETURNING id, name, color',
-    [name, color, id],
+    'UPDATE domains SET name = $1, color = $2, icon = $3 WHERE id = $4 RETURNING id, name, color, icon',
+    [name, color, icon, id],
   );
   return rows[0] || null;
 }

@@ -28,17 +28,18 @@ END $$;
 -- ---------------------------------------------------------------------------
 -- Domaines d'insertion (10)
 -- ---------------------------------------------------------------------------
-INSERT INTO domains (id, name, color) VALUES
-    ('gestion', 'Gestion & Finance', '#1E6B4A'),
-    ('info', 'Informatique', '#2B51A3'),
-    ('sante', 'Santé', '#B03352'),
-    ('btp', 'BTP & Génie', '#9A5412'),
-    ('petrole', 'Pétrole & Mines', '#2F3B45'),
-    ('com', 'Communication', '#6D40A6'),
-    ('logi', 'Transport & Logistique', '#0D6F7C'),
-    ('droit', 'Droit & Administration', '#7A2E2E'),
-    ('agro', 'Agronomie & Environnement', '#4C7A1E'),
-    ('hotel', 'Hôtellerie & Tourisme', '#B5562A')
+-- L'icône est un nom Font Awesome, sans le préfixe « fa- ».
+INSERT INTO domains (id, name, color, icon) VALUES
+    ('gestion', 'Gestion & Finance', '#1E6B4A', 'chart-line'),
+    ('info', 'Informatique', '#2B51A3', 'laptop-code'),
+    ('sante', 'Santé', '#B03352', 'stethoscope'),
+    ('btp', 'BTP & Génie', '#9A5412', 'helmet-safety'),
+    ('petrole', 'Pétrole & Mines', '#2F3B45', 'oil-well'),
+    ('com', 'Communication', '#6D40A6', 'bullhorn'),
+    ('logi', 'Transport & Logistique', '#0D6F7C', 'truck'),
+    ('droit', 'Droit & Administration', '#7A2E2E', 'scale-balanced'),
+    ('agro', 'Agronomie & Environnement', '#4C7A1E', 'leaf'),
+    ('hotel', 'Hôtellerie & Tourisme', '#B5562A', 'hotel')
 ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------

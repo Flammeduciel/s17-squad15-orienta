@@ -11,7 +11,7 @@ async function listDomains(req, res) {
 
 /** `POST /admin/domains` — crée un domaine ; son identifiant est tiré de son nom. */
 async function createDomain(req, res) {
-  const { name, color } = req.valid.body;
+  const { name, color, icon } = req.valid.body;
   if (await domains.findByName(name)) {
     throw httpError(409, 'DEJA_EXISTANT', `Le domaine « ${name} » existe déjà.`);
   }
@@ -21,18 +21,18 @@ async function createDomain(req, res) {
   for (let n = 2; await domains.findById(id); n += 1) {
     id = `${base}-${n}`;
   }
-  res.status(201).json(await domains.create({ id, name, color }));
+  res.status(201).json(await domains.create({ id, name, color, icon }));
 }
 
-/** `PUT /admin/domains/:id` — renomme ou recolore ; l'identifiant ne change pas. */
+/** `PUT /admin/domains/:id` — change le nom, la couleur ou l'icône ; l'identifiant ne change pas. */
 async function updateDomain(req, res) {
   const { id } = req.valid.params;
-  const { name, color } = req.valid.body;
+  const { name, color, icon } = req.valid.body;
   const sameName = await domains.findByName(name);
   if (sameName && sameName.id !== id) {
     throw httpError(409, 'DEJA_EXISTANT', `Le domaine « ${name} » existe déjà.`);
   }
-  const domain = await domains.update(id, { name, color });
+  const domain = await domains.update(id, { name, color, icon });
   if (!domain) throw httpError(...NOT_FOUND);
   res.json(domain);
 }
