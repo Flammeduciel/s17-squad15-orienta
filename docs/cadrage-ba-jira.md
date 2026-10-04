@@ -256,7 +256,7 @@ enregistrer comme **tâches**. Le détail du contenu de chacun est dans
 | Réf | Bloc | Assigné | Terminé quand |
 |---|---|---|---|
 | BK1 | Socle de l'API | Flamme | L'API démarre, se connecte à la base et renvoie ses erreurs au format commun. |
-| BK2 | Authentification | Flamme | La connexion délivre un jeton, toute route `/admin` le réclame, « mot de passe oublié » envoie un lien de réinitialisation. |
+| BK2 | Authentification | Flamme | La connexion délivre un jeton, toute route `/admin` le réclame. La connexion se fait par adresse e-mail et mot de passe. |
 | BK3 | Référentiels | Gilles BITEMO | Domaines, diplômes, séries du bac et débouchés se lisent publiquement et s'administrent ; un élément utilisé ne peut pas être supprimé. |
 | BK4 | Instituts | Gilles BITEMO | Les instituts se listent, se consultent et s'administrent ; leur image se dépose. |
 | BK5 | Formations | Flamme | Les formations se recherchent, se consultent et s'administrent avec leurs frais par niveau, séries et débouchés ; les 5 KPI sont servis. |
@@ -353,7 +353,7 @@ développé contre le contrat `docs/openapi.yaml`, mais pas recetté.
 
 | Ticket | Est bloqué par | Raison |
 |---|---|---|
-| P1 | BK2 | Connexion et mot de passe oublié |
+| P1 | BK2 | Connexion |
 | P10 | P1 | Affiche la session ouverte et la ferme |
 | P11 | BK5 | Lit les 5 KPI |
 | P14 | BK5 | Liste, filtre et supprime les formations |

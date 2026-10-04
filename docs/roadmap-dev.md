@@ -55,7 +55,7 @@ par `backend/scripts/migrate.sql` et remplie par `backend/scripts/seed.sql`.
 | # | Bloc | Développeur | Branche | Contenu | Dépend de |
 |---|------|-------------|---------|---------|-----------|
 | BK1 | Socle de l'API | **Flamme** | `feat/backend-socle-api` | Structure Express, connexion PostgreSQL, validation des entrées, format d'erreur commun (`Error`), CORS, service des images déposées. | — |
-| BK2 | Authentification | **Flamme** | `feat/backend-auth` | `POST /auth/login`, `POST /auth/logout`, `POST /auth/password-reset` et sa confirmation, protection de toutes les routes `/admin` par jeton. | BK1 |
+| BK2 | Authentification | **Flamme** | `feat/backend-auth` | `POST /auth/login` (adresse e-mail et mot de passe), `POST /auth/logout`, protection de toutes les routes `/admin` par jeton. | BK1 |
 | BK3 | Référentiels | **Gilles** | `feat/backend-referentiels` | Domaines, diplômes, séries du bac, débouchés : lecture publique (`/domains`, `/degrees`, `/bac-series`, `/careers`) et CRUD `/admin/…`. Suppression refusée (409) tant que l'élément est utilisé. Changer la durée d'un diplôme ajuste ses formations. | BK1 pour la lecture, BK2 pour le CRUD |
 | BK4 | Instituts | **Gilles** | `feat/backend-instituts` | `GET /institutes` (liste et filtres propres à l'institut), `GET /institutes/{id}`, `GET /districts`, CRUD `/admin/institutes`, dépôt d'image `/admin/images`. | BK1 pour la lecture, BK2 pour le CRUD |
 | BK5 | Formations | **Flamme** | `feat/backend-formations` | `GET /programs` (recherche multi-critères) et `GET /programs/{id}`, CRUD `/admin/programs` avec frais par niveau, séries et débouchés, statut publié ou brouillon. Ajoute à `GET /institutes` les filtres qui portent sur les formations. `GET /admin/indicators` (les 5 KPI). | BK3, BK4 |
@@ -97,7 +97,7 @@ les deux interfaces, `.env.example`) est préparé par **Flamme** avec BK1.
 
 | # | Page | Route | Développeur | Branche | Critère de recette |
 |---|------|-------|-------------|---------|---------------------|
-| P1 | Connexion | `/connexion` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | Le nom d'utilisateur et le mot de passe valides ouvrent la session ; les identifiants erronés affichent une erreur explicite. « Mot de passe oublié » demande l'e-mail du compte et envoie un lien de réinitialisation. Aucune inscription. La session se maintient d'une visite à l'autre et la page est inaccessible sans elle. |
+| P1 | Connexion | `/connexion` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | L'adresse e-mail et le mot de passe valides ouvrent la session ; les identifiants erronés affichent une erreur explicite. Aucune inscription, aucun « mot de passe oublié ». La session se maintient d'une visite à l'autre et la page est inaccessible sans elle. |
 | P10 | Compte | `/compte` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | Le compte connecté s'affiche et la déconnexion ferme la session puis revient à la connexion. |
 | P11 | Tableau de bord | `/admin` | **Fresnel OBA VERCHY** | `feat/back-office-dashboard` | Les 5 indicateurs de `GET /admin/indicators` s'affichent : établissements, formations et filières, arrondissements couverts, diplômes délivrés, débouchés. |
 | P14 | Liste des formations | `/admin/formations` | **Elie NGANGA** | `feat/back-office-formations-liste` | Le tableau liste toutes les formations, brouillons compris, se recherche, se filtre par domaine et par statut, et se pagine. Chaque ligne offre l'édition et la suppression avec confirmation. |
@@ -191,7 +191,7 @@ que son bloc backend soit prêt ; elle ne peut pas être **recettée** sans lui.
 
 | Ceci | dépend de | parce que |
 |------|-----------|-----------|
-| P1 Connexion | BK2 | Appelle la connexion et le mot de passe oublié. |
+| P1 Connexion | BK2 | Appelle la connexion. |
 | P10 Compte | P1 | Affiche la session ouverte et la ferme. |
 | P11 Tableau de bord | BK5 | Lit les 5 KPI. |
 | P14 Liste des formations | BK5 | Liste, filtre et supprime les formations. |

@@ -10,23 +10,13 @@ const { query } = require('../config/db');
  *
  * @typedef {object} User
  * @property {number} id
- * @property {string} username
- * @property {string|null} email
+ * @property {string} email Adresse e-mail, qui sert d'identifiant de connexion.
  * @property {string} password_hash Hash bcrypt, jamais renvoyé au client.
  * @property {string} name
  * @property {string} role
  */
 
-const COLUMNS = 'id, username, email, password_hash, name, role';
-
-/**
- * @param {string} username Nom d'utilisateur, tel que saisi à la connexion.
- * @returns {Promise<User|null>}
- */
-async function findByUsername(username) {
-  const { rows } = await query(`SELECT ${COLUMNS} FROM users WHERE username = $1`, [username]);
-  return rows[0] || null;
-}
+const COLUMNS = 'id, email, password_hash, name, role';
 
 /**
  * @param {number} id
@@ -40,7 +30,7 @@ async function findById(id) {
 /**
  * Recherche insensible à la casse : `Squad@Exemple.cg` trouve `squad@exemple.cg`.
  *
- * @param {string} email
+ * @param {string} email Adresse saisie à la connexion.
  * @returns {Promise<User|null>}
  */
 async function findByEmail(email) {
@@ -48,13 +38,4 @@ async function findByEmail(email) {
   return rows[0] || null;
 }
 
-/**
- * @param {number} id
- * @param {string} passwordHash Nouveau hash bcrypt.
- * @returns {Promise<void>}
- */
-async function updatePassword(id, passwordHash) {
-  await query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, id]);
-}
-
-module.exports = { findByUsername, findById, findByEmail, updatePassword };
+module.exports = { findById, findByEmail };

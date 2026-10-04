@@ -62,7 +62,7 @@ async function checkDatabase() {
  * @throws {Error} 503 `BASE_INDISPONIBLE` si aucune base n'est configurée.
  *
  * @example
- * const { rows } = await query('SELECT * FROM users WHERE username = $1', [username]);
+ * const { rows } = await query('SELECT * FROM users WHERE email = $1', [email]);
  */
 async function query(sql, params = []) {
   if (!pool) {

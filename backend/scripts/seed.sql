@@ -302,13 +302,12 @@ JOIN (SELECT program_name, COUNT(*) AS total FROM seed_program_courses GROUP BY 
   ON n.program_name = pc.program_name;
 
 -- ---------------------------------------------------------------------------
--- Compte Squad par défaut (mot de passe : orienta2026 — À CHANGER)
+-- Compte Squad par défaut : squad@orienta.cg / orienta2026 (À CHANGER)
 -- Le hash ci-dessous est un bcrypt réel, généré pour ce mot de passe.
 -- Ne jamais exécuter ce seed en production : changez d'abord le mot de passe.
--- `email` reste vide : à renseigner pour que « mot de passe oublié » fonctionne.
 -- ---------------------------------------------------------------------------
-INSERT INTO users (username, password_hash, name, role)
-VALUES ('squad', '$2b$10$6x9Auqu6/4/0L7O341ZcS./yDm2B/wU.K/mWKFDu8wmB1RtQScNdC', 'Squad', 'superadmin')
-ON CONFLICT (username) DO NOTHING;
+INSERT INTO users (email, password_hash, name, role)
+VALUES ('squad@orienta.cg', '$2b$10$6x9Auqu6/4/0L7O341ZcS./yDm2B/wU.K/mWKFDu8wmB1RtQScNdC', 'Squad', 'superadmin')
+ON CONFLICT (email) DO NOTHING;
 
 COMMIT;
