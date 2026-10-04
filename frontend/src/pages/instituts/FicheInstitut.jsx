@@ -28,7 +28,7 @@ function Fees({ program }) {
 
 function FicheInstitut() {
   const { id } = useParams();
-  const { data, loading, error } = useApi(
+  const { data, loading, error, reload } = useApi(
     () => Promise.all([getInstitute(id), getCareers()]).then(([institute, careers]) => ({ institute, careers })),
     [id],
   );
@@ -37,7 +37,7 @@ function FicheInstitut() {
     if (data) document.title = `${data.institute.name} · Orienta`;
   }, [data]);
 
-  if (!data) return <PageState loading={loading} error={error} notFound="Institut introuvable" />;
+  if (!data) return <PageState loading={loading} error={error} notFound="Institut introuvable" onRetry={reload} />;
 
   const { institute, careers } = data;
   const { programs } = institute;

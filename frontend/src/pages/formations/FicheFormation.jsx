@@ -43,7 +43,7 @@ async function loadFiche(id) {
 
 function FicheFormation() {
   const { id } = useParams();
-  const { data, loading, error } = useApi(() => loadFiche(id), [id]);
+  const { data, loading, error, reload } = useApi(() => loadFiche(id), [id]);
   const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
@@ -53,7 +53,7 @@ function FicheFormation() {
     trackVisit(data.program.id);
   }, [data]);
 
-  if (!data) return <PageState loading={loading} error={error} notFound="Formation introuvable" />;
+  if (!data) return <PageState loading={loading} error={error} notFound="Formation introuvable" onRetry={reload} />;
 
   const { program, institute, programs, careers } = data;
   const { domain } = program;

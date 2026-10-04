@@ -1,7 +1,9 @@
 import Icon from '../../components/Icon';
 import InstituteCard from '../../components/InstituteCard';
+import LoadError from '../../components/LoadError';
 import MiniCard from '../../components/MiniCard';
 import ProgramCard from '../../components/ProgramCard';
+import SkeletonCards from '../../components/SkeletonCards';
 import { useSearch } from '../../context/search-context';
 import { ans, fcfa, pluriel } from '../../utils/format';
 import { popularIds, recentIds } from '../../utils/history';
@@ -9,7 +11,9 @@ import { MAX_BUDGET, activeCount, instituteResults, programMatches, programsWith
 
 // Colonne de résultats de l'accueil : compteur, tri, rappels de filtres, grille.
 // La grille change selon la vue choisie : instituts, formations, diplômes ou débouchés.
-export default function Results({ data, onOpenFilters }) {
+// Pendant le chargement, elle affiche des cartes fantômes ; en cas d'échec,
+// un message avec un bouton pour réessayer.
+export default function Results({ data, loading, error, onRetry, onOpenFilters }) {
   const { filters, change, resetFilters } = useSearch();
   const { view } = filters;
   const domain = data.domains.find((item) => item.id === filters.domain);
@@ -109,7 +113,7 @@ export default function Results({ data, onOpenFilters }) {
   return (
     <div style={{ minWidth: 0 }}>
       <div className="rbar">
-        <h2>{label}</h2>
+        <h2>{loading ? 'Chargement…' : error ? 'Données indisponibles' : label}</h2>
         <div className="r">
           <button className="openf" type="button" onClick={onOpenFilters}>
             <Icon name="sliders" />
@@ -140,8 +144,12 @@ export default function Results({ data, onOpenFilters }) {
         ))}
       </div>
 
-      <div className="grid">
-        {empty ? (
+      <div className="grid" aria-busy={loading}>
+        {loading ? (
+          <SkeletonCards />
+        ) : error ? (
+          <LoadError error={error} onRetry={onRetry} />
+        ) : empty ? (
           // EX-13 : recherche vide ou mal saisie.
           <div className="empty">
             <h3>Résultat introuvable</h3>

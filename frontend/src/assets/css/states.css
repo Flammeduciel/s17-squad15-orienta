@@ -1,0 +1,65 @@
+/**
+ * assets/css/states.css
+ * ---------------------------------------------------------------------------
+ * États d'attente : indicateur de chargement et cartes fantômes affichées
+ * pendant qu'une liste arrive. L'état d'erreur réutilise `.empty` (cards.css).
+ */
+
+.loading {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.loading::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--line);
+  border-top-color: var(--green);
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skel span {
+  display: block;
+  border-radius: 8px;
+  background: var(--soft);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.skel .skel-cover {
+  aspect-ratio: 20/19;
+  border-radius: 16px;
+}
+
+.skel .skel-line {
+  height: 14px;
+}
+
+.skel .skel-line.short {
+  width: 55%;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: .45;
+  }
+}

@@ -15,13 +15,13 @@ function Favoris() {
   const { favorites } = useFavorites();
   // Les favoris sont gardés dans le navigateur ; leurs fiches sont rechargées
   // depuis l'API, pour afficher des informations à jour.
-  const { data: programs, loading, error } = useApi(getPrograms, []);
+  const { data: programs, loading, error, reload } = useApi(getPrograms, []);
 
   useEffect(() => {
     document.title = 'Mes favoris · Orienta';
   }, []);
 
-  if (!programs) return <PageState loading={loading} error={error} />;
+  if (!programs) return <PageState loading={loading} error={error} onRetry={reload} />;
 
   const list = programs.filter((program) => favorites.includes(program.id));
 
