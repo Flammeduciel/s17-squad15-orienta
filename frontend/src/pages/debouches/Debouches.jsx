@@ -7,8 +7,9 @@ import Icon from '../../components/Icon';
 import PageState from '../../components/PageState';
 import ProgramCard from '../../components/ProgramCard';
 import { useApi } from '../../hooks/useApi';
-import { ROUTES } from '../../routes';
-import { pluriel, lieu } from '../../utils/format';
+import { ROUTES, debouchePath } from '../../routes';
+import { lieu, pluriel } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
 
 // Le débouché demandé et les formations publiées qui y mènent.
 async function loadCareer(id) {
@@ -23,7 +24,12 @@ function Debouches() {
   const { data, loading, error, reload } = useApi(() => loadCareer(id), [id]);
 
   useEffect(() => {
-    if (data?.career) document.title = `${data.career.name} · Orienta`;
+    if (!data?.career) return;
+    setSeo({
+      title: `Devenir ${data.career.name} : les formations · Orienta`,
+      description: `${pluriel(data.programs.length, 'formation')} ${lieu(data.programs.map((program) => program.institute.city))} pour devenir ${data.career.name} : instituts, diplômes et frais de scolarité.`,
+      path: debouchePath(data.career.id),
+    });
   }, [data]);
 
   if (!data) return <PageState loading={loading} error={error} onRetry={reload} />;

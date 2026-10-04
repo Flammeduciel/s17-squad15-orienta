@@ -58,7 +58,6 @@ Créer une nouvelle **Application** dans Dokploy :
 | `DATABASE_URL` | Oui    | La chaîne de connexion du service PostgreSQL (étape 1)                                         |
 | `JWT_SECRET`   | Oui    | Une chaîne aléatoire longue et secrète - jamais la valeur par défaut de développement. **Sans elle, l'API refuse de démarrer.** |
 | `JWT_EXPIRES_IN` | Non | Durée d'une session avant reconnexion - `8h` par défaut |
-| `BACKOFFICE_URL` | Oui | L'URL publique du back-office, sans slash final : elle sert à construire le lien « mot de passe oublié » |
 | `SMTP_URL`     | Oui    | Le serveur d'envoi des e-mails, ex. `smtps://utilisateur:motdepasse@smtp.exemple.cg:465`. Sans elle, les e-mails ne partent pas : ils sont seulement écrits dans les journaux |
 | `MAIL_FROM`    | Non    | L'expéditeur des e-mails, ex. `Orienta <no-reply@orienta.cg>` |
 | `CORS_ORIGIN`  | Oui    | Les URLs publiques autorisées à appeler l'API, séparées par des virgules, **sans slash final** - ex. `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
@@ -126,6 +125,7 @@ Créer une deuxième **Application** dans Dokploy :
 | Argument               | Valeur                                                              |
 | ---------------------- | ------------------------------------------------------------------- |
 | `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.orienta.exemple.com`     |
+| `VITE_SITE_URL`       | L'URL publique du site lui-même, sans slash final, ex. `https://orienta.exemple.com` : elle alimente les balises de référencement et l'image d'aperçu des liens partagés |
 
 Aucune variable requise dans "Environment Settings" pour le frontend.
 
@@ -207,16 +207,21 @@ qu'à re-seeder.
 | -------------- | ------ | ----------------------------------------------------------------- |
 | `DATABASE_URL` | Oui    | `postgresql://user:pass@host:5432/db`                          |
 | `JWT_SECRET`   | Oui    | une chaîne aléatoire longue                                     |
-| `BACKOFFICE_URL` | Oui  | `https://back-office.orienta.exemple.com`                      |
 | `SMTP_URL`     | Oui    | `smtps://utilisateur:motdepasse@smtp.exemple.cg:465`           |
 | `CORS_ORIGIN`  | Oui    | `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
 | `PORT`         | Non    | `4000` (valeur par défaut)                                      |
 
-**Frontend et back-office** (identique pour les deux)
+**Frontend et back-office**
 
 | Variable               | Requis | Type           | Exemple                                  |
 | ---------------------- | ------ | ---------------- | ------------------------------------------- |
 | `VITE_API_URL`        | Oui    | Build Argument | `https://api.orienta.exemple.com`         |
+| `VITE_SITE_URL`       | Oui (frontend seulement) | Build Argument | `https://orienta.exemple.com` |
+
+`VITE_SITE_URL` est l'adresse publique du site, sans slash final. Elle est écrite
+dans les balises de référencement et de partage (adresse canonique, image
+d'aperçu `og-image.png`). Sans elle, ces balises pointent vers `localhost` et
+l'aperçu du lien ne s'affiche pas sur WhatsApp ou Facebook.
 
 ## Dépannage
 

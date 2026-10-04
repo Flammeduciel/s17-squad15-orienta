@@ -9,8 +9,9 @@ import Icon from '../../components/Icon';
 import PageState from '../../components/PageState';
 import ProgramCard from '../../components/ProgramCard';
 import { useApi } from '../../hooks/useApi';
-import { ROUTES, formationPath } from '../../routes';
-import { admission, ans, dateFr, fcfa, imageUrl, mailLink, niveau, whatsappLink } from '../../utils/format';
+import { ROUTES, formationPath, institutPath } from '../../routes';
+import { admission, ans, dateFr, fcfa, imageUrl, mailLink, niveau, pluriel, whatsappLink } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
 
 const photoStyle = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' };
 
@@ -34,7 +35,13 @@ function FicheInstitut() {
   );
 
   useEffect(() => {
-    if (data) document.title = `${data.institute.name} · Orienta`;
+    if (!data) return;
+    const { institute } = data;
+    setSeo({
+      title: `${institute.name} (${institute.short_name}), ${institute.city} · Orienta`,
+      description: `${institute.name}, institut privé ${institute.accredited ? 'agréé ' : ''}à ${institute.district}, ${institute.city} : ${pluriel(institute.programs.length, 'formation')}, frais d'inscription ${fcfa(institute.registration_fee)}, contact et dates de rentrée.`,
+      path: institutPath(institute.id),
+    });
   }, [data]);
 
   if (!data) return <PageState loading={loading} error={error} notFound="Institut introuvable" onRetry={reload} />;

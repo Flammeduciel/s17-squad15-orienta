@@ -10,6 +10,7 @@ import { useFavorites } from '../../context/favorites-context';
 import { useApi } from '../../hooks/useApi';
 import { ROUTES } from '../../routes';
 import { pluriel } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
 
 function Favoris() {
   const { favorites } = useFavorites();
@@ -18,7 +19,13 @@ function Favoris() {
   const { data: programs, loading, error, reload } = useApi(getPrograms, []);
 
   useEffect(() => {
-    document.title = 'Mes favoris · Orienta';
+    // Page personnelle : elle n'a pas à apparaître dans les moteurs de recherche.
+    setSeo({
+      title: 'Mes favoris · Orienta',
+      description: 'Les formations que tu as mises de côté sur Orienta Brazzaville.',
+      path: '/favoris',
+      index: false,
+    });
   }, []);
 
   if (!programs) return <PageState loading={loading} error={error} onRetry={reload} />;

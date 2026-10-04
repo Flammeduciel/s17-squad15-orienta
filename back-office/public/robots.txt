@@ -1,0 +1,3 @@
+# Back-office réservé à la Squad : rien ne doit être indexé.
+User-agent: *
+Disallow: /
