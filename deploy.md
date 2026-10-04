@@ -76,8 +76,9 @@ Le schéma complet (tables, colonnes, index, vue `indicators`) est documenté da
 `docs/schema.md` (diagramme Mermaid) et `docs/schema.sql`. Le `migrate.sql` embarqué
 dans l'image en est l'application exécutable.
 
-**Base créée avec le premier schéma (Kelasi).** Ce schéma ne peut pas être
-transformé sur place. Si ses tables sont vides, `migrate.sql` les reconstruit
+**Base créée avec un ancien schéma** (identifiants numérotés, arrondissement
+écrit en toutes lettres dans l'institut). Ce schéma ne peut pas être
+transformé sur place en identifiants UUID et en tables villes / arrondissements. Si ses tables sont vides, `migrate.sql` les reconstruit
 tout seul. Si elles contiennent des données (par exemple l'ancien seed), la
 migration s'arrête avec un message explicite et **le conteneur ne démarre pas** :
 il faut alors lancer une fois, à la main, `psql $DATABASE_URL -f scripts/reset.sql`
