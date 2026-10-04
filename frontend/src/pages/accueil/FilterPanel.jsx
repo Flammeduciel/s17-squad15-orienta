@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { useSearch } from '../../context/search-context';
 import { ans, fcfa, normalize } from '../../utils/format';
-import { MAX_BUDGET, MIN_BUDGET, programsWith, toggleIn } from './filters';
+import { MAX_BUDGET, MIN_BUDGET, toggleIn } from './filters';
 
 // Panneau de filtres de l'accueil. Sur mobile, il s'ouvre en feuille par le bas.
-// programs : formations trouvées par la recherche, pour les compteurs.
-// ready : faux tant que le catalogue n'est pas chargé ; les listes sont alors en attente.
-export default function FilterPanel({ data, programs, ready, open, onClose }) {
+// Chaque case porte le nombre de formations du catalogue pour cette valeur.
+// ready : faux tant que les listes ne sont pas chargées.
+export default function FilterPanel({ data, ready, open, onClose }) {
   const { filters, change, resetFilters } = useSearch();
   const [careerSearch, setCareerSearch] = useState('');
 
-  // Nombre de formations qu'on obtiendrait en choisissant cette seule valeur.
-  const count = (key, value) => programsWith(programs, filters, key, value).length;
-
-  const careers = data.careers.filter((name) => normalize(name).includes(normalize(careerSearch)));
+  const careers = data.careers.filter((career) => normalize(career.name).includes(normalize(careerSearch)));
   const durations = [...new Set(data.degrees.map((degree) => degree.duration))].sort((a, b) => a - b);
 
   return (
@@ -32,15 +29,15 @@ export default function FilterPanel({ data, programs, ready, open, onClose }) {
             Chargement…
           </p>
         )}
-        {data.districts.map((name) => (
-          <label className="check" key={name}>
+        {data.districts.map((district) => (
+          <label className="check" key={district.name}>
             <input
               type="checkbox"
-              checked={filters.districts.includes(name)}
-              onChange={() => change({ districts: toggleIn(filters.districts, name) })}
+              checked={filters.districts.includes(district.name)}
+              onChange={() => change({ districts: toggleIn(filters.districts, district.name) })}
             />
-            {name}
-            <span className="n">{count('districts', name)}</span>
+            {district.name}
+            <span className="n">{district.program_count}</span>
           </label>
         ))}
       </div>
@@ -60,15 +57,15 @@ export default function FilterPanel({ data, programs, ready, open, onClose }) {
               {ready ? 'Aucun débouché trouvé.' : 'Chargement…'}
             </p>
           )}
-          {careers.map((name) => (
-            <label className="check" key={name}>
+          {careers.map((career) => (
+            <label className="check" key={career.id}>
               <input
                 type="checkbox"
-                checked={filters.careers.includes(name)}
-                onChange={() => change({ careers: toggleIn(filters.careers, name) })}
+                checked={filters.careers.includes(career.id)}
+                onChange={() => change({ careers: toggleIn(filters.careers, career.id) })}
               />
-              {name}
-              <span className="n">{count('careers', name)}</span>
+              {career.name}
+              <span className="n">{career.program_count}</span>
             </label>
           ))}
         </div>
@@ -82,8 +79,8 @@ export default function FilterPanel({ data, programs, ready, open, onClose }) {
               className="pill"
               type="button"
               key={degree.id}
-              aria-pressed={filters.degrees.includes(degree.name)}
-              onClick={() => change({ degrees: toggleIn(filters.degrees, degree.name) })}
+              aria-pressed={filters.degrees.includes(degree.id)}
+              onClick={() => change({ degrees: toggleIn(filters.degrees, degree.id) })}
             >
               {degree.name}
             </button>

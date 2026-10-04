@@ -9,8 +9,9 @@ function withParams(path, params = {}) {
   return query ? `${path}?${query}` : path;
 }
 
-// params : critères de recherche du contrat (q, domain_id, max_tuition, bac_series,
-// evening, internship, installments, sort). Sans critère, tout le catalogue publié.
+// params : critères de recherche du contrat (q, domain_id, district, degree_id,
+// career_id, duration, max_tuition, bac_series, evening, internship, installments,
+// sort). Une liste devient « 1,3 » dans l'adresse. Sans critère, tout le catalogue publié.
 export const getPrograms = (params) => request(withParams('/programs', params)).then((data) => data.items);
 export const getProgram = (id) => request(`/programs/${id}`);
 export const getInstitutes = (params) => request(withParams('/institutes', params)).then((data) => data.items);
