@@ -6,9 +6,6 @@
 const { z } = require('zod');
 const { requiredText } = require('./common');
 
-/** Paramètres de `/admin/domains/:id` : l'identifiant est un slug, pas un nombre. */
-const domainParams = z.object({ id: requiredText(20) });
-
 /** Corps de la création et de la modification d'un domaine. */
 const domainBody = z.object({
   name: requiredText(100),
@@ -22,4 +19,4 @@ const domainBody = z.object({
     .default('shapes'),
 });
 
-module.exports = { domainParams, domainBody };
+module.exports = { domainBody };

@@ -6,7 +6,8 @@ const KEY = 'orienta-favs';
 function stored() {
   try {
     const list = JSON.parse(localStorage.getItem(KEY));
-    return Array.isArray(list) ? list : [];
+    // Les identifiants sont des UUID (du texte) : un ancien favori numéroté est oublié.
+    return Array.isArray(list) ? list.filter((id) => typeof id === 'string') : [];
   } catch {
     return [];
   }

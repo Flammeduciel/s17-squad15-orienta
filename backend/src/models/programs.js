@@ -19,10 +19,10 @@ const SELECT = `
   JOIN institutes i ON i.id = p.institute_id`;
 
 const SORTS = {
-  relevance: 'p.id',
-  tuition_asc: 'tuition ASC, p.id',
-  tuition_desc: 'tuition DESC, p.id',
-  duration: 'd.duration, tuition, p.id',
+  relevance: 'i.short_name, p.name',
+  tuition_asc: 'tuition ASC, p.name',
+  tuition_desc: 'tuition DESC, p.name',
+  duration: 'd.duration, tuition, p.name',
 };
 
 /**
@@ -30,11 +30,11 @@ const SORTS = {
  *
  * @param {object} filters
  * @param {'published'|'draft'} [filters.status]
- * @param {number} [filters.institute_id]
+ * @param {string} [filters.institute_id]
  * @param {string} [filters.domain_id]
  * @param {string[]} [filters.district] Un de ces arrondissements.
- * @param {number[]} [filters.degree_id] Un de ces diplômes.
- * @param {number[]} [filters.career_id] Au moins un de ces débouchés.
+ * @param {string[]} [filters.degree_id] Un de ces diplômes.
+ * @param {string[]} [filters.career_id] Au moins un de ces débouchés.
  * @param {number[]} [filters.duration] Une de ces durées.
  * @param {number} [filters.max_tuition] Frais de 1re année maximum.
  * @param {string} [filters.bac_series] Code de série ; une formation sans série est ouverte à toutes.
@@ -58,11 +58,11 @@ async function findAll(filters) {
   if (filters.domain_id) add('p.domain_id = ?', filters.domain_id);
   // Critères à plusieurs valeurs : « = ANY(liste) » veut dire « une des valeurs de la liste ».
   if (filters.district) add('i.district = ANY(?::text[])', filters.district);
-  if (filters.degree_id) add('p.degree_id = ANY(?::int[])', filters.degree_id);
+  if (filters.degree_id) add('p.degree_id = ANY(?::uuid[])', filters.degree_id);
   if (filters.duration) add('d.duration = ANY(?::int[])', filters.duration);
   if (filters.career_id) {
     add(
-      'EXISTS (SELECT 1 FROM program_careers pc WHERE pc.program_id = p.id AND pc.career_id = ANY(?::int[]))',
+      'EXISTS (SELECT 1 FROM program_careers pc WHERE pc.program_id = p.id AND pc.career_id = ANY(?::uuid[]))',
       filters.career_id,
     );
   }
@@ -90,7 +90,7 @@ async function findAll(filters) {
   return rows;
 }
 
-/** @param {number} id */
+/** @param {string} id */
 async function findById(id) {
   const { rows } = await query(`${SELECT} WHERE p.id = $1`, [id]);
   return rows[0] || null;
@@ -99,30 +99,30 @@ async function findById(id) {
 /**
  * Frais, séries, débouchés et cours d'une liste de formations, en quatre requêtes.
  *
- * @param {number[]} programIds
+ * @param {string[]} programIds
  * @returns {Promise<{ fees: object[], series: object[], careers: object[], courses: object[] }>}
  */
 async function findRelations(programIds) {
   const fees = await query(
-    'SELECT program_id, year, amount FROM program_fees WHERE program_id = ANY($1) ORDER BY year',
+    'SELECT program_id, year, amount FROM program_fees WHERE program_id = ANY($1::uuid[]) ORDER BY year',
     [programIds],
   );
   const series = await query(
     `SELECT pb.program_id, s.code FROM program_bac_series pb
      JOIN bac_series s ON s.id = pb.series_id
-     WHERE pb.program_id = ANY($1) ORDER BY s.code`,
+     WHERE pb.program_id = ANY($1::uuid[]) ORDER BY s.code`,
     [programIds],
   );
   const careers = await query(
     `SELECT pc.program_id, c.name FROM program_careers pc
      JOIN careers c ON c.id = pc.career_id
-     WHERE pc.program_id = ANY($1) ORDER BY c.name`,
+     WHERE pc.program_id = ANY($1::uuid[]) ORDER BY c.name`,
     [programIds],
   );
   const courses = await query(
     `SELECT pc.program_id, pc.year, c.name FROM program_courses pc
      JOIN courses c ON c.id = pc.course_id
-     WHERE pc.program_id = ANY($1) ORDER BY pc.year, pc.position`,
+     WHERE pc.program_id = ANY($1::uuid[]) ORDER BY pc.year, pc.position`,
     [programIds],
   );
   return { fees: fees.rows, series: series.rows, careers: careers.rows, courses: courses.rows };
@@ -139,7 +139,7 @@ async function findByName(instituteId, name) {
 
 /** @returns {Promise<number>} Combien des identifiants donnés existent dans la table. */
 async function countExisting(table, ids) {
-  const { rows } = await query(`SELECT COUNT(*)::int AS total FROM ${table} WHERE id = ANY($1)`, [ids]);
+  const { rows } = await query(`SELECT COUNT(*)::int AS total FROM ${table} WHERE id = ANY($1::uuid[])`, [ids]);
   return rows[0].total;
 }
 
@@ -178,7 +178,7 @@ function values(program) {
   ];
 }
 
-/** @returns {Promise<number>} Identifiant de la nouvelle formation. */
+/** @returns {Promise<string>} Identifiant de la nouvelle formation. */
 async function create(program) {
   return transaction(async (client) => {
     const { rows } = await client.query(
@@ -194,7 +194,7 @@ async function create(program) {
 }
 
 /**
- * @param {number} id
+ * @param {string} id
  * @param {object} program Corps validé de la requête.
  * @param {number} duration Durée du diplôme choisi : les cours rattachés à une
  *   année qui n'existe plus sont ramenés sur la dernière année.

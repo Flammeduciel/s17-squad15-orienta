@@ -14,7 +14,8 @@ export default function PageState({ loading, error, notFound, onRetry }) {
       </div>
     );
   }
-  if (error?.status === 404) {
+  // 404 : la fiche n'existe pas. 400 : l'adresse ne contient pas un identifiant valide.
+  if (error?.status === 404 || error?.status === 400) {
     return (
       <div className="wrap detail">
         <div className="empty">

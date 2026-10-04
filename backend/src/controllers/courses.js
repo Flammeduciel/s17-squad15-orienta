@@ -53,7 +53,7 @@ async function listCourses(req, res) {
  * Vérifie les rattachements demandés : chaque formation existe, n'apparaît
  * qu'une fois, et l'année ne dépasse pas la durée de son diplôme.
  *
- * @param {{ program_id: number, year: number }[]} links
+ * @param {{ program_id: string, year: number }[]} links
  */
 async function checkLinks(links) {
   const ids = links.map((link) => link.program_id);

@@ -9,7 +9,7 @@ const { query } = require('../config/db');
  * Compte Squad tel que lu en base.
  *
  * @typedef {object} User
- * @property {number} id
+ * @property {string} id
  * @property {string} email Adresse e-mail, qui sert d'identifiant de connexion.
  * @property {string} password_hash Hash bcrypt, jamais renvoyé au client.
  * @property {string} name
@@ -19,7 +19,7 @@ const { query } = require('../config/db');
 const COLUMNS = 'id, email, password_hash, name, role';
 
 /**
- * @param {number} id
+ * @param {string} id
  * @returns {Promise<User|null>}
  */
 async function findById(id) {

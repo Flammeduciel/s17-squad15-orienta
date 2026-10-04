@@ -23,10 +23,10 @@ async function findByName(name) {
   return rows[0] || null;
 }
 
-async function create({ id, name, color, icon }) {
+async function create({ name, color, icon }) {
   const { rows } = await query(
-    'INSERT INTO domains (id, name, color, icon) VALUES ($1, $2, $3, $4) RETURNING id, name, color, icon',
-    [id, name, color, icon],
+    'INSERT INTO domains (name, color, icon) VALUES ($1, $2, $3) RETURNING id, name, color, icon',
+    [name, color, icon],
   );
   return rows[0];
 }

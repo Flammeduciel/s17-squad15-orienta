@@ -1,5 +1,4 @@
 const httpError = require('../utils/httpError');
-const slugify = require('../utils/slug');
 const domains = require('../models/domains');
 
 const NOT_FOUND = [404, 'DOMAINE_INTROUVABLE', 'Aucun domaine ne correspond à cet identifiant.'];
@@ -9,22 +8,16 @@ async function listDomains(req, res) {
   res.json(await domains.findAll());
 }
 
-/** `POST /admin/domains` - crée un domaine ; son identifiant est tiré de son nom. */
+/** `POST /admin/domains` - crée un domaine. */
 async function createDomain(req, res) {
   const { name, color, icon } = req.valid.body;
   if (await domains.findByName(name)) {
     throw httpError(409, 'DEJA_EXISTANT', `Le domaine « ${name} » existe déjà.`);
   }
-  // Deux noms différents peuvent donner le même identifiant : on ajoute alors un numéro.
-  const base = slugify(name, 17) || 'domaine';
-  let id = base;
-  for (let n = 2; await domains.findById(id); n += 1) {
-    id = `${base}-${n}`;
-  }
-  res.status(201).json(await domains.create({ id, name, color, icon }));
+  res.status(201).json(await domains.create({ name, color, icon }));
 }
 
-/** `PUT /admin/domains/:id` - change le nom, la couleur ou l'icône ; l'identifiant ne change pas. */
+/** `PUT /admin/domains/:id` - change le nom, la couleur ou l'icône. */
 async function updateDomain(req, res) {
   const { id } = req.valid.params;
   const { name, color, icon } = req.valid.body;

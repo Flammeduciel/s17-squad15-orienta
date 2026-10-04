@@ -48,7 +48,7 @@ async function findAll({ district, accredited }) {
   return rows;
 }
 
-/** @param {number} id */
+/** @param {string} id */
 async function findById(id) {
   const { rows } = await query(`SELECT ${DETAIL} FROM institutes i WHERE i.id = $1`, [id]);
   return rows[0] || null;
@@ -59,7 +59,7 @@ async function findById(id) {
  *
  * @param {string} name
  * @param {string} shortName
- * @returns {Promise<{ id: number, name: string, short_name: string }|null>}
+ * @returns {Promise<{ id: string, name: string, short_name: string }|null>}
  */
 async function findByNameOrShortName(name, shortName) {
   const { rows } = await query(
@@ -92,7 +92,7 @@ function values(institute) {
   ];
 }
 
-/** @returns {Promise<number>} Identifiant du nouvel institut. */
+/** @returns {Promise<string>} Identifiant du nouvel institut. */
 async function create(institute) {
   const { rows } = await query(
     `INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, email, color,

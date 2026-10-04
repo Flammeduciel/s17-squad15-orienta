@@ -40,7 +40,7 @@ async function getAnyProgram(req, res) {
  * par année du diplôme, et l'institut n'a pas déjà une formation de ce nom.
  *
  * @param {object} body Corps validé.
- * @param {number|null} currentId Formation en cours de modification, sinon `null`.
+ * @param {string|null} currentId Formation en cours de modification, sinon `null`.
  * @returns {Promise<object>} Le diplôme choisi.
  */
 async function checkProgram(body, currentId) {

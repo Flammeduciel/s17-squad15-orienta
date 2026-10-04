@@ -13,7 +13,7 @@ import { pluriel } from '../../utils/format';
 // Le débouché demandé et les formations publiées qui y mènent.
 async function loadCareer(id) {
   const [careers, programs] = await Promise.all([getCareers(), getPrograms()]);
-  const career = careers.find((item) => item.id === Number(id));
+  const career = careers.find((item) => item.id === id);
   if (!career) return { career: null, programs: [] };
   return { career, programs: programs.filter((program) => program.careers.includes(career.name)) };
 }

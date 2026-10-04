@@ -133,7 +133,7 @@ export default function SearchBar({ data, onSearch }) {
         <select
           id="s-dip"
           value={degree}
-          onChange={(event) => change({ degrees: event.target.value ? [Number(event.target.value)] : [] })}
+          onChange={(event) => change({ degrees: event.target.value ? [event.target.value] : [] })}
         >
           <option value="">Tous</option>
           {data.degrees.map((item) => (

@@ -92,16 +92,16 @@ function ProgramForm({ program, lists, onClose, onSaved }) {
   const [submitting, setSubmitting] = useState(false);
 
   // La durée des études vient du diplôme choisi : elle n'est pas saisie.
-  const degree = lists.degrees.find((item) => item.id === Number(form.degree_id));
+  const degree = lists.degrees.find((item) => item.id === form.degree_id);
   const duration = degree?.duration ?? 1;
-  const instituteCount = lists.programs.filter((item) => item.institute.id === Number(form.institute_id)).length;
+  const instituteCount = lists.programs.filter((item) => item.institute.id === form.institute_id).length;
   const careers = lists.careers.filter((career) => matches(careerSearch, career.name));
 
   const onChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
 
   // Changer de diplôme change le nombre d'années, donc le nombre de montants.
   const onDegree = (event) => {
-    const next = lists.degrees.find((item) => item.id === Number(event.target.value));
+    const next = lists.degrees.find((item) => item.id === event.target.value);
     setForm({
       ...form,
       degree_id: next.id,
@@ -130,9 +130,9 @@ function ProgramForm({ program, lists, onClose, onSaved }) {
     }
     const body = {
       name: form.name.trim(),
-      institute_id: Number(form.institute_id),
+      institute_id: form.institute_id,
       domain_id: form.domain_id,
-      degree_id: Number(form.degree_id),
+      degree_id: form.degree_id,
       description: form.description.trim() || null,
       admission_requirements: form.admission_requirements.trim() || null,
       fees: form.fees.map(Number),
