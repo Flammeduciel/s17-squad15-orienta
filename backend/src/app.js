@@ -6,6 +6,8 @@ const { requireAuth } = require('./middlewares/auth');
 const { notFound, errorHandler } = require('./middlewares/errors');
 const districtsRoutes = require("./routes/districts");
 const { uploadDir } = require('./config/env');
+const institutesRoutes = require("./routes/institutes");
+
 
 /**
  * L'application Express, sans l'écoute du port : `server.js` s'en charge.
@@ -45,6 +47,7 @@ app.use(authRoutes);
 app.use('/admin', requireAuth);
 // BK4 — instituts.
 app.use(districtsRoutes);
+app.use(institutesRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
