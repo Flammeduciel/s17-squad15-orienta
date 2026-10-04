@@ -10,8 +10,9 @@ import MiniCard from '../../components/MiniCard';
 import PageState from '../../components/PageState';
 import { useFavorites } from '../../context/favorites-context';
 import { useApi } from '../../hooks/useApi';
-import { ROUTES, institutPath } from '../../routes';
+import { ROUTES, formationPath, institutPath } from '../../routes';
 import { admission, ans, dateFr, fcfa, mailLink, whatsappLink } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
 import { trackVisit } from '../../utils/history';
 import FormulaireQuestion from './FormulaireQuestion';
 
@@ -48,7 +49,12 @@ function FicheFormation() {
 
   useEffect(() => {
     if (!data) return;
-    document.title = `${data.program.name} · Orienta`;
+    const { program } = data;
+    setSeo({
+      title: `${program.name} (${program.degree.name}) - ${program.institute.short_name} · Orienta`,
+      description: `${program.name} : ${program.degree.name} en ${ans(program.duration)} à ${program.institute.name}, ${program.institute.district}, ${program.institute.city}. ${fcfa(program.tuition)} par an. Programme, admission et débouchés.`,
+      path: formationPath(program.id),
+    });
     // Alimente « Consultées récemment » et « Les plus visitées » de l'accueil.
     trackVisit(data.program.id);
   }, [data]);
@@ -147,9 +153,7 @@ function FicheFormation() {
                 <div>
                   <b>{program.installments ? 'Paiement en plusieurs fois' : "Paiement à l'inscription"}</b>
                   <span>
-                    {program.installments
-                      ? 'Scolarité réglable en plusieurs tranches'
-                      : 'Scolarité réglée en une fois'}
+                    {program.installments ? 'Scolarité réglable en plusieurs tranches' : 'Scolarité réglée en une fois'}
                   </span>
                 </div>
               </div>
@@ -175,9 +179,7 @@ function FicheFormation() {
                           <li key={course}>{course}</li>
                         ))}
                         {/* Le stage se fait en dernière année. */}
-                        {stage > 0 && index === program.years.length - 1 && (
-                          <li>Stage en entreprise ({stage} mois)</li>
-                        )}
+                        {stage > 0 && index === program.years.length - 1 && <li>Stage en entreprise ({stage} mois)</li>}
                       </ul>
                     </div>
                   ))}

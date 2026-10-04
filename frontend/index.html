@@ -2,12 +2,110 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Les adresses complètes de cette page (canonique, image de partage) commencent
+         par un repère que le build remplace par VITE_SITE_URL, l'adresse publique du
+         site : voir vite.config.js. -->
+
+    <!-- Référencement : titre et description affichés dans les résultats de recherche.
+         Chaque page les ajuste ensuite (src/utils/seo.js). -->
+    <title>Orienta Brazzaville - Trouve ton institut privé après le bac</title>
+    <meta name="description" content="Compare les instituts privés de Brazzaville après le bac : formations, diplômes, frais de scolarité, agrément et débouchés. Tout au même endroit." />
+    <meta
+      name="keywords"
+      content="institut privé Brazzaville, formation après le bac Congo, orientation post-bac, BTS Brazzaville, Licence Brazzaville, Master Brazzaville, école supérieure Brazzaville, institut agréé, frais de scolarité, débouchés, bachelier"
+    />
+    <meta name="author" content="Orienta" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="%SITE_URL%/" />
+    <link rel="alternate" hreflang="fr" href="%SITE_URL%/" />
+
+    <!-- Lieu : le site concerne Brazzaville, République du Congo. -->
+    <meta name="geo.region" content="CG-BZV" />
+    <meta name="geo.placename" content="Brazzaville" />
+    <meta name="geo.position" content="-4.2634;15.2429" />
+    <meta name="ICBM" content="-4.2634, 15.2429" />
+
+    <!-- Open Graph : aperçu du lien sur WhatsApp, Facebook, LinkedIn… -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Orienta Brazzaville" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:title" content="Orienta Brazzaville - Trouve ton institut privé après le bac" />
+    <meta property="og:description" content="Compare les instituts privés de Brazzaville après le bac : formations, diplômes, frais de scolarité, agrément et débouchés. Tout au même endroit." />
+    <meta property="og:image" content="%SITE_URL%/og-image.png" />
+    <meta property="og:image:secure_url" content="%SITE_URL%/og-image.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Orienta - Trouve ton institut à Brazzaville : instituts privés, formations, diplômes et débouchés" />
+
+    <!-- Carte X (Twitter) : même aperçu, en grand format. -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Orienta Brazzaville - Trouve ton institut privé après le bac" />
+    <meta name="twitter:description" content="Compare les instituts privés de Brazzaville après le bac : formations, diplômes, frais de scolarité, agrément et débouchés. Tout au même endroit." />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.png" />
+    <meta name="twitter:image:alt" content="Orienta - Trouve ton institut à Brazzaville : instituts privés, formations, diplômes et débouchés" />
+
+    <!-- Icônes et installation sur l'écran d'accueil. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Orienta Brazzaville - Les instituts privés de Brazzaville, au même endroit</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="application-name" content="Orienta" />
+    <meta name="apple-mobile-web-app-title" content="Orienta" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0F1512" media="(prefers-color-scheme: dark)" />
+
+    <!-- Données structurées : présentent le site et son éditeur aux moteurs de recherche. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "%SITE_URL%/#site",
+            "url": "%SITE_URL%/",
+            "name": "Orienta Brazzaville",
+            "alternateName": "Orienta",
+            "description": "Compare les instituts privés de Brazzaville après le bac : formations, diplômes, frais de scolarité, agrément et débouchés. Tout au même endroit.",
+            "inLanguage": "fr",
+            "publisher": { "@id": "%SITE_URL%/#organisation" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "%SITE_URL%/#organisation",
+            "name": "Orienta",
+            "url": "%SITE_URL%/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "%SITE_URL%/icon-512.png",
+              "width": 512,
+              "height": 512
+            },
+            "image": "%SITE_URL%/og-image.png",
+            "description": "Plateforme d'orientation qui regroupe les instituts privés d'enseignement supérieur de Brazzaville.",
+            "areaServed": {
+              "@type": "City",
+              "name": "Brazzaville",
+              "containedInPlace": { "@type": "Country", "name": "République du Congo" }
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      Orienta Brazzaville regroupe les instituts privés de Brazzaville, leurs formations, leurs diplômes et leurs
+      débouchés. Active JavaScript pour consulter le site.
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

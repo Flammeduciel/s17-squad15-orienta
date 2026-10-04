@@ -15,6 +15,7 @@ import { useSearch } from '../../context/search-context';
 import { useApi } from '../../hooks/useApi';
 import { useDebounce } from '../../hooks/useDebounce';
 import { lieu } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
 import FilterPanel from './FilterPanel';
 import { searchParams } from './filters';
 import Results from './Results';
@@ -65,7 +66,12 @@ function Accueil() {
   const resultsRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'Orienta Brazzaville - Les instituts privés de Brazzaville, au même endroit';
+    setSeo({
+      title: 'Orienta Brazzaville - Trouve ton institut privé après le bac',
+      description:
+        'Compare les instituts privés de Brazzaville après le bac : formations, diplômes, frais de scolarité, agrément et débouchés. Tout au même endroit.',
+      path: '/',
+    });
   }, []);
 
   const data = loaded ?? EMPTY;
