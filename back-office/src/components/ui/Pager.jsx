@@ -1,3 +1,5 @@
+// Pagination de la maquette (.pager). Réutilisable par toutes les listes (formations, instituts, cours…).
+// Ne s'affiche pas quand tout tient sur une page.
 export default function Pager({ total, perPage, page, onPage }) {
   const pages = Math.max(1, Math.ceil(total / perPage))
   if (total <= perPage) return null

@@ -7,15 +7,14 @@
 const KEY = 'orienta-favoris'
 const listeners = new Set()
 
-const texte = (v) =>
-  v && typeof v === 'object' ? (v.nom ?? v.name ?? v.short_name ?? v.sigle ?? '') : (v ?? '')
+const texte = (v) => (v && typeof v === 'object' ? (v.nom ?? v.sigle ?? '') : (v ?? ''))
 
 // Ne garde de la formation que ce qui sert à l'affichage de la liste.
 export const instantane = (f) => ({
   id: f.id,
-  nom: f.nom ?? f.name ?? '',
-  institut: texte(f.institut ?? f.institute),
-  diplome: texte(f.diplome ?? f.degree),
+  nom: f.nom ?? '',
+  institut: texte(f.institut),
+  diplome: texte(f.diplome),
 })
 
 function lire() {

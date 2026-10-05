@@ -1,52 +1,34 @@
+import { USE_MOCK_API } from '../config'
 import { request } from './http'
+import * as mock from './mockCours'
 
-const toApiCourse = ({ nom, liens }) => ({
-  name: nom,
-  programs: liens.map(({ formation, annee }) => {
-    const programId = Number(formation)
-    if (!Number.isInteger(programId) || programId < 1) {
-      throw new Error(`Identifiant de formation invalide : ${formation}`)
-    }
-    return { program_id: programId, year: annee }
-  }),
-})
+/* Contrat attendu de l'API (BK6, Gilles ; formations : BK5, Flamme). À valider avec eux.
 
-const fromApiCourse = (course) => ({
-  id: String(course.id),
-  nom: course.name,
-  liens: course.programs.map((program) => ({
-    formation: String(program.program_id),
-    annee: program.year,
-  })),
-})
+   GET    /cours        → [{ id, nom, liens: [{ formation, annee }] }]
+   POST   /cours        { nom, liens }  → le cours créé        (409 si l'intitulé existe déjà)
+   PUT    /cours/:id    { nom, liens }  → le cours modifié     (409 si l'intitulé existe déjà)
+   DELETE /cours/:id
+   GET    /formations   → [{ id, nom, institut, diplome, duree }]
+                          (institut = sigle ; duree = nombre d'années du diplôme)
 
-const fromApiProgram = (program) => ({
-  id: String(program.id),
-  nom: program.name,
-  institut: program.institute.short_name,
-  diplome: program.degree.name,
-  duree: program.duration,
-})
-
-export const listCours = async () => {
-  const courses = await request('/admin/courses')
-  if (!Array.isArray(courses)) throw new Error('Réponse invalide : la liste des cours est attendue.')
-  return courses.map(fromApiCourse)
+   `liens` est la liste COMPLÈTE des formations auxquelles le cours est rattaché : rattacher ou
+   retirer un cours d'une formation revient à renvoyer la liste mise à jour. `annee` va de 1 à
+   la durée de la formation. */
+const real = {
+  listCours: () => request('/cours'),
+  listFormations: () => request('/formations'),
+  createCours: (body) => request('/cours', { method: 'POST', body }),
+  updateCours: (id, body) => request(`/cours/${id}`, { method: 'PUT', body }),
+  deleteCours: (id) => request(`/cours/${id}`, { method: 'DELETE' }),
 }
 
-export const listFormations = async () => {
-  const response = await request('/admin/programs')
-  if (!response || !Array.isArray(response.items)) {
-    throw new Error('Réponse invalide : la liste des formations est attendue.')
-  }
-  return response.items.map(fromApiProgram)
-}
+const api = USE_MOCK_API ? mock : real
 
-export const createCours = (body) =>
-  request('/admin/courses', { method: 'POST', body: toApiCourse(body) })
+// Accepte un tableau nu ou { data: [...] }.
+const asList = (d) => (Array.isArray(d) ? d : (d?.data ?? []))
 
-export const updateCours = (id, body) =>
-  request(`/admin/courses/${encodeURIComponent(id)}`, { method: 'PUT', body: toApiCourse(body) })
-
-export const deleteCours = (id) =>
-  request(`/admin/courses/${encodeURIComponent(id)}`, { method: 'DELETE' })
+export const listCours = async () => asList(await api.listCours())
+export const listFormations = async () => asList(await api.listFormations())
+export const createCours = api.createCours
+export const updateCours = api.updateCours
+export const deleteCours = api.deleteCours
