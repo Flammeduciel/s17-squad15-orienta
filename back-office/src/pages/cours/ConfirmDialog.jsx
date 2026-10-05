@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 
-// Fenêtre de confirmation de la maquette (.modal). Échap ou clic à côté = annuler.
 export default function ConfirmDialog({ title, body, confirmLabel = 'Confirmer', onConfirm, onCancel }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onCancel()
