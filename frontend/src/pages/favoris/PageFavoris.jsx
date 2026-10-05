@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { rechargerFavoris } from './favorisStore'
 import { useFavoris } from './useFavoris'
+import { getFormation } from '../api/formations'
 
 /* Page « Mes favoris ». Affiche tout de suite les favoris gardés dans le navigateur, puis les
    remet à jour depuis l'API (formation supprimée = retirée de la liste).
