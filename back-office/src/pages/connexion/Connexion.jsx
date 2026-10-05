@@ -13,7 +13,7 @@ function Connexion() {
   const { user, login } = useAuth();
   const toast = useToast();
   const location = useLocation();
-  const [form, setForm] = useState({ login: '', password: '' });
+  const [form, setForm] = useState({ login: 'squad', password: 'orienta2026' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false);
