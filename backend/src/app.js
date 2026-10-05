@@ -9,6 +9,10 @@ const { uploadDir } = require('./config/env');
 const institutesRoutes = require("./routes/institutes");
 const imagesRoutes = require("./routes/images");
 
+const domainsRoutes = require("./routes/domains");
+const bacSeriesRoutes = require("./routes/bacSeries");
+const careersRoutes = require("./routes/careers");
+const degreesRoutes = require("./routes/degrees");
 
 /**
  * L'application Express, sans l'écoute du port : `server.js` s'en charge.
@@ -50,6 +54,11 @@ app.use('/admin', requireAuth);
 app.use(districtsRoutes);
 app.use(institutesRoutes);
 app.use(imagesRoutes);
+// BK3 — référentiels (après requireAuth : leurs routes /admin sont protégées).
+app.use(domainsRoutes);
+app.use(bacSeriesRoutes);
+app.use(careersRoutes);
+app.use(degreesRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
