@@ -4,7 +4,11 @@ const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const { requireAuth } = require('./middlewares/auth');
 const { notFound, errorHandler } = require('./middlewares/errors');
+const districtsRoutes = require("./routes/districts");
 const { uploadDir } = require('./config/env');
+const institutesRoutes = require("./routes/institutes");
+const imagesRoutes = require("./routes/images");
+
 const domainsRoutes = require("./routes/domains");
 const bacSeriesRoutes = require("./routes/bacSeries");
 const careersRoutes = require("./routes/careers");
@@ -46,6 +50,10 @@ app.use(authRoutes);
 // Tout ce qui commence par /admin exige une session Squad : les routes
 // d'administration des blocs suivants sont protégées sans rien ajouter.
 app.use('/admin', requireAuth);
+// BK4 — instituts.
+app.use(districtsRoutes);
+app.use(institutesRoutes);
+app.use(imagesRoutes);
 // BK3 — référentiels (après requireAuth : leurs routes /admin sont protégées).
 app.use(domainsRoutes);
 app.use(bacSeriesRoutes);
