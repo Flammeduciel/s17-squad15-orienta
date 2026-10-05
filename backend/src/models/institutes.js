@@ -63,8 +63,8 @@ const fold = (text) =>
  * que `%` et `_` saisis par le visiteur restent des caractères ordinaires.
  *
  * Seuls `q`, `district` et `accredited` sont appliqués ici. Les filtres qui
- * portent sur les formations sont ajoutés par BK5 : ils se branchent sur
- * `conditions`/`params` et sur la requête.
+ * portent sur les formations sont appliqués par le contrôleur, à partir de la
+ * recherche des formations (bloc BK5).
  *
  * @param {{ q?: string, district?: string, accredited?: boolean }} filters
  * @returns {Promise<InstituteSummary[]>}
@@ -100,7 +100,7 @@ async function list({ q, district, accredited } = {}) {
 
 /**
  * Fiche d'un institut. `programs` (formations publiées) est ajouté par le
- * contrôleur : il vient de BK5.
+ * contrôleur.
  *
  * @param {number} id
  * @returns {Promise<(InstituteSummary & object)|null>}

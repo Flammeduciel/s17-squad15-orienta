@@ -13,6 +13,7 @@ const domainsRoutes = require("./routes/domains");
 const bacSeriesRoutes = require("./routes/bacSeries");
 const careersRoutes = require("./routes/careers");
 const degreesRoutes = require("./routes/degrees");
+const programsRoutes = require('./routes/programs');
 
 /**
  * L'application Express, sans l'écoute du port : `server.js` s'en charge.
@@ -59,6 +60,8 @@ app.use(domainsRoutes);
 app.use(bacSeriesRoutes);
 app.use(careersRoutes);
 app.use(degreesRoutes);
+// BK5 - formations et indicateurs.
+app.use(programsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
