@@ -1,0 +1,37 @@
+/**
+ * assets/css/tables.css
+ * ---------------------------------------------------------------------------
+ * Tableau des tarifs et conditions d'admission de la fiche institut.
+ */
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.tbl th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tbl td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.tbl tr:last-child td {
+  border-bottom: 0;
+}
+
+.tblwrap {
+  overflow: auto;
+  border-radius: 14px;
+}

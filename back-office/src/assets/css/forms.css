@@ -1,0 +1,247 @@
+/**
+ * assets/css/forms.css
+ * ---------------------------------------------------------------------------
+ * Formulaires : champs, cases à cocher, groupes, pied de formulaire, messages.
+ * Contient aussi les blocs propres aux fiches : frais par niveau, séries, débouchés, programme,
+ * rattachements d'un cours, image d'institut.
+ */
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--green);
+  margin: 0;
+  flex: none;
+}
+
+.fld label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.fld input,
+.fld textarea,
+.fld select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 11px 12px;
+  font: 500 15px var(--body);
+}
+
+.fld textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.fld input:focus,
+.fld textarea:focus,
+.fld select:focus {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+  border-color: var(--green);
+}
+
+.fld .hint {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.fld.bad input,
+.fld.bad textarea,
+.fld.bad select {
+  border-color: var(--heart);
+  box-shadow: inset 0 0 0 1px var(--heart);
+}
+
+.fld .err {
+  display: block;
+  color: var(--heart);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.ok {
+  background: var(--green-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.err {
+  background: var(--heart);
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.form {
+  display: grid;
+  gap: 20px;
+}
+
+.form .row {
+  display: grid;
+  gap: 16px;
+}
+
+.form .two {
+  grid-template-columns: 1fr 1fr;
+}
+
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 0;
+  min-width: 0;
+}
+
+legend {
+  font: 800 14px var(--display);
+  padding: 0 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.formfoot {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 4px;
+}
+
+.formfoot .sp {
+  margin-left: auto;
+}
+
+.logoedit {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.logoedit .ap {
+  flex: none;
+  width: 104px;
+  height: 78px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #fff;
+  font: 800 17px var(--display);
+  background: var(--soft);
+}
+
+.logoedit .ap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+  display: block;
+}
+
+.logoedit .cmd {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.logoedit .cmd .hint {
+  max-width: 460px;
+}
+
+.tarifs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+  gap: 12px;
+}
+
+.tarifs label {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.deblist {
+  max-height: 230px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 8px;
+}
+
+.fld .check {
+  display: flex;
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.fld .check input {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  flex: none;
+}
+
+.fld .err {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.programme {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 12px;
+}
+
+.sergrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+  gap: 2px 14px;
+}
+
+.lien {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 150px 34px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.programme .annee {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.programme ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 3px;
+}
