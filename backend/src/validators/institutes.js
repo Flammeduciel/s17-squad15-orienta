@@ -11,8 +11,8 @@ const { DISTRICTS } = require("../models/districts");
  * Paramètres de `GET /institutes`.
  *
  * Les filtres qui portent sur les formations (domaine, diplôme, débouché,
- * durée, budget, série, cours du soir, stage, tranches) sont validés ici mais
- * appliqués par le bloc BK5.
+ * durée, budget, série, cours du soir, stage, tranches) sont validés ici et
+ * appliqués par le contrôleur, à partir de la recherche des formations.
  */
 const instituteListQuery = z.object({
   q: z
