@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/auth-context'
-import { useTheme } from '../../context/theme-context'
+import { useTheme } from '../../hooks/useTheme'
 import { useToast } from '../../context/toast-context'
 import { ROUTES } from '../../routes'
 import Icon from '../../components/Icon'

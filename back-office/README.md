@@ -32,6 +32,10 @@ back-office/src/
 └── pages/         # Un dossier par page ou groupe de pages, avec ses fichiers déjà créés
 ```
 
+Un composant utilisé par une seule page reste dans le dossier de cette page ;
+il ne monte dans `components/` que lorsqu'une deuxième page en a besoin. Les
+composants réservés à Cours sont rangés dans `pages/cours/`.
+
 La connexion (P1) et la coquille (S6) sont faites. Les autres fichiers de pages
 n'affichent que leur titre : il reste à les remplir en suivant la maquette. Les
 routes sont déjà branchées dans `App.jsx`, il n'y a pas à y toucher.

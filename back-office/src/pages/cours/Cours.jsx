@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { createCours, deleteCours, listCours, listFormations, updateCours } from '../../api/cours.js'
 import Icon from '../../components/Icon.jsx'
-import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx'
-import Pager from '../../components/ui/Pager.jsx'
 import { useToast } from '../../context/toast-context.js'
+import ConfirmDialog from './ConfirmDialog.jsx'
 import CoursForm from './CoursForm.jsx'
+import Pager from './Pager.jsx'
 import { libForme, niveau, norm, parNom, pluriel } from './helpers.js'
  
 const PER_PAGE = 10
