@@ -42,5 +42,14 @@ const courseBody = z
       path: ["programs"],
     },
   );
+/** Paramètres de `/admin/programs/:id/courses/:course_id`. */
+const attachParams = z.object({ id, course_id: id });
 
-module.exports = { courseListQuery, courseBody };
+/** Corps de `PUT /admin/programs/:id/courses/:course_id`. */
+const attachBody = z.object({
+  year: z
+    .number({ error: 'est obligatoire et doit être un nombre entier.' })
+    .int('doit être un nombre entier.')
+    .min(1, 'doit être au moins 1.'),
+});
+module.exports = { courseListQuery, courseBody, attachParams, attachBody };

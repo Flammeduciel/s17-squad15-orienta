@@ -163,5 +163,42 @@ async function remove(id) {
   const { rowCount } = await query("DELETE FROM courses WHERE id = $1", [id]);
   return rowCount > 0;
 }
+/**
+ * Rattache le cours à la formation, ou change son année. Même année : la
+ * position est conservée ; nouvelle année : le cours passe en fin d'année.
+ *
+ * @param {number} programId
+ * @param {number} courseId
+ * @param {number} year
+ * @returns {Promise<void>}
+ */
+async function setLink(programId, courseId, year) {
+  await transaction(async (client) => {
+    const { rows } = await client.query(
+      'SELECT year, position FROM program_courses WHERE program_id = $1 AND course_id = $2',
+      [programId, courseId],
+    );
+    const before = rows[0];
+    if (before && before.year === year) return;
+    await client.query('DELETE FROM program_courses WHERE program_id = $1 AND course_id = $2', [
+      programId,
+      courseId,
+    ]);
+    await attach(client, courseId, { program_id: programId, year }, null);
+  });
+}
 
-module.exports = { list, findById, findByProgram, create, update, remove };
+/**
+ * @param {number} programId
+ * @param {number} courseId
+ * @returns {Promise<boolean>} `false` si le rattachement n'existait pas.
+ */
+async function removeLink(programId, courseId) {
+  const { rowCount } = await query(
+    'DELETE FROM program_courses WHERE program_id = $1 AND course_id = $2',
+    [programId, courseId],
+  );
+  return rowCount > 0;
+}
+
+module.exports = { list, findById, findByProgram, create, update, remove, setLink, removeLink };

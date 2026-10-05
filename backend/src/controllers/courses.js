@@ -1,3 +1,4 @@
+const programService = require("../services/programs");
 const httpError = require("../utils/httpError");
 const { translatePgError } = require("../utils/pgErrors");
 const courses = require("../models/courses");
@@ -81,4 +82,27 @@ async function remove(req, res) {
   res.status(204).end();
 }
 
-module.exports = { list, create, update, remove };
+/** `PUT /admin/programs/:id/courses/:course_id` : 200 avec la fiche formation à jour. */
+async function attachToProgram(req, res) {
+  const { id: programId, course_id: courseId } = req.valid.params;
+  const { year } = req.valid.body;
+  const program = await programs.findById(programId);
+  if (!program) {
+    throw httpError(404, 'FORMATION_INTROUVABLE', 'Aucune formation ne correspond à cet identifiant.');
+  }
+  if (!(await courses.findById(courseId))) throw notFound();
+  await checkLinks([{ program_id: programId, year }]);
+  await courses.setLink(programId, courseId, year);
+  res.json(await programService.getDetail(programId));
+}
+
+/** `DELETE /admin/programs/:id/courses/:course_id` : 204. Le cours reste au catalogue. */
+async function detachFromProgram(req, res) {
+  const { id: programId, course_id: courseId } = req.valid.params;
+  if (!(await courses.removeLink(programId, courseId))) {
+    throw httpError(404, 'RATTACHEMENT_INTROUVABLE', "Ce cours n'est pas rattaché à cette formation.");
+  }
+  res.status(204).end();
+}
+
+module.exports = { list, create, update, remove, attachToProgram, detachFromProgram };
