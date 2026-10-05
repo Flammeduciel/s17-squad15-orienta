@@ -15,6 +15,12 @@ const PATHS = {
   menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  pencil: '<path d="M4 20h4L20 8l-4-4L4 16v4Z"/><path d="m14 6 4 4"/>',
+  trash: '<path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+  back: '<path d="M15 18l-6-6 6-6"/>',
 };
 
 export default function Icon({ name, className }) {
