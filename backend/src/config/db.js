@@ -71,4 +71,35 @@ async function query(sql, params = []) {
   return pool.query(sql, params);
 }
 
-module.exports = { pool, checkDatabase, query };
+/**
+ * Exécute plusieurs requêtes qui doivent réussir ou échouer ensemble.
+ * Si la fonction lève une erreur, rien n'est enregistré.
+ *
+ * @param {(client: import('pg').PoolClient) => Promise<any>} work Reçoit un client : y faire `client.query(sql, params)`.
+ * @returns {Promise<any>} Ce que renvoie `work`.
+ *
+ * @example
+ * await transaction(async (client) => {
+ *   await client.query('INSERT INTO programs (name) VALUES ($1)', [name]);
+ *   await client.query('INSERT INTO program_fees (program_id, year, amount) VALUES ($1, 1, $2)', [id, amount]);
+ * });
+ */
+async function transaction(work) {
+  if (!pool) {
+    throw httpError(503, 'BASE_INDISPONIBLE', "La base de données n'est pas configurée.");
+  }
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await work(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = { pool, checkDatabase, query, transaction };
