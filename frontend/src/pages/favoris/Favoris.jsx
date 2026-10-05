@@ -1,74 +1,28 @@
-import { useEffect, useState } from 'react'
-import { getFormation } from '../../api/formations'
-import { rechargerFavoris } from './favorisStore'
-import { useFavoris } from './useFavoris'
+/* Favoris — route /favoris (ticket P3).
+   Maquette : template/index.html. */
+   import { useFavoris } from './useFavoris'
 
-export default function Favoris({ hrefFormation = (id) => `/formations/${id}`, fetchOne = getFormation }) {
-  const { favoris, basculer } = useFavoris()
-  const [etat, setEtat] = useState({ chargement: favoris.length > 0, retires: 0, erreurs: 0 })
-
-  useEffect(() => {
-    let annule = false
-    rechargerFavoris(fetchOne).then((r) => {
-      if (!annule) setEtat({ chargement: false, ...r })
-    })
-    return () => {
-      annule = true
-    }
-    // Une seule actualisation à l'ouverture de la page.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+function Favoris({ formation }) {
+   const { favoris, basculer } = useFavoris()
+  const actif = favoris.some((f) => String(f.id) === String(formation.id))
+  const label = actif ? `Retirer ${formation.nom} des favoris` : `Ajouter ${formation.nom} aux favoris`
 
   return (
-    <section>
-      <h1>Mes favoris</h1>
-      <p style={{ color: 'var(--muted)' }}>
-        Les formations que vous avez gardées de côté. Elles restent sur cet appareil.
-      </p>
-
-      {etat.chargement && <p role="status">Actualisation des formations…</p>}
-      {etat.retires > 0 && (
-        <p className="ok" role="status">
-          {etat.retires === 1
-            ? "1 formation n'existe plus et a été retirée de vos favoris."
-            : `${etat.retires} formations n'existent plus et ont été retirées de vos favoris.`}
-        </p>
-      )}
-      {etat.erreurs > 0 && (
-        <p className="err" role="alert">
-          Certaines formations n'ont pas pu être actualisées. Les informations affichées peuvent dater.
-        </p>
-      )}
-
-      {favoris.length === 0 ? (
-        <div className="empty">
-          <h3>Aucun favori</h3>
-          <p>Ajoutez une formation avec le bouton « Favoris » pour la retrouver ici.</p>
-        </div>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 12 }}>
-          {favoris.map((f) => (
-            <li key={f.id} className="rowc">
-              <div className="hd">
-                <div className="who">
-                  <b>
-                    <a href={hrefFormation(f.id)}>{f.nom}</a>
-                  </b>
-                  <small>{[f.institut, f.diplome].filter(Boolean).join(' · ')}</small>
-                </div>
-                <button
-                  type="button"
-                  className="btn line sm"
-                  aria-label={`Retirer ${f.nom} des favoris`}
-                  onClick={() => basculer(f)}
-                >
-                  Retirer
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    <button
+      type="button"
+      className="pill"
+      aria-pressed={actif}
+      aria-label={label}
+      title={actif ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      onClick={() => basculer(formation)}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill={actif ? 'var(--heart)' : 'none'} stroke={actif ? 'var(--heart)' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 5 6.4 5c2 0 3.5 1.1 4.3 2.5h.6C12.1 6.1 13.6 5 15.6 5 19 5 21.1 8.4 21.6 11.8 19.5 16.4 12 21 12 21Z" />
+      </svg>
+      <span>{actif ? 'Favori' : 'Favoris'}</span>
+    </button>
   )
 }
+
+export default Favoris
