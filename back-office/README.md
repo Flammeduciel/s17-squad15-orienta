@@ -20,42 +20,31 @@ npm run dev
 ```
 back-office/src/
 ├── main.jsx       # Point d'entrée : charge le design system et monte l'application
-├── App.jsx        # Routage : pages ouvertes (connexion) et pages protégées
-├── routes.js      # Toutes les adresses du back-office au même endroit
-├── config.js      # Réglages lus dans les variables VITE_…
+├── App.jsx        # Choisit la page à afficher
 ├── assets/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
-├── api/           # Appels à l'API : client HTTP, authentification, session
-├── components/    # Composants partagés : coquille (menu, barre), icônes, garde de session
-├── context/       # États partagés entre pages : session, messages éphémères
-├── hooks/         # Thème clair / sombre
 └── pages/         # Un dossier par page ou groupe de pages, avec ses fichiers déjà créés
 ```
 
-La connexion (P1) et la coquille (S6) sont faites. Les autres fichiers de pages
-n'affichent que leur titre : il reste à les remplir en suivant la maquette. Les
-routes sont déjà branchées dans `App.jsx`, il n'y a pas à y toucher.
+Chaque fichier de page existe déjà et n'affiche que son titre : il reste à le
+remplir en suivant la maquette.
 
-## Session et appels à l'API
+D'autres dossiers arriveront avec le premier fichier qui en a besoin — git ne
+garde pas un dossier vide :
 
-- `api/http.js` fournit `request(chemin, { method, body })`. Il ajoute tout seul
-  le jeton de session (`Authorization: Bearer …`) : une page n'a rien à faire
-  pour être authentifiée.
-- Une erreur de l'API devient une `ApiError` avec `status` (statut HTTP),
-  `code` (code du contrat, ex. `ELEMENT_UTILISE`) et `message`.
-- Si l'API refuse le jeton (expiré), la session est fermée et l'utilisateur
-  revient à la page de connexion.
-- Le compte connecté se lit avec `useAuth()` : `const { user } = useAuth()`.
-
-Pour travailler sans lancer l'API, mettre `VITE_USE_MOCK_AUTH=true` dans `.env` :
-la connexion passe alors par un faux backend (`squad` / `orienta2026`).
+| Dossier | Ce qu'on y mettra |
+|---|---|
+| `components/` | Les composants utilisés par plusieurs pages (menu latéral, tableau, pagination, fenêtre de confirmation…) |
+| `services/` | Les appels à l'API, un fichier par ressource |
+| `context/` | Les états partagés entre pages : session, thème |
+| `utils/` | Les petites fonctions sans dépendance (formatage des montants, des dates…) |
+| `assets/images/` | Les images importées par le code |
 
 ## Les pages
 
 | Fichier | Page | Route | Ticket |
 |---|---|---|---|
 | `pages/connexion/Connexion.jsx` | Connexion, mot de passe oublié | `/connexion` | P1 |
-| `pages/connexion/ResetPassword.jsx` | Nouveau mot de passe, ouvert depuis le lien reçu par e-mail | `/reinitialiser-mot-de-passe` | P1 |
 | `pages/compte/Compte.jsx` | Compte | `/compte` | P10 |
 | `pages/tableau-de-bord/TableauDeBord.jsx` | Tableau de bord | `/admin` | P11 |
 | `pages/formations/ListeFormations.jsx` | Liste des formations | `/admin/formations` | P14 |

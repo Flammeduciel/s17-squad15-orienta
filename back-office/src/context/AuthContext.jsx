@@ -1,21 +1,12 @@
 import { useEffect, useState } from 'react';
 import * as authApi from '../api/auth';
-import { SESSION_EXPIRED } from '../api/http';
 import { AuthContext } from './auth-context';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Jeton refusé par l'API (expiré, compte supprimé) : on ferme la session,
-  // et <ProtectedRoute> renvoie alors à la page de connexion.
-  useEffect(() => {
-    const onExpired = () => setUser(null);
-    window.addEventListener(SESSION_EXPIRED, onExpired);
-    return () => window.removeEventListener(SESSION_EXPIRED, onExpired);
-  }, []);
-
-  // Maintien de session : au chargement, on reprend la session gardée dans le navigateur.
+  // Maintien de session : au chargement, on demande à l'API qui est connecté.
   useEffect(() => {
     let cancelled = false;
     authApi

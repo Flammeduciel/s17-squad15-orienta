@@ -41,10 +41,7 @@ function ResetPassword() {
       toast('Mot de passe modifié. Vous pouvez vous connecter.');
       navigate(ROUTES.connexion, { replace: true });
     } catch (err) {
-      if (err.code === 'PARAMETRE_INVALIDE') {
-        // Mot de passe refusé par l'API : son message dit pourquoi.
-        setError(err.message);
-      } else if ([400, 401, 410].includes(err.status)) {
+      if ([400, 401, 410].includes(err.status)) {
         setError('Ce lien est invalide ou expiré. Refaites une demande depuis la page de connexion.');
       } else if (err.status === 0) {
         setError(err.message);
