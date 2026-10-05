@@ -7,6 +7,7 @@ const { notFound, errorHandler } = require('./middlewares/errors');
 const districtsRoutes = require("./routes/districts");
 const { uploadDir } = require('./config/env');
 const institutesRoutes = require("./routes/institutes");
+const imagesRoutes = require("./routes/images");
 
 
 /**
@@ -48,6 +49,7 @@ app.use('/admin', requireAuth);
 // BK4 — instituts.
 app.use(districtsRoutes);
 app.use(institutesRoutes);
+app.use(imagesRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
