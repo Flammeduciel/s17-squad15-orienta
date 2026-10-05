@@ -113,4 +113,76 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-module.exports = { list, findById };
+const DEFAULT_COLOR = "#17693F";
+
+/** Valeurs d'écriture, dans l'ordre des colonnes de `create` et `update`. */
+const writeParams = (d) => [
+  d.name,
+  d.short_name,
+  d.district,
+  d.address,
+  d.phone,
+  d.whatsapp,
+  d.email,
+  d.color,
+  d.image_url,
+  d.description,
+  d.benefits,
+  d.registration_fee,
+  d.registration_deadline,
+  d.start_date,
+  d.accreditation_number,
+];
+
+/**
+ * @param {object} data Corps validé de `POST /admin/institutes`.
+ * @returns {Promise<number>} Identifiant du nouvel institut.
+ */
+async function create(data) {
+  const { rows } = await query(
+    `INSERT INTO institutes
+       (name, short_name, district, address, phone, whatsapp, email, color, image_url,
+        description, benefits, registration_fee, registration_deadline, start_date,
+        accreditation_number)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,COALESCE($8, '${DEFAULT_COLOR}'),$9,$10,$11,$12,$13,$14,$15)
+     RETURNING id`,
+    writeParams(data),
+  );
+  return rows[0].id;
+}
+
+/**
+ * Remplace les champs de l'institut. `color` absente : l'ancienne est gardée.
+ * `accredited` n'est pas écrite (colonne générée).
+ *
+ * @param {number} id
+ * @param {object} data Corps validé de `PUT /admin/institutes/:id`.
+ * @returns {Promise<boolean>} `false` si l'institut n'existe pas.
+ */
+async function update(id, data) {
+  const { rowCount } = await query(
+    `UPDATE institutes SET
+       name = $2, short_name = $3, district = $4, address = $5, phone = $6, whatsapp = $7,
+       email = $8, color = COALESCE($9, color), image_url = $10, description = $11,
+       benefits = $12, registration_fee = $13, registration_deadline = $14,
+       start_date = $15, accreditation_number = $16, updated_at = NOW()
+     WHERE id = $1`,
+    [id, ...writeParams(data)],
+  );
+  return rowCount > 0;
+}
+
+/**
+ * Supprime l'institut ; ses formations partent avec lui (ON DELETE CASCADE).
+ *
+ * @param {number} id
+ * @returns {Promise<boolean>}
+ */
+async function remove(id) {
+  const { rowCount } = await query("DELETE FROM institutes WHERE id = $1", [
+    id,
+  ]);
+  return rowCount > 0;
+}
+
+module.exports = { list, findById, create, update, remove };
