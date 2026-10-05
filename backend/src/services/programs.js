@@ -7,6 +7,7 @@
 const programs = require('../models/programs');
 const institutes = require('../models/institutes');
 const { matches } = require('../utils/text');
+const courses = require("../models/courses");
 
 /**
  * @param {object} row Ligne de `models/programs`.
@@ -14,6 +15,12 @@ const { matches } = require('../utils/text');
  * @param {object} institute Résumé de l'institut de la formation.
  * @returns {object} `ProgramSummary` du contrat.
  */
+
+/** « 1re année », « 2e année »… et « M1 », « M2 » pour un Master. */
+function yearLabel(year, degreeName) {
+  if (degreeName === 'Master') return `M${year}`;
+  return year === 1 ? '1re année' : `${year}e année`;
+}
 function toSummary(row, relations, institute) {
   const mine = (list) => list.filter((item) => item.program_id === row.id);
   return {
@@ -80,12 +87,23 @@ async function getDetail(id) {
   const relations = await programs.findRelations([id]);
   const allInstitutes = await institutes.list();
   const institute = allInstitutes.find((item) => item.id === row.institute_id);
+
+  const programCourses = await courses.findByProgram(id);
+  const byYear = new Map();
+  for (const course of programCourses) {
+    if (!byYear.has(course.year)) byYear.set(course.year, []);
+    byYear.get(course.year).push(course.name);
+  }
   return {
     ...toSummary(row, relations, institute),
     description: row.description,
-    // Le programme par année arrive avec les cours (bloc BK6).
-    courses: [],
-    years: [],
+    courses: programCourses.map((course) => course.name),
+    // Une année sans cours est omise (contrat).
+    years: [...byYear].map(([year, names]) => ({
+      year,
+      label: yearLabel(year, row.degree_name),
+      courses: names,
+    })),
   };
 }
 
