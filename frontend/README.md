@@ -20,6 +20,7 @@ npm run dev
 frontend/src/
 ├── main.jsx       # Point d'entrée : charge le design system et monte l'application
 ├── App.jsx        # Choisit la page à afficher
+├── api/           # Appels à l'API, un fichier par ressource
 ├── assets/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
 └── pages/         # Un dossier par page, avec son fichier déjà créé
@@ -34,7 +35,7 @@ garde pas un dossier vide :
 | Dossier | Ce qu'on y mettra |
 |---|---|
 | `components/` | Les composants utilisés par plusieurs pages (en-tête, pied de page, carte de formation…) |
-| `services/` | Les appels à l'API, un fichier par ressource |
+| `api/` | Les appels à l'API, un fichier par ressource |
 | `context/` | Les états partagés entre pages : thème, favoris |
 | `utils/` | Les petites fonctions sans dépendance (formatage des montants, des dates…) |
 | `assets/images/` | Les images importées par le code |
