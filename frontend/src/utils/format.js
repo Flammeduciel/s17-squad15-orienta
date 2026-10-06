@@ -1,13 +1,20 @@
-// Mise en forme des valeurs de l'API pour l'affichage (français, comme les maquettes).
+import { API_URL } from '../api/http';
 
-// 650000 -> « 650 000 FCFA ». Les montants de l'API sont des entiers en FCFA.
-export function formatFcfa(amount) {
-  return `${amount.toLocaleString('fr-FR')} FCFA`;
-}
+// Montant en francs CFA : 420000 -> « 420 000 FCFA ».
+export const fcfa = (amount) => `${Number(amount || 0).toLocaleString('fr-FR')} FCFA`;
 
-// « 2026-10-20 » -> « 20 oct. 2026 ». Une date absente ou illisible donne une chaîne vide.
-export function formatDate(iso) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso ?? '')) return '';
+// Durée : 1 -> « 1 an », 3 -> « 3 ans ».
+export const ans = (n) => `${n} an${n > 1 ? 's' : ''}`;
+
+// Compte accordé : pluriel(2, 'institut') -> « 2 instituts ».
+export const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+
+// Année d'études : 1 -> « 1re année », 2 -> « 2e année ».
+export const niveau = (year) => `${year === 1 ? '1re' : `${year}e`} année`;
+
+// Date de l'API (« 2026-11-03 ») -> « 3 nov. 2026 ».
+export function dateFr(iso) {
+  if (!iso) return '';
   return new Date(`${iso}T00:00:00`).toLocaleDateString('fr-FR', {
     day: 'numeric',
     month: 'short',
@@ -15,12 +22,47 @@ export function formatDate(iso) {
   });
 }
 
-// 1 -> « 1 an », 3 -> « 3 ans ».
-export function formatDuration(years) {
-  return `${years} an${years > 1 ? 's' : ''}`;
+// Texte sans accents ni majuscules, pour chercher sans tenir compte des accents.
+export const normalize = (text) =>
+  String(text ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+// Vrai si tous les mots de la recherche sont dans le texte.
+export const matches = (search, text) => {
+  const haystack = normalize(text);
+  return normalize(search)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => haystack.includes(word));
+};
+
+// Conditions d'admission d'une formation, en une phrase.
+export function admission(program) {
+  let series = 'Bac toutes séries';
+  if (program.bac_series.length > 0) {
+    series = `Bac série${program.bac_series.length > 1 ? 's' : ''} ${program.bac_series.join(', ')}`;
+  } else if (program.degree.name === 'Master') {
+    series = 'Licence dans le domaine';
+  }
+  return [series, program.admission_requirements].filter(Boolean).join(' · ');
 }
 
-// (1, 'formation') -> « 1 formation », (3, 'formation') -> « 3 formations ».
-export function plural(count, word) {
-  return `${count} ${word}${count > 1 ? 's' : ''}`;
+// Adresse complète d'une image déposée : l'API renvoie « /uploads/… ».
+export const imageUrl = (path) => (path ? API_URL + path : null);
+
+// Liens de contact d'un institut.
+export const whatsappLink = (institute, message) =>
+  `https://wa.me/${institute.whatsapp}?text=${encodeURIComponent(message)}`;
+export const mailLink = (institute, subject) =>
+  `mailto:${institute.email}?subject=${encodeURIComponent(subject)}`;
+
+// Lieu couvert par une liste, d'après les villes qu'elle contient :
+// lieu(['Brazzaville', 'Brazzaville']) -> « à Brazzaville » ;
+// avec plusieurs villes -> « dans 2 villes ». Liste vide -> « ».
+export function lieu(cities) {
+  const names = [...new Set(cities)];
+  if (names.length === 0) return '';
+  return names.length === 1 ? `à ${names[0]}` : `dans ${names.length} villes`;
 }
