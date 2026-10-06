@@ -15,6 +15,7 @@ const careersRoutes = require("./routes/careers");
 const degreesRoutes = require("./routes/degrees");
 const programsRoutes = require('./routes/programs');
 const coursesRoutes = require('./routes/courses');
+const contactRoutes = require('./routes/contact');
 /**
  * L'application Express, sans l'écoute du port : `server.js` s'en charge.
  *
@@ -64,6 +65,8 @@ app.use(degreesRoutes);
 app.use(programsRoutes);
 // BK6 - cours.
 app.use(coursesRoutes);
+// BK7 - formulaire de contact.
+app.use(contactRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
