@@ -11,11 +11,14 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# VITE_* variables are baked in at build time, not read at runtime —
+# VITE_* variables are baked in at build time, not read at runtime -
 # they must be passed as a Docker build argument (Dokploy's "Build
 # Arguments", not "Environment Settings").
 ARG VITE_API_URL
 ENV VITE_API_URL=${VITE_API_URL}
+# Public address of the site, used by the SEO and sharing tags of index.html.
+ARG VITE_SITE_URL
+ENV VITE_SITE_URL=${VITE_SITE_URL}
 
 RUN npm run build
 

@@ -1,258 +1,178 @@
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import FormationCard from '../../components/FormationCard';
-import Icon from '../../components/Icon';
-import InstitutCard from '../../components/InstitutCard';
-import Status from '../../components/Status';
-import { useFetch } from '../../hooks/useFetch';
-import { formatDuration, plural } from '../../utils/format';
-import {
-  FILTER_KEYS,
-  SORTS,
-  activeTags,
-  countInstitutes,
-  groupByCareer,
-  groupByDegree,
-  readFilters,
-  readVue,
-} from './catalogue';
-import Filters from './Filters';
-import Hero from './Hero';
-
-/* Accueil et recherche — route / (ticket P2).
+/* Accueil et recherche - route / (ticket P2).
    Maquette : template/index.html. */
+import { useEffect, useRef, useState } from 'react';
+import {
+  getBacSeries,
+  getCareers,
+  getDegrees,
+  getDistricts,
+  getDomains,
+  getInstitutes,
+  getPrograms,
+} from '../../api/catalogue';
+import Icon from '../../components/Icon';
+import { useSearch } from '../../context/search-context';
+import { useApi } from '../../hooks/useApi';
+import { useDebounce } from '../../hooks/useDebounce';
+import { lieu } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
+import FilterPanel from './FilterPanel';
+import { searchParams } from './filters';
+import Results from './Results';
+import SearchBar from './SearchBar';
 
-// Place le début des résultats en haut de l'écran (sans animation si l'utilisateur l'a demandée).
-function scrollToResults() {
-  const top = document.getElementById('resultats');
-  if (!top) return;
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  window.scrollTo({ top: top.offsetTop - 80, behavior: calm ? 'auto' : 'smooth' });
+// Listes de référence de l'accueil (domaines, diplômes, séries, débouchés,
+// arrondissements), chargées une seule fois. Elles remplissent les filtres et
+// donnent les totaux des quatre accès. Aucun institut ni formation ici.
+async function loadLists() {
+  const [domains, degrees, bacSeries, careers, districts] = await Promise.all([
+    getDomains(),
+    getDegrees(),
+    getBacSeries(),
+    getCareers(),
+    getDistricts(),
+  ]);
+  return { domains, degrees, bacSeries, careers, districts };
 }
 
+// Résultats de la grille : on ne demande à l'API que ce que la vue affiche.
+// La vue Instituts charge les instituts ; les vues Formations, Diplômes et
+// Débouchés chargent les formations.
+async function loadResults(kind, params, sort) {
+  const items = kind === 'institutes' ? await getInstitutes(params) : await getPrograms({ ...params, sort });
+  return { kind, items };
+}
+
+// Listes vides, utilisées tant que les données ne sont pas arrivées : l'accueil
+// s'affiche tout de suite, et se remplit ensuite.
+const EMPTY = { domains: [], degrees: [], bacSeries: [], careers: [], districts: [] };
+
+const sum = (list, key) => list.reduce((total, item) => total + item[key], 0);
+
 function Accueil() {
-  const [params, setParams] = useSearchParams();
-  const [panelOpen, setPanelOpen] = useState(false);
+  const { data: loaded, error: listsError, reload: reloadLists } = useApi(loadLists, []);
+  const { filters, change } = useSearch();
 
-  const vue = readVue(params);
-  const filters = readFilters(params);
-  const sort = params.get('sort') ?? '';
+  // Le curseur du budget bouge vite : on attend qu'il s'arrête avant d'appeler l'API.
+  const budget = useDebounce(filters.budget);
+  const params = searchParams({ ...filters, budget });
+  const kind = filters.view === 'inst' ? 'institutes' : 'programs';
+  const search = useApi(() => loadResults(kind, params, filters.sort), [kind, params, filters.sort]);
+  // Pendant une nouvelle recherche, les résultats précédents restent affichés,
+  // sauf s'ils sont d'une autre sorte (instituts au lieu de formations).
+  const last = search.data ?? search.lastData;
+  const found = last && last.kind === kind ? last.items : null;
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const resultsRef = useRef(null);
 
-  // Listes de référence : domaines, arrondissements, diplômes, débouchés, séries du bac.
-  const domains = useFetch('/domains').data ?? [];
-  const districts = useFetch('/districts').data ?? [];
-  const degrees = useFetch('/degrees').data ?? [];
-  const careers = useFetch('/careers').data ?? [];
-  const series = useFetch('/bac-series').data ?? [];
-  const everyInstitute = useFetch('/institutes').data;
-
-  // Les instituts ont leur propre liste ; les trois autres vues viennent des formations trouvées.
-  // Les vues « Diplômes » et « Débouchés » ignorent leur propre filtre pour lister tous les choix possibles.
-  const institutes = useFetch(vue === 'inst' ? '/institutes' : null, filters);
-  const programs = useFetch(vue === 'inst' ? null : '/programs', {
-    ...filters,
-    degree_id: vue === 'dip' ? undefined : filters.degree_id,
-    career_id: vue === 'deb' ? undefined : filters.career_id,
-    sort: vue === 'form' ? sort : undefined,
-  });
-  const current = vue === 'inst' ? institutes : programs;
-
-  // Le panneau de filtres plein écran (téléphone) bloque le défilement de la page derrière lui.
   useEffect(() => {
-    document.body.style.overflow = panelOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [panelOpen]);
+    setSeo({
+      title: 'Orienta Brazzaville - Trouve ton institut privé après le bac',
+      description:
+        'Compare les instituts privés de Brazzaville après le bac : formations, diplômes, frais de scolarité, agrément et débouchés. Tout au même endroit.',
+      path: '/',
+    });
+  }, []);
 
-  // Applique des changements aux filtres ; une valeur vide retire le filtre.
-  function change(patch) {
-    const next = new URLSearchParams(params);
-    for (const [key, value] of Object.entries(patch)) {
-      if (value === undefined || value === null || value === '') next.delete(key);
-      else next.set(key, String(value));
-    }
-    setParams(next, { replace: true });
-  }
+  const data = loaded ?? EMPTY;
 
-  // Efface les filtres et la recherche, mais garde le domaine, la vue et le tri.
-  function clearFilters() {
-    change(Object.fromEntries(FILTER_KEYS.filter((key) => key !== 'domain_id').map((key) => [key, null])));
-  }
-
-  function goTo(patch) {
-    change(patch);
-    scrollToResults();
-  }
-
-  const domain = domains.find((d) => d.id === filters.domain_id);
-  const inDomain = domain ? ` en ${domain.name}` : '';
-  const tags = activeTags(filters, { degrees, careers, series });
-  const activeCount = tags.filter((tag) => tag.key !== 'q').length;
-
-  const totals = {
-    inst: everyInstitute ? everyInstitute.total : null,
-    form: degrees.length ? degrees.reduce((sum, d) => sum + d.program_count, 0) : null,
-    dip: degrees.length || null,
-    deb: careers.length || null,
+  const scrollToResults = () => {
+    const top = resultsRef.current.offsetTop - 80;
+    window.scrollTo({ top, behavior: 'smooth' });
   };
 
-  // Titre de la barre de résultats et grille, selon la vue ; `count` sert à détecter l'absence de résultat.
-  function showResults(items) {
-    if (vue === 'inst') {
-      return {
-        count: items.length,
-        label: `${plural(items.length, 'institut')}${inDomain} à Brazzaville`,
-        grid: items.map((institute) => <InstitutCard key={institute.id} institute={institute} />),
-      };
-    }
-    if (vue === 'form') {
-      return {
-        count: items.length,
-        label: `${plural(items.length, 'formation')}${inDomain} à Brazzaville`,
-        grid: items.map((program) => <FormationCard key={program.id} program={program} />),
-      };
-    }
+  // Bouton « Rechercher » : la grille est toujours rechargée depuis l'API, même
+  // si le mot n'a pas changé, puis on descend jusqu'aux résultats.
+  const onSearch = () => {
+    search.reload();
+    scrollToResults();
+  };
 
-    const dip = vue === 'dip';
-    const groups = dip ? groupByDegree(items) : groupByCareer(items, careers);
-    return {
-      count: groups.length,
-      label: dip
-        ? `${plural(groups.length, 'diplôme')} préparé${groups.length > 1 ? 's' : ''} à Brazzaville`
-        : `${plural(groups.length, 'débouché')}${inDomain}`,
-      choices: groups.map((group) => (
-        <button
-          className="job"
-          type="button"
-          key={group.id}
-          onClick={() => goTo({ vue: 'form', [dip ? 'degree_id' : 'career_id']: group.id })}
-        >
-          <Icon name={dip ? 'award' : 'brief'} />
-          <span>
-            {group.name}
-            <small>
-              {dip ? `${formatDuration(group.duration)} · ` : ''}
-              {plural(group.programs.length, 'formation')} · {plural(countInstitutes(group.programs), 'institut')}
-            </small>
-          </span>
-        </button>
-      )),
-    };
-  }
+  // « à Brazzaville » tant qu'une seule ville est enregistrée.
+  const place = loaded ? lieu(data.districts.map((district) => district.city)) : '';
 
-  let label = 'Chargement…';
-  let content = <Status loading />;
-
-  if (current.error) {
-    content = <Status error={current.error} onRetry={current.reload} />;
-  } else if (current.data) {
-    const result = showResults(current.data.items);
-    label = result.label;
-    if (result.count === 0) {
-      content = (
-        <div className="grid">
-          <div className="empty">
-            <h3>Résultat introuvable</h3>
-            <p>Vérifie l'orthographe ou retire un filtre pour voir plus de résultats.</p>
-            <button className="btn line" type="button" onClick={clearFilters}>
-              Effacer tous les filtres
-            </button>
-          </div>
-        </div>
-      );
-    } else {
-      content = result.grid ? <div className="grid">{result.grid}</div> : <div className="jobgrid">{result.choices}</div>;
-    }
-  }
+  // Les quatre accès de l'accueil (EX-09) : chacun change ce que la grille affiche.
+  const access = [
+    { view: 'inst', icon: 'building', label: 'Instituts', total: sum(data.districts, 'institute_count') },
+    { view: 'form', icon: 'cap', label: 'Formations', total: sum(data.districts, 'program_count') },
+    { view: 'dip', icon: 'award', label: 'Diplômes', total: data.degrees.length },
+    { view: 'deb', icon: 'brief', label: 'Débouchés', total: data.careers.length },
+  ];
 
   return (
     <>
-      <Hero
-        filters={filters}
-        vue={vue}
-        districts={districts}
-        degrees={degrees}
-        totals={totals}
-        onSearch={(search) => goTo(search)}
-        onVue={(next) => goTo({ vue: next })}
-      />
+      <section className="hero">
+        <div className="wrap">
+          <h1>Trouve ton institut à Brazzaville</h1>
+          <p>Instituts privés, formations, diplômes et débouchés : tout au même endroit, sans te déplacer.</p>
+          {/* key : quand la recherche appliquée change (rappel retiré, filtres
+              effacés), la barre repart de ce texte. */}
+          <SearchBar key={filters.q} data={data} onSearch={onSearch} />
+          <div className="access" role="group" aria-label="Parcourir">
+            {access.map((item) => (
+              <button
+                className="acc"
+                type="button"
+                key={item.view}
+                aria-pressed={filters.view === item.view}
+                onClick={() => {
+                  change({ view: item.view });
+                  scrollToResults();
+                }}
+              >
+                <Icon name={item.icon} />
+                <span>
+                  <b>{item.label}</b>
+                  {/* Tant que le catalogue n'est pas là, le compte est remplacé par « … ». */}
+                  <small>
+                    {loaded ? item.total : '…'} {place}
+                  </small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <nav className="cats" aria-label="Domaines">
         <div className="wrap">
-          <button className="cat" type="button" aria-pressed={!filters.domain_id} onClick={() => change({ domain_id: null })}>
+          <button className="cat" type="button" aria-pressed={!filters.domain} onClick={() => change({ domain: '' })}>
             <Icon name="all" />
             Tout
           </button>
-          {domains.map((d) => (
+          {data.domains.map((domain) => (
             <button
               className="cat"
               type="button"
-              key={d.id}
-              aria-pressed={filters.domain_id === d.id}
-              onClick={() => change({ domain_id: d.id })}
+              key={domain.id}
+              aria-pressed={filters.domain === domain.id}
+              onClick={() => change({ domain: domain.id })}
             >
-              <Icon name={d.id} />
-              {d.name}
+              <Icon name={domain.icon} />
+              {domain.name}
             </button>
           ))}
         </div>
       </nav>
 
-      <div className="wrap layout" id="resultats">
-        <aside className={`filters${panelOpen ? ' open' : ''}`} aria-label="Filtres">
-          <Filters
-            filters={filters}
-            lists={{ districts, degrees, careers, series }}
-            onChange={change}
-            onClear={clearFilters}
-            onClose={() => setPanelOpen(false)}
-          />
-        </aside>
-
-        <div>
-          <div className="rbar">
-            <h2>{label}</h2>
-            <div className="r">
-              <button className="openf" type="button" onClick={() => setPanelOpen(true)}>
-                <Icon name="sliders" />
-                Filtres {activeCount > 0 && <span>({activeCount})</span>}
-              </button>
-              {vue === 'form' && (
-                <select
-                  className="sort"
-                  aria-label="Trier les formations"
-                  value={sort || 'relevance'}
-                  onChange={(e) => change({ sort: e.target.value === 'relevance' ? null : e.target.value })}
-                >
-                  {SORTS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </div>
-
-          {tags.length > 0 && (
-            <div className="active-tags">
-              {tags.map((tag) => (
-                <button className="atag" type="button" key={tag.key} onClick={() => change({ [tag.key]: null })}>
-                  {tag.label}
-                  <span aria-hidden="true">×</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {content}
-        </div>
+      <div className="wrap layout" ref={resultsRef}>
+        <FilterPanel data={data} ready={Boolean(loaded)} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
+        <Results
+          data={data}
+          found={found ?? []}
+          loading={!found && !search.error}
+          searching={search.loading}
+          error={found ? null : search.error || listsError}
+          onRetry={() => {
+            reloadLists();
+            search.reload();
+          }}
+          onOpenFilters={() => setFiltersOpen(true)}
+        />
       </div>
-
-      {panelOpen && <div className="scrim" onClick={() => setPanelOpen(false)} />}
+      {filtersOpen && <div className="scrim" onClick={() => setFiltersOpen(false)} />}
     </>
   );
 }
 
-export default Accueil;
+export default Accueil

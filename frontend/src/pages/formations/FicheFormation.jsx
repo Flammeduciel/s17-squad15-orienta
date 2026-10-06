@@ -1,24 +1,26 @@
+/* Fiche formation - route /formations/:id (ticket P4).
+   Maquette : template/index.html. */
+import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import AgrementBadge from '../../components/AgrementBadge';
-import BackLink from '../../components/BackLink';
+import { getCareers, getInstitute, getProgram, getPrograms } from '../../api/catalogue';
+import AccreditationBadge from '../../components/AccreditationBadge';
+import CareerButtons from '../../components/CareerButtons';
 import Icon from '../../components/Icon';
-import PageIntrouvable from '../../components/PageIntrouvable';
-import Status from '../../components/Status';
-import { useFavoris } from '../../context/favoris-context';
-import { useFetch } from '../../hooks/useFetch';
-import { ROUTES } from '../../routes';
-import { formatDate, formatDuration, formatFcfa } from '../../utils/format';
-import { admissionText, feeLines } from '../../utils/program';
+import MiniCard from '../../components/MiniCard';
+import PageState from '../../components/PageState';
+import { useFavorites } from '../../context/favorites-context';
+import { useApi } from '../../hooks/useApi';
+import { ROUTES, formationPath, institutPath } from '../../routes';
+import { admission, ans, dateFr, fcfa, mailLink, whatsappLink } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
+import { trackVisit } from '../../utils/history';
 import FormulaireQuestion from './FormulaireQuestion';
 
-/* Fiche formation — route /formations/:id (ticket P4).
-   Maquette : template/index.html. */
-
-// Dossier d'inscription : le dossier de base, celui d'un Master, et le complément santé.
-const DOSSIER = [
+// Pièces du dossier d'inscription, selon le niveau d'entrée.
+const DOSSIER_BAC = [
   "Copie du baccalauréat ou de l'attestation de réussite",
   'Relevé de notes du bac',
-  "Acte de naissance",
+  'Acte de naissance',
   "2 photos d'identité",
 ];
 const DOSSIER_MASTER = [
@@ -28,320 +30,288 @@ const DOSSIER_MASTER = [
   "2 photos d'identité",
 ];
 
+// La fiche a besoin de la formation, de son institut (coordonnées, dates),
+// des autres formations (pour les suggestions) et du référentiel des débouchés.
+async function loadFiche(id) {
+  const program = await getProgram(id);
+  const [institute, programs, careers] = await Promise.all([
+    getInstitute(program.institute.id),
+    getPrograms(),
+    getCareers(),
+  ]);
+  return { program, institute, programs, careers };
+}
+
 function FicheFormation() {
   const { id } = useParams();
-  const { isFavori, toggle } = useFavoris();
+  const { data, loading, error, reload } = useApi(() => loadFiche(id), [id]);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { data: program, loading, error, reload } = useFetch(`/programs/${id}`);
-  // Les coordonnées (téléphone, WhatsApp) et les autres formations viennent de la fiche institut :
-  // ProgramDetail n'embarque que le résumé de l'institut.
-  const { data: institute } = useFetch(
-    program ? `/institutes/${program.institute.id}` : null,
-  );
-  const careers = useFetch('/careers').data ?? [];
-  // Formations de même domaine, ailleurs qu'à cet institut (« Formations similaires »).
-  const similar = useFetch(program ? '/programs' : null, { domain_id: program.domain.id }).data?.items ?? [];
+  useEffect(() => {
+    if (!data) return;
+    const { program } = data;
+    setSeo({
+      title: `${program.name} (${program.degree.name}) - ${program.institute.short_name} · Orienta`,
+      description: `${program.name} : ${program.degree.name} en ${ans(program.duration)} à ${program.institute.name}, ${program.institute.district}, ${program.institute.city}. ${fcfa(program.tuition)} par an. Programme, admission et débouchés.`,
+      path: formationPath(program.id),
+    });
+    // Alimente « Consultées récemment » et « Les plus visitées » de l'accueil.
+    trackVisit(data.program.id);
+  }, [data]);
 
-  if (error?.status === 404 || error?.status === 400 || program?.status === 'draft') {
-    return <PageIntrouvable title="Formation introuvable" message="Cette formation n'existe pas ou n'existe plus." />;
-  }
-  if (error || !program) {
-    return (
-      <div className="wrap detail">
-        <BackLink />
-        <Status loading={loading} error={error} onRetry={reload} />
-      </div>
-    );
-  }
+  if (!data) return <PageState loading={loading} error={error} notFound="Formation introuvable" onRetry={reload} />;
 
-  const favori = isFavori(program.id);
-  const careerId = (name) => careers.find((career) => career.name === name)?.id;
-  const autres = (institute?.programs ?? []).filter((p) => p.id !== program.id);
-  const similaires = similar
-    .filter((p) => p.institute.id !== program.institute.id)
+  const { program, institute, programs, careers } = data;
+  const { domain } = program;
+  const favorite = isFavorite(program.id);
+  const others = institute.programs.filter((item) => item.id !== program.id);
+  const similar = programs
+    .filter((item) => item.domain.id === domain.id && item.institute.id !== institute.id)
     .slice(0, 3);
-  const dossier = program.degree.name === 'Master' ? DOSSIER_MASTER : DOSSIER;
-
-  const whatsappMessage = `Bonjour ${program.institute.short_name}, je suis bachelier(ère) et je m'intéresse à la formation « ${program.name} ». Pouvez-vous me donner plus d'informations (admission, frais, places disponibles) ?`;
-  const subject = encodeURIComponent(`Demande d'informations — ${program.name}`);
-  const total = formatFcfa(program.tuition + (institute?.registration_fee ?? program.institute.registration_fee));
+  const master = program.degree.name === 'Master';
+  const stage = program.internship_months;
+  const waMessage = `Bonjour ${institute.short_name}, je suis bachelier(ère) et je m'intéresse à la formation « ${program.name} ». Pouvez-vous me donner plus d'informations (admission, frais, places disponibles) ?`;
 
   return (
-    <div className="wrap detail">
-      <BackLink />
+    <>
+      <div className="wrap detail">
+        <Link className="back" to={ROUTES.accueil}>
+          <Icon name="back" size={18} />
+          Retour aux résultats
+        </Link>
 
-      <div className="dtitle">
-        <div>
-          <h1>{program.name}</h1>
-          <p className="sub">
-            <b>{program.degree.name}</b> · {formatDuration(program.duration)} ·{' '}
-            <Link className="ilnk" to={ROUTES.institut(program.institute.id)}>
-              {program.institute.name}
-            </Link>{' '}
-            · {program.institute.district}
-          </p>
-        </div>
-        <button
-          className="btn line"
-          type="button"
-          aria-pressed={favori}
-          aria-label={favori ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-          onClick={() => toggle(program.id)}
-        >
-          <Icon name="heart" />
-          {favori ? 'Dans vos favoris' : 'Ajouter aux favoris'}
-        </button>
-      </div>
-
-      <div className="dcover" style={{ background: program.domain.color }}>
-        <Icon name={program.domain.id} className="big" />
-      </div>
-
-      <div className="dgrid">
-        <div className="dmain sec">
-          {program.description && (
-            <section>
-              <h2>Présentation</h2>
-              <p>{program.description}</p>
-            </section>
-          )}
-
-          <section className="highlights">
-            <div className="hl">
-              <Icon name="cap" />
-              <div>
-                <b>
-                  {program.degree.name} en {formatDuration(program.duration)}
-                </b>
-                <span>{admissionText(program)}</span>
-              </div>
-            </div>
-            <div className="hl">
-              <Icon name="brief" />
-              <div>
-                <b>
-                  {program.internship_months > 0
-                    ? `Stage de ${program.internship_months} mois en entreprise`
-                    : "Projet de fin d'études"}
-                </b>
-                <span>
-                  {program.internship_months > 0
-                    ? "Organisé par l'institut en dernière année"
-                    : 'Réalisé avec un encadrant de l’institut'}
-                </span>
-              </div>
-            </div>
-            <div className="hl">
-              <Icon name={program.evening ? 'moon' : 'clock'} />
-              <div>
-                <b>{program.evening ? 'Cours du jour ou du soir' : 'Cours en journée'}</b>
-                <span>{program.evening ? 'Tu peux étudier tout en travaillant' : 'Du lundi au vendredi'}</span>
-              </div>
-            </div>
-            <div className="hl">
-              <Icon name="cash" />
-              <div>
-                <b>{program.installments ? 'Paiement en plusieurs fois' : "Paiement à l'inscription"}</b>
-                <span>
-                  {program.installments ? 'Scolarité réglable en plusieurs tranches' : 'Scolarité réglée en une fois'}
-                </span>
-              </div>
-            </div>
-          </section>
-
-          {program.careers.length > 0 && (
-            <section>
-              <h2>Les débouchés après cette formation</h2>
-              <div className="jobgrid">
-                {program.careers.map((name) =>
-                  careerId(name) ? (
-                    <Link className="job" key={name} to={ROUTES.debouche(careerId(name))}>
-                      <Icon name="brief" />
-                      {name}
-                    </Link>
-                  ) : (
-                    <span className="job" key={name}>
-                      <Icon name="brief" />
-                      {name}
-                    </span>
-                  ),
-                )}
-              </div>
-              <p>Touche un débouché pour voir toutes les formations qui y mènent.</p>
-            </section>
-          )}
-
-          <section>
-            <h2>Ce que tu vas apprendre</h2>
-            {program.years.length > 0 ? (
-              <div className="years">
-                {program.years.map((annee) => (
-                  <div className="year" key={annee.year}>
-                    <h3>{annee.label}</h3>
-                    <ul>
-                      {annee.courses.map((course) => (
-                        <li key={course}>{course}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>Le programme de cette formation n'a pas encore été renseigné.</p>
-            )}
-          </section>
-
-          <section>
-            <h2>Dossier d'inscription</h2>
-            <ul className="checklist">
-              {dossier.map((piece) => (
-                <li key={piece}>{piece}</li>
-              ))}
-              {program.domain.id === 'sante' && <li>Certificat médical et carnet de vaccination</li>}
-            </ul>
-          </section>
-
-          <section>
-            <h2>L'institut</h2>
-            <div className="instbox">
-              <div className="instlogo" style={{ background: program.institute.color ?? '#5E6B64' }}>
-                {program.institute.short_name}
-              </div>
-              <div>
-                <b>
-                  <Link className="ilnk" to={ROUTES.institut(program.institute.id)}>
-                    {program.institute.name}
-                  </Link>
-                </b>
-                <div>
-                  <AgrementBadge institute={program.institute} />
-                </div>
-                <p>
-                  <Icon name="pin" />
-                  {institute?.address ? `${institute.address}, Brazzaville` : `${program.institute.district}, Brazzaville`}
-                </p>
-              </div>
-            </div>
-            {institute?.description && <p>{institute.description}</p>}
-
-            {autres.length > 0 && (
-              <>
-                <h3>Autres formations de {program.institute.short_name}</h3>
-                <div className="minigrid">
-                  {autres.map((other) => (
-                    <Link className="mini" key={other.id} to={ROUTES.formation(other.id)}>
-                      <b>{other.name}</b>
-                      <small>
-                        {other.degree.name} · {formatDuration(other.duration)} · {formatFcfa(other.tuition)}/an
-                      </small>
-                    </Link>
-                  ))}
-                </div>
-              </>
-            )}
-          </section>
-
-          {similaires.length > 0 && (
-            <section>
-              <h2>Formations similaires ailleurs</h2>
-              <div className="minigrid">
-                {similaires.map((other) => (
-                  <Link className="mini" key={other.id} to={ROUTES.formation(other.id)}>
-                    <b>{other.name}</b>
-                    <small>
-                      {other.institute.short_name} · {other.institute.district} · {formatFcfa(other.tuition)}/an
-                    </small>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="dtitle">
+          <div>
+            <h1>{program.name}</h1>
+            <p className="sub">
+              <b>{program.degree.name}</b> · {ans(program.duration)} ·{' '}
+              <Link className="ilnk" to={institutPath(institute.id)}>
+                {institute.name}
+              </Link>{' '}
+              · {institute.district}
+            </p>
+          </div>
+          <button
+            className="lnk"
+            type="button"
+            aria-pressed={favorite}
+            style={{ textDecoration: 'underline' }}
+            onClick={() => toggleFavorite(program.id)}
+          >
+            {favorite ? '♥ Dans mes favoris' : '♡ Ajouter aux favoris'}
+          </button>
         </div>
 
-        <aside className="book">
-          <p className="p">
-            <b className="num">{formatFcfa(program.tuition)}</b> / an
-          </p>
-
-          <AgrementBadge institute={program.institute} />
-
-          {(institute?.registration_deadline || institute?.start_date) && (
-            <div className="dates">
-              {institute?.registration_deadline && (
-                <div>
-                  <small>Inscriptions jusqu'au</small>
-                  {formatDate(institute.registration_deadline)}
-                </div>
-              )}
-              {institute?.start_date && (
-                <div>
-                  <small>Rentrée</small>
-                  {formatDate(institute.start_date)}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="lines">
-            {feeLines(program).map((line) => (
-              <div key={line.label || 'frais'}>
-                <span>{line.label ? `Scolarité ${line.label}` : 'Scolarité'}</span>
-                <span className="num">{formatFcfa(line.amount)}</span>
-              </div>
-            ))}
-            <div>
-              <span>Frais d'inscription</span>
-              <span className="num">{formatFcfa(institute?.registration_fee ?? program.institute.registration_fee)}</span>
-            </div>
-            <div className="tot">
-              <span>Total à prévoir</span>
-              <span className="num">{total}</span>
+        <div className="dcover" style={{ background: domain.color }}>
+          <div style={{ width: '100%', height: '100%' }}>
+            <div className="cover" style={{ background: 'none', aspectRatio: 'auto', height: '100%' }}>
+              <div className="pat" />
+              <div className="blob" />
+              <Icon name={domain.icon} className="big" />
+              <span className="inst">{institute.short_name}</span>
             </div>
           </div>
+        </div>
 
-          {institute?.whatsapp && (
-            <a
-              className="btn wa"
-              href={`https://wa.me/${institute.whatsapp}?text=${encodeURIComponent(whatsappMessage)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              WhatsApp — message pré-rempli
+        <div className="dgrid">
+          <div className="dmain">
+            {program.description && (
+              <section>
+                <h2>Présentation</h2>
+                <p style={{ maxWidth: '70ch' }}>{program.description}</p>
+              </section>
+            )}
+
+            <section className="highlights">
+              <div className="hl">
+                <Icon name="cap" />
+                <div>
+                  <b>
+                    {program.degree.name} en {ans(program.duration)}
+                  </b>
+                  <span>{admission(program)}</span>
+                </div>
+              </div>
+              <div className="hl">
+                <Icon name="brief" />
+                <div>
+                  <b>{stage ? `Stage de ${stage} mois en entreprise` : "Projet de fin d'études"}</b>
+                  <span>
+                    {stage ? "Organisé par l'institut en dernière année" : "Réalisé avec un encadrant de l'institut"}
+                  </span>
+                </div>
+              </div>
+              <div className="hl">
+                <Icon name={program.evening ? 'moon' : 'clock'} />
+                <div>
+                  <b>{program.evening ? 'Cours du jour ou du soir' : 'Cours en journée'}</b>
+                  <span>{program.evening ? 'Tu peux étudier tout en travaillant' : 'Du lundi au vendredi'}</span>
+                </div>
+              </div>
+              <div className="hl">
+                <Icon name="cash" />
+                <div>
+                  <b>{program.installments ? 'Paiement en plusieurs fois' : "Paiement à l'inscription"}</b>
+                  <span>
+                    {program.installments ? 'Scolarité réglable en plusieurs tranches' : 'Scolarité réglée en une fois'}
+                  </span>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2>Les débouchés après cette formation</h2>
+              <CareerButtons names={program.careers} careers={careers} />
+              <p style={{ color: 'var(--muted)', fontSize: 14, marginTop: 10 }}>
+                Touche un débouché pour voir toutes les formations qui y mènent.
+              </p>
+            </section>
+
+            {program.years.length > 0 && (
+              <section>
+                <h2>Ce que tu vas apprendre</h2>
+                <div className="years">
+                  {program.years.map((year, index) => (
+                    <div className="year" key={year.year}>
+                      <h3>{year.label}</h3>
+                      <ul>
+                        {year.courses.map((course) => (
+                          <li key={course}>{course}</li>
+                        ))}
+                        {/* Le stage se fait en dernière année. */}
+                        {stage > 0 && index === program.years.length - 1 && <li>Stage en entreprise ({stage} mois)</li>}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section>
+              <h2>Dossier d'inscription</h2>
+              <ul className="checklist">
+                {(master ? DOSSIER_MASTER : DOSSIER_BAC).map((piece) => (
+                  <li key={piece}>{piece}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section>
+              <h2>L'institut</h2>
+              <div className="instbox">
+                <div className="instlogo" style={{ background: institute.color }}>
+                  {institute.short_name}
+                </div>
+                <div>
+                  <b style={{ fontSize: 18 }}>
+                    <Link className="ilnk" to={institutPath(institute.id)}>
+                      {institute.name}
+                    </Link>
+                  </b>
+                  <div style={{ marginTop: 6 }}>
+                    <AccreditationBadge institute={institute} />
+                  </div>
+                  <p style={{ marginTop: 6 }}>
+                    <Icon name="pin" size={14} /> {institute.address}, {institute.city}
+                  </p>
+                </div>
+              </div>
+              <p style={{ marginTop: 14, maxWidth: '64ch' }}>{institute.description}</p>
+              {others.length > 0 && (
+                <>
+                  <h3 style={{ marginTop: 24, fontSize: 16 }}>Autres formations de {institute.short_name}</h3>
+                  <div className="minigrid">
+                    {others.map((item) => (
+                      <MiniCard
+                        key={item.id}
+                        program={item}
+                        detail={`${item.degree.name} · ${ans(item.duration)} · ${fcfa(item.tuition)}/an`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </section>
+
+            {similar.length > 0 && (
+              <section style={{ borderBottom: 0 }}>
+                <h2>Formations similaires ailleurs</h2>
+                <div className="minigrid">
+                  {similar.map((item) => (
+                    <MiniCard
+                      key={item.id}
+                      program={item}
+                      detail={`${item.institute.short_name} · ${item.institute.district} · ${fcfa(item.tuition)}/an`}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+
+          <aside className="book" id="book">
+            <p className="p">
+              <b className="num">{fcfa(program.tuition)}</b> / an
+            </p>
+            <AccreditationBadge institute={institute} />
+            <div className="dates">
+              <div>
+                <small>Inscriptions jusqu'au</small>
+                {dateFr(institute.registration_deadline)}
+              </div>
+              <div>
+                <small>Rentrée</small>
+                {dateFr(institute.start_date)}
+              </div>
+            </div>
+            <div className="lines">
+              <div>
+                <span>Scolarité 1re année</span>
+                <span className="num">{fcfa(program.tuition)}</span>
+              </div>
+              <div>
+                <span>Frais d'inscription</span>
+                <span className="num">{fcfa(institute.registration_fee)}</span>
+              </div>
+              <div className="tot">
+                <span>Total à prévoir</span>
+                <span className="num">{fcfa(program.tuition + institute.registration_fee)}</span>
+              </div>
+            </div>
+            <a className="btn wa" href={whatsappLink(institute, waMessage)} target="_blank" rel="noopener">
+              WhatsApp (message pré-rempli)
             </a>
-          )}
-
-          {institute?.phone && (
             <div className="phone">
               <div>
-                <small>Secrétariat</small>
+                <small style={{ color: 'var(--muted)', display: 'block' }}>Secrétariat</small>
                 <span>{institute.phone}</span>
               </div>
-              <button
-                className="copy"
-                type="button"
-                title="Copier le numéro"
-                aria-label="Copier le numéro de téléphone"
-                onClick={() => navigator.clipboard?.writeText(institute.phone)}
-              >
-                Copier
-              </button>
+              <a className="copy" href={`tel:${institute.phone.replace(/\s/g, '')}`} style={{ textDecoration: 'none' }}>
+                Appeler
+              </a>
             </div>
-          )}
-
-          {institute?.email && (
-            <a className="btn line" href={`mailto:${institute.email}?subject=${subject}`}>
-              Écrire par e-mail
-            </a>
-          )}
-
-          <FormulaireQuestion
-            institut={{ name: program.institute.name, short_name: program.institute.short_name }}
-            formation={{ id: program.id, name: program.name }}
-          />
-        </aside>
+            {institute.email && (
+              <a className="btn line" href={mailLink(institute, `Demande d'informations - ${program.name}`)}>
+                Écrire par e-mail
+              </a>
+            )}
+            <FormulaireQuestion program={program} institute={institute} />
+          </aside>
+        </div>
       </div>
-    </div>
+
+      {/* Barre fixe en bas d'écran sur mobile. */}
+      <div className="mbar">
+        <div>
+          <b className="num">{fcfa(program.tuition)}</b> / an
+          <small>Rentrée {dateFr(institute.start_date)}</small>
+        </div>
+        <a className="btn" href="#book">
+          Contacter
+        </a>
+      </div>
+    </>
   );
 }
 
-export default FicheFormation;
+export default FicheFormation
