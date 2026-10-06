@@ -153,6 +153,15 @@
   background: var(--wa);
 }
 
+.btn.sm {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.btn:disabled {
+  opacity: .5;
+}
+
 .back {
   display: inline-flex;
   align-items: center;
