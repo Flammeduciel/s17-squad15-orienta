@@ -14,7 +14,6 @@ import { ROUTES, formationPath, institutPath } from '../../routes';
 import { admission, ans, dateFr, fcfa, mailLink, whatsappLink } from '../../utils/format';
 import { setSeo } from '../../utils/seo';
 import { trackVisit } from '../../utils/history';
-import FormulaireQuestion from './FormulaireQuestion';
 
 // Pièces du dossier d'inscription, selon le niveau d'entrée.
 const DOSSIER_BAC = [
@@ -295,7 +294,6 @@ function FicheFormation() {
                 Écrire par e-mail
               </a>
             )}
-            <FormulaireQuestion program={program} institute={institute} />
           </aside>
         </div>
       </div>
