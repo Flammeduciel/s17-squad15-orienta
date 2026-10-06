@@ -1,73 +1,93 @@
-import { Link, useParams } from 'react-router-dom';
-import { imageUrl } from '../../api/http';
-import AgrementBadge from '../../components/AgrementBadge';
-import BackLink from '../../components/BackLink';
-import FormationCard from '../../components/FormationCard';
-import Icon from '../../components/Icon';
-import PageIntrouvable from '../../components/PageIntrouvable';
-import Status from '../../components/Status';
-import { useFetch } from '../../hooks/useFetch';
-import { ROUTES } from '../../routes';
-import { formatDate, formatDuration, formatFcfa } from '../../utils/format';
-import { admissionText, feeLines } from '../../utils/program';
-
-/* Fiche institut — route /instituts/:id (ticket P6).
+/* Fiche institut - route /instituts/:id (ticket P6).
    Maquette : template/index.html. */
+import { useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { getCareers, getInstitute } from '../../api/catalogue';
+import AccreditationBadge from '../../components/AccreditationBadge';
+import CareerButtons from '../../components/CareerButtons';
+import Icon from '../../components/Icon';
+import PageState from '../../components/PageState';
+import ProgramCard from '../../components/ProgramCard';
+import { useApi } from '../../hooks/useApi';
+import { ROUTES, formationPath, institutPath } from '../../routes';
+import { admission, ans, dateFr, fcfa, imageUrl, mailLink, niveau, pluriel, whatsappLink } from '../../utils/format';
+import { setSeo } from '../../utils/seo';
 
-// L'image remplit la couverture ; sans image, c'est le sigle de l'institut sur sa couleur.
-const IMAGE_STYLE = { width: '100%', height: '100%', objectFit: 'cover' };
+const photoStyle = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' };
+
+// Frais d'une formation : un seul montant s'ils sont identiques chaque année,
+// sinon une ligne par niveau.
+function Fees({ program }) {
+  const amounts = program.fees.map((fee) => fee.amount);
+  if (new Set(amounts).size <= 1) return fcfa(program.tuition);
+  return program.fees.map((fee) => (
+    <div key={fee.year}>
+      {niveau(fee.year)} : {fcfa(fee.amount)}
+    </div>
+  ));
+}
 
 function FicheInstitut() {
   const { id } = useParams();
-  const { data: institute, loading, error, reload } = useFetch(`/institutes/${id}`);
-  const careerList = useFetch('/careers').data ?? [];
+  const { data, loading, error, reload } = useApi(
+    () => Promise.all([getInstitute(id), getCareers()]).then(([institute, careers]) => ({ institute, careers })),
+    [id],
+  );
 
-  // Une adresse qui n'est pas un identifiant d'institut, ou un institut supprimé : fiche introuvable.
-  if (error?.status === 404 || error?.status === 400) {
-    return <PageIntrouvable title="Institut introuvable" message="Cet institut n'existe pas ou n'existe plus." />;
-  }
-  if (error || !institute) {
-    return (
-      <div className="wrap detail">
-        <BackLink />
-        <Status loading={loading} error={error} onRetry={reload} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!data) return;
+    const { institute } = data;
+    setSeo({
+      title: `${institute.name} (${institute.short_name}), ${institute.city} · Orienta`,
+      description: `${institute.name}, institut privé ${institute.accredited ? 'agréé ' : ''}à ${institute.district}, ${institute.city} : ${pluriel(institute.programs.length, 'formation')}, frais d'inscription ${fcfa(institute.registration_fee)}, contact et dates de rentrée.`,
+      path: institutPath(institute.id),
+    });
+  }, [data]);
 
+  if (!data) return <PageState loading={loading} error={error} notFound="Institut introuvable" onRetry={reload} />;
+
+  const { institute, careers } = data;
   const { programs } = institute;
-  const image = imageUrl(institute.image_url);
-  const careers = [...new Set(programs.flatMap((program) => program.careers))].sort((a, b) => a.localeCompare(b, 'fr'));
-  const careerId = (name) => careerList.find((career) => career.name === name)?.id;
+  const degrees = [...new Set(programs.map((program) => program.degree.name))];
+  const careerNames = [...new Set(programs.flatMap((program) => program.careers))].sort((a, b) =>
+    a.localeCompare(b, 'fr'),
+  );
+  const waMessage = `Bonjour ${institute.short_name}, je souhaite obtenir des informations sur vos formations.`;
 
-  const whatsappMessage = `Bonjour ${institute.short_name}, je souhaite obtenir des informations sur vos formations.`;
-  const subject = encodeURIComponent("Demande d'informations");
+  // Bannière de la fiche ; sans bannière, on reprend l'image des cartes.
+  const banner = institute.banner_url || institute.image_url;
 
   return (
     <div className="wrap detail">
-      <BackLink />
+      <Link className="back" to={ROUTES.accueil}>
+        <Icon name="back" size={18} />
+        Retour aux résultats
+      </Link>
 
       <div className="dtitle">
         <div>
           <h1>{institute.name}</h1>
           <p className="sub">
-            <b>{institute.short_name}</b> · {institute.district}, Brazzaville
-            <AgrementBadge institute={institute} />
+            <b>{institute.short_name}</b> · {institute.district}, {institute.city}
+            {institute.accredited && ' · '}
+            <AccreditationBadge institute={institute} />
           </p>
         </div>
       </div>
 
-      <div className="dcover" style={{ background: institute.color }}>
-        {image ? <img src={image} alt="" style={IMAGE_STYLE} /> : <span className="big-sigle">{institute.short_name}</span>}
+      <div className="dcover" style={{ background: institute.color, position: 'relative' }}>
+        {banner ? (
+          <img src={imageUrl(banner)} alt="" style={photoStyle} />
+        ) : (
+          <span className="big-sigle">{institute.short_name}</span>
+        )}
       </div>
 
-      <div className="dmain sec">
-        {institute.description && (
-          <section>
-            <h2>Présentation</h2>
-            <p>{institute.description}</p>
-          </section>
-        )}
+      <div className="dmain" style={{ marginTop: 36 }}>
+        <section>
+          <h2>Présentation</h2>
+          <p style={{ maxWidth: '70ch' }}>{institute.description}</p>
+        </section>
 
         {institute.benefits.length > 0 && (
           <section>
@@ -82,71 +102,52 @@ function FicheInstitut() {
 
         <section>
           <h2>Coordonnées et inscriptions</h2>
-          <div className="lines">
-            {institute.address && (
-              <div>
-                <span>Adresse</span>
-                <span>{institute.address}, Brazzaville</span>
-              </div>
-            )}
-            {institute.phone && (
-              <div>
-                <span>Téléphone</span>
-                <span className="num">{institute.phone}</span>
-              </div>
-            )}
+          <div className="lines" style={{ maxWidth: 560 }}>
+            <div>
+              <span>Adresse</span>
+              <span>
+                {institute.address}, {institute.city}
+              </span>
+            </div>
+            <div>
+              <span>Téléphone</span>
+              <span className="num">{institute.phone}</span>
+            </div>
             {institute.email && (
               <div>
                 <span>E-mail</span>
-                <a className="ilnk" href={`mailto:${institute.email}?subject=${subject}`}>
+                <a className="ilnk" href={mailLink(institute, "Demande d'informations")}>
                   {institute.email}
                 </a>
               </div>
             )}
             <div>
               <span>Frais d'inscription</span>
-              <span className="num">{formatFcfa(institute.registration_fee)}</span>
+              <span className="num">{fcfa(institute.registration_fee)}</span>
             </div>
-            {institute.registration_deadline && (
-              <div>
-                <span>Clôture des inscriptions</span>
-                <span>{formatDate(institute.registration_deadline)}</span>
-              </div>
-            )}
-            {institute.start_date && (
-              <div className="tot">
-                <span>Rentrée</span>
-                <span>{formatDate(institute.start_date)}</span>
-              </div>
-            )}
+            <div>
+              <span>Clôture des inscriptions</span>
+              <span>{dateFr(institute.registration_deadline)}</span>
+            </div>
+            <div className="tot">
+              <span>Rentrée</span>
+              <span>{dateFr(institute.start_date)}</span>
+            </div>
           </div>
-
-          <p>
-            {institute.whatsapp && (
-              <>
-                <a
-                  className="btn wa"
-                  href={`https://wa.me/${institute.whatsapp}?text=${encodeURIComponent(whatsappMessage)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  WhatsApp — message pré-rempli
-                </a>{' '}
-              </>
-            )}
+          {/* Contact direct : WhatsApp pré-rempli, e-mail, appel (EX-06). */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+            <a className="btn wa" href={whatsappLink(institute, waMessage)} target="_blank" rel="noopener">
+              WhatsApp (message pré-rempli)
+            </a>
             {institute.email && (
-              <>
-                <a className="btn line" href={`mailto:${institute.email}?subject=${subject}`}>
-                  Écrire par e-mail
-                </a>{' '}
-              </>
-            )}
-            {institute.phone && (
-              <a className="btn line" href={`tel:${institute.phone.replace(/\s/g, '')}`}>
-                Appeler
+              <a className="btn line" href={mailLink(institute, "Demande d'informations")}>
+                Écrire par e-mail
               </a>
             )}
-          </p>
+            <a className="btn line" href={`tel:${institute.phone.replace(/\s/g, '')}`}>
+              Appeler
+            </a>
+          </div>
         </section>
 
         {programs.length > 0 && (
@@ -154,27 +155,13 @@ function FicheInstitut() {
             <section>
               <h2>Diplômes délivrés et débouchés</h2>
               <div className="pills">
-                {institute.degrees.map((degree) => (
-                  <span className="pill" key={degree}>
+                {degrees.map((degree) => (
+                  <span className="pill" style={{ cursor: 'default' }} key={degree}>
                     {degree}
                   </span>
                 ))}
               </div>
-              <div className="jobgrid">
-                {careers.map((name) =>
-                  careerId(name) ? (
-                    <Link className="job" key={name} to={`${ROUTES.accueil}?vue=form&career_id=${careerId(name)}`}>
-                      <Icon name="brief" />
-                      {name}
-                    </Link>
-                  ) : (
-                    <span className="job" key={name}>
-                      <Icon name="brief" />
-                      {name}
-                    </span>
-                  ),
-                )}
-              </div>
+              <CareerButtons names={careerNames} careers={careers} style={{ marginTop: 16 }} />
             </section>
 
             <section>
@@ -194,22 +181,16 @@ function FicheInstitut() {
                     {programs.map((program) => (
                       <tr key={program.id}>
                         <td>
-                          <Link className="ilnk" to={ROUTES.formation(program.id)}>
+                          <Link className="ilnk" to={formationPath(program.id)}>
                             {program.name}
                           </Link>
                         </td>
                         <td>{program.degree.name}</td>
-                        <td>{formatDuration(program.duration)}</td>
+                        <td>{ans(program.duration)}</td>
                         <td className="num">
-                          {feeLines(program).map((line, index) => (
-                            <span key={line.label}>
-                              {index > 0 && <br />}
-                              {line.label && `${line.label} : `}
-                              {formatFcfa(line.amount)}
-                            </span>
-                          ))}
+                          <Fees program={program} />
                         </td>
-                        <td>{admissionText(program)}</td>
+                        <td>{admission(program)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -219,17 +200,18 @@ function FicheInstitut() {
           </>
         )}
 
-        <section>
+        <section style={{ borderBottom: 0 }}>
           <h2>Formations proposées ({programs.length})</h2>
-          <div className="grid">
-            {programs.length > 0 ? (
-              programs.map((program) => <FormationCard key={program.id} program={program} />)
-            ) : (
+          <div className="grid" style={{ marginTop: 8 }}>
+            {programs.length === 0 && (
               <div className="empty">
                 <h3>Aucune formation publiée</h3>
                 <p>La Squad n'a pas encore saisi les formations de cet institut.</p>
               </div>
             )}
+            {programs.map((program) => (
+              <ProgramCard key={program.id} program={program} />
+            ))}
           </div>
         </section>
       </div>
@@ -237,4 +219,4 @@ function FicheInstitut() {
   );
 }
 
-export default FicheInstitut;
+export default FicheInstitut

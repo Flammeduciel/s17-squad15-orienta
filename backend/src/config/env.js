@@ -39,7 +39,6 @@ function readJwtSecret() {
  * @property {string[]} corsOrigin Interfaces autorisées à appeler l'API depuis un navigateur.
  * @property {string} uploadDir Dossier des images déposées, servi sous `/uploads`.
  * @property {number} maxUploadBytes Taille maximale d'une image, en octets.
- * @property {string} backofficeUrl Adresse du back-office, pour les liens envoyés par e-mail.
  * @property {string|undefined} smtpUrl Serveur d'envoi des e-mails ; absent, les e-mails sont écrits dans les journaux.
  * @property {string} mailFrom Expéditeur des e-mails.
  */
@@ -58,7 +57,6 @@ module.exports = {
     .filter(Boolean),
   uploadDir: path.resolve(process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads')),
   maxUploadBytes: Number(process.env.MAX_UPLOAD_BYTES) || 2 * 1024 * 1024,
-  backofficeUrl: (process.env.BACKOFFICE_URL || 'http://localhost:5174').replace(/\/+$/, ''),
   smtpUrl: process.env.SMTP_URL,
   mailFrom: process.env.MAIL_FROM || 'Orienta <no-reply@orienta.local>',
 };

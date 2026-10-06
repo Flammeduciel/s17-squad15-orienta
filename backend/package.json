@@ -2,7 +2,7 @@
   "name": "orienta-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "API Orienta — orientation des nouveaux bacheliers vers les instituts privés de Brazzaville",
+  "description": "API Orienta - orientation des nouveaux bacheliers vers les instituts privés de Brazzaville",
   "main": "server.js",
   "type": "commonjs",
   "engines": {

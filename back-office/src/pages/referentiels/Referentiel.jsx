@@ -1,185 +1,183 @@
 import { useState } from 'react';
-import { errorMessage, request } from '../../api/http';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Icon from '../../components/Icon';
-import Status from '../../components/Status';
+import Modal from '../../components/Modal';
+import PageState from '../../components/PageState';
 import { useToast } from '../../context/toast-context';
-import { useFetch } from '../../hooks/useFetch';
-import { plural } from '../../utils/format';
+import { useApi } from '../../hooks/useApi';
+import { errorMessage } from '../../utils/format';
 
-/* Page générique des quatre référentiels (tickets P20 à P23). Chaque page ne fournit
-   que sa configuration (voir referentiels.jsx) : liste, formulaire et suppression
-   partagent le même canevas. Les suppressions sont refusées par l'API tant que la
-   ligne est utilisée (409) — le message du serveur est affiché tel quel.
-   Maquette : template/back-office.html (pageRefl). */
-
-function Field({ id, label, error, as: Input = 'input', ...props }) {
-  return (
-    <div className={`fld${error ? ' bad' : ''}`}>
-      <label htmlFor={id}>{label}</label>
-      <Input
-        id={id}
-        required
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? `${id}-err` : undefined}
-        {...props}
-      />
-      {error && (
-        <span className="err" id={`${id}-err`}>
-          {error}
-        </span>
-      )}
-    </div>
-  );
-}
-
-export default function Referentiel({ config, extra }) {
+/**
+ * Écran commun aux quatre référentiels (diplômes, débouchés, séries du bac,
+ * domaines d'insertion) : une liste, un formulaire à deux champs ouvert dans
+ * une fenêtre, une suppression avec confirmation. Chaque page lui passe sa configuration.
+ *
+ * config :
+ * - title, intro : titre et phrase d'introduction de la page ;
+ * - nom, un, le, ce, aucun : le mot du référentiel et ses articles
+ *   (« diplôme », « un diplôme », « le diplôme », « ce diplôme », « Aucun diplôme ») ;
+ * - nameKey, nameLabel, namePlaceholder : champ qui porte l'intitulé (`name` ou `code`) ;
+ * - column : titre de la deuxième colonne ; cell(row, data) : son contenu ;
+ * - empty : valeurs d'un formulaire vide ; field(form, setForm, data) : le deuxième champ ;
+ * - toBody(form) : corps envoyé à l'API ;
+ * - load() : charge { rows, programs, … } ; usage(row, data) : nombre de formations qui l'utilisent ;
+ * - create(body), update(id, body), remove(id) : appels à l'API.
+ */
+export default function Referentiel({ config }) {
   const toast = useToast();
-  const items = useFetch(config.liste);
-
-  const [form, setForm] = useState(null); // fermé : null ; ouvert : { id: nombre|null, values }
-  const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const { data, loading, error, reload } = useApi(config.load, []);
+  // editing : null (liste seule), 'new' (ajout) ou la ligne en cours de modification.
+  const [editing, setEditing] = useState(null);
+  const [form, setForm] = useState(config.empty);
+  const [formError, setFormError] = useState('');
   const [toDelete, setToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
 
-  const rows = items.data ?? [];
+  if (!data) return <PageState loading={loading} error={error} />;
 
-  const openCreate = () => {
-    setErrors({});
-    setForm({ id: null, values: config.initial() });
-    window.scrollTo(0, 0);
+  const { rows } = data;
+  const nameOf = (row) => row[config.nameKey];
+
+  const startAdd = () => {
+    setForm(config.empty);
+    setFormError('');
+    setEditing('new');
+  };
+  const startEdit = (row) => {
+    setForm({ ...config.empty, ...row });
+    setFormError('');
+    setEditing(row);
   };
 
-  const openEdit = (item) => {
-    setErrors({});
-    setForm({ id: item.id, values: config.toValues(item) });
-    window.scrollTo(0, 0);
-  };
-
-  const setField = (field) => (event) => {
-    setForm((current) => ({ ...current, values: { ...current.values, [field]: event.target.value } }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
-  };
-
-  async function submit(event) {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    const found = config.validate(form.values);
-    setErrors(found);
-    if (Object.keys(found).length > 0) {
-      toast(`${plural(Object.keys(found).length, 'erreur')} dans le formulaire.`, true);
+    setFormError('');
+    const name = String(form[config.nameKey] ?? '').trim();
+    if (!name) {
+      setFormError('Ce champ est obligatoire.');
       return;
     }
-
-    setSaving(true);
+    const body = config.toBody({ ...form, [config.nameKey]: name }, data);
     try {
-      const payload = config.toPayload(form.values);
-      if (form.id) {
-        await request(`${config.gestion}/${form.id}`, { method: 'PUT', body: payload });
-        toast(`« ${config.affiche(payload)} » modifié.`);
+      if (editing === 'new') {
+        await config.create(body);
+        toast(`« ${name} » ajouté au référentiel.`);
       } else {
-        await request(config.gestion, { method: 'POST', body: payload });
-        toast(`« ${config.affiche(payload)} » ajouté au référentiel.`);
+        await config.update(editing.id, body);
+        toast(`« ${name} » mis à jour.`);
       }
-      setForm(null);
-      items.reload();
-    } catch (error) {
-      toast(errorMessage(error), true);
-      setSaving(false);
+      setEditing(null);
+      reload();
+    } catch (err) {
+      // Nom déjà pris (409) ou champ refusé (400) : l'API dit pourquoi.
+      setFormError(errorMessage(err));
     }
-  }
+  };
 
-  async function remove() {
-    setDeleting(true);
+  const onDelete = async () => {
+    const row = toDelete;
+    setToDelete(null);
     try {
-      await request(`${config.gestion}/${toDelete.id}`, { method: 'DELETE' });
-      toast(`« ${config.affiche(toDelete)} » supprimé du référentiel.`);
-      if (form?.id === toDelete.id) setForm(null);
-      setToDelete(null);
-      items.reload();
-    } catch (error) {
-      toast(errorMessage(error), true);
-    } finally {
-      setDeleting(false);
+      await config.remove(row.id);
+      toast(`« ${nameOf(row)} » supprimé du référentiel.`);
+      reload();
+    } catch (err) {
+      // Encore utilisé par une formation : l'API refuse (409) et dit par combien.
+      toast(errorMessage(err), true);
     }
-  }
-
-  if (items.error) return <Status error={items.error} onRetry={items.reload} />;
-  if (!items.data) return <Status loading />;
+  };
 
   return (
     <>
       <div className="pagehead">
         <div>
-          <h1>{config.titre}</h1>
+          <h1>{config.title}</h1>
           <p>{config.intro}</p>
         </div>
-        {!form && (
-          <button className="btn" type="button" onClick={openCreate}>
-            <Icon name="plus" />
-            Ajouter {config.un}
-          </button>
-        )}
+        <button className="btn" type="button" onClick={startAdd}>
+          <Icon name="plus" />
+          Ajouter {config.un}
+        </button>
       </div>
 
-      {form && (
-        <form className="form" noValidate onSubmit={submit}>
-          <fieldset>
-            <legend>{form.id ? `Modifier ${config.le}` : `Ajouter ${config.un}`}</legend>
+      {/* L'ajout et la modification se font dans une fenêtre, par-dessus la liste. */}
+      {editing && (
+        <Modal
+          size="medium"
+          title={editing === 'new' ? `Ajouter ${config.un}` : `Modifier ${config.le}`}
+          onClose={() => setEditing(null)}
+        >
+          <form className="form" onSubmit={onSubmit} noValidate>
             <div className="row two">
-              <Field
-                id="r-nom"
-                label={config.etiquette}
-                placeholder={config.ph}
-                value={form.values[config.cle]}
-                onChange={setField(config.cle)}
-                error={errors[config.cle]}
-              />
-              {config.champ(form.values, errors, setField, extra)}
+              <div className={`fld${formError ? ' bad' : ''}`}>
+                <label htmlFor="r-nom">{config.nameLabel}</label>
+                <input
+                  id="r-nom"
+                  autoFocus
+                  placeholder={config.namePlaceholder}
+                  value={form[config.nameKey] ?? ''}
+                  onChange={(event) => setForm({ ...form, [config.nameKey]: event.target.value })}
+                />
+                {formError && (
+                  <span className="err" role="alert">
+                    {formError}
+                  </span>
+                )}
+              </div>
+              {config.field(form, setForm, data)}
             </div>
-          </fieldset>
-          <div className="formfoot">
-            <button className="btn" type="submit" disabled={saving}>
-              {saving ? 'Enregistrement…' : form.id ? 'Enregistrer les modifications' : 'Ajouter'}
-            </button>
-            <button className="btn line" type="button" onClick={() => setForm(null)}>
-              Annuler
-            </button>
-          </div>
-        </form>
+            <div className="formfoot">
+              <button className="btn" type="submit">
+                {editing === 'new' ? 'Ajouter' : 'Enregistrer les modifications'}
+              </button>
+              <button className="btn line" type="button" onClick={() => setEditing(null)}>
+                Annuler
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       <div className="panel">
         <header>
-          <h2>{plural(rows.length, config.nom)}</h2>
+          <h2>
+            {rows.length} {config.nom}
+            {rows.length > 1 ? 's' : ''}
+          </h2>
         </header>
-        {rows.length > 0 ? (
+        {rows.length === 0 ? (
+          <div className="pad">
+            <div className="empty">
+              <h3>{config.aucun}</h3>
+              <p>{config.emptyHint ?? 'Ajoutez-en pour pouvoir les rattacher aux formations.'}</p>
+            </div>
+          </div>
+        ) : (
           <div className="tblwrap">
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>{config.etiquette}</th>
-                  <th>{config.champTitre}</th>
-                  <th className="num">Formations</th>
+                  <th>{config.nameLabel}</th>
+                  <th>{config.column}</th>
+                  <th className="num">{config.usageLabel ?? 'Formations'}</th>
                   <th />
                 </tr>
               </thead>
               <tbody>
-                {rows.map((item) => (
-                  <tr key={item.id}>
+                {rows.map((row) => (
+                  <tr key={row.id}>
                     <td>
-                      <b>{config.affiche(item)}</b>
+                      <b>{nameOf(row)}</b>
                     </td>
-                    <td>{config.ligne(item, extra)}</td>
-                    <td className="num">{config.usage(item, extra)}</td>
+                    <td>{config.cell(row, data)}</td>
+                    <td className="num">{config.usage(row, data)}</td>
                     <td>
                       <div className="acts">
                         <button
                           className="act"
                           type="button"
                           title="Modifier"
-                          aria-label={`Modifier ${config.affiche(item)}`}
-                          onClick={() => openEdit(item)}
+                          aria-label={`Modifier ${nameOf(row)}`}
+                          onClick={() => startEdit(row)}
                         >
                           <Icon name="pencil" />
                         </button>
@@ -187,8 +185,8 @@ export default function Referentiel({ config, extra }) {
                           className="act del"
                           type="button"
                           title="Supprimer"
-                          aria-label={`Supprimer ${config.affiche(item)}`}
-                          onClick={() => setToDelete(item)}
+                          aria-label={`Supprimer ${nameOf(row)}`}
+                          onClick={() => setToDelete(row)}
                         >
                           <Icon name="trash" />
                         </button>
@@ -199,23 +197,14 @@ export default function Referentiel({ config, extra }) {
               </tbody>
             </table>
           </div>
-        ) : (
-          <div className="pad">
-            <div className="empty">
-              <h3>{config.aucun}</h3>
-              <p>Ajoutez-en pour pouvoir les rattacher aux formations.</p>
-            </div>
-          </div>
         )}
       </div>
 
       {toDelete && (
         <ConfirmDialog
           title={`Supprimer ${config.ce} ?`}
-          message={`« ${config.affiche(toDelete)} » sera supprimé du référentiel. Cette action est définitive.`}
-          confirmLabel="Supprimer"
-          busy={deleting}
-          onConfirm={remove}
+          body={`« ${nameOf(toDelete)} » sera retiré du référentiel. Cette action est définitive.`}
+          onConfirm={onDelete}
           onCancel={() => setToDelete(null)}
         />
       )}

@@ -72,3 +72,12 @@ button {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+
+/* Icône Font Awesome (composant Icon) : le dessin est centré dans sa boîte,
+   dont la taille est fixée par chaque composant (.btn .icon, .cat .icon…). */
+.icon {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  line-height: 1;
+}

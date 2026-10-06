@@ -22,9 +22,11 @@
   background: var(--soft);
 }
 
-.lnk svg {
+.lnk svg,
+.lnk .icon {
   width: 20px;
   height: 20px;
+  font-size: 17px;
 }
 
 .lnk .badge {
@@ -55,9 +57,11 @@
   cursor: pointer;
 }
 
-.go svg {
+.go svg,
+.go .icon {
   width: 18px;
   height: 18px;
+  font-size: 15px;
 }
 
 .go:hover {
@@ -87,9 +91,11 @@
   font-size: 14px;
 }
 
-.openf svg {
+.openf svg,
+.openf .icon {
   width: 16px;
   height: 16px;
+  font-size: 14px;
 }
 
 .heart {
@@ -151,15 +157,6 @@
 
 .btn.wa {
   background: var(--wa);
-}
-
-.btn.sm {
-  padding: 8px 12px;
-  font-size: 13px;
-}
-
-.btn:disabled {
-  opacity: .5;
 }
 
 .back {

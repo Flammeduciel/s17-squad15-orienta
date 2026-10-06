@@ -28,8 +28,8 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  const login = async (identifiant, password) => {
-    const data = await authApi.login(identifiant, password);
+  const login = async (email, password) => {
+    const data = await authApi.login(email, password);
     setUser(data.user ?? data);
   };
 

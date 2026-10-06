@@ -183,27 +183,6 @@ select.plain {
   resize: vertical;
 }
 
-.fld .hint {
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 6px;
-}
-
-.fld.bad input,
-.fld.bad textarea,
-.fld.bad select {
-  border-color: var(--heart);
-  box-shadow: inset 0 0 0 1px var(--heart);
-}
-
-.fld .err {
-  display: block;
-  color: var(--heart);
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 6px;
-}
-
 .ok {
   background: var(--green-soft);
   border-radius: 12px;
@@ -217,30 +196,4 @@ select.plain {
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 14px;
-}
-
-.form {
-  display: grid;
-  gap: 20px;
-}
-
-.form .row {
-  display: grid;
-  gap: 16px;
-}
-
-.form .two {
-  grid-template-columns: 1fr 1fr;
-}
-
-.formfoot {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-  padding-top: 4px;
-}
-
-.formfoot .sp {
-  margin-left: auto;
 }

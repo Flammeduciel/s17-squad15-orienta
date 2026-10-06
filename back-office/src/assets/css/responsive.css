@@ -54,6 +54,16 @@
     grid-template-columns: minmax(0,1fr);
   }
 
+  .modal {
+    padding: 10px;
+  }
+
+  .modal .mbox.medium,
+  .modal .mbox.large {
+    padding: 18px;
+    max-height: calc(100vh - 20px);
+  }
+
   .login {
     grid-template-columns: minmax(0,1fr);
   }
@@ -119,9 +129,11 @@
     padding-right: 40px;
   }
 
-  .stat .ico svg {
+  .stat .ico svg,
+  .stat .ico .icon {
     width: 16px;
     height: 16px;
+    font-size: 14px;
   }
 
   .stat small {

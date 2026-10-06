@@ -5,7 +5,7 @@ back-office, backend), toutes trois construites depuis ce même dépôt Git via
 leur propre `Dockerfile`, plus **un service PostgreSQL** géré par Dokploy (pas
 de conteneur Postgres dans ce dépôt).
 
-Le back-office est une application React + Vite **distincte** du frontend public —
+Le back-office est une application React + Vite **distincte** du frontend public -
 même stack, même dépôt, mais un domaine et un déploiement à part. Un bachelier ne
 doit jamais atterrir dessus, et son accès est de toute façon gardé côté backend
 (authentification JWT requise sur toutes les routes `/admin`).
@@ -56,12 +56,11 @@ Créer une nouvelle **Application** dans Dokploy :
 | Variable       | Requis | Valeur                                                                                         |
 | -------------- | ------ | ---------------------------------------------------------------------------------------------- |
 | `DATABASE_URL` | Oui    | La chaîne de connexion du service PostgreSQL (étape 1)                                         |
-| `JWT_SECRET`   | Oui    | Une chaîne aléatoire longue et secrète — jamais la valeur par défaut de développement. **Sans elle, l'API refuse de démarrer.** |
-| `JWT_EXPIRES_IN` | Non | Durée d'une session avant reconnexion — `8h` par défaut |
-| `BACKOFFICE_URL` | Oui | L'URL publique du back-office, sans slash final : elle sert à construire le lien « mot de passe oublié » |
+| `JWT_SECRET`   | Oui    | Une chaîne aléatoire longue et secrète - jamais la valeur par défaut de développement. **Sans elle, l'API refuse de démarrer.** |
+| `JWT_EXPIRES_IN` | Non | Durée d'une session avant reconnexion - `8h` par défaut |
 | `SMTP_URL`     | Oui    | Le serveur d'envoi des e-mails, ex. `smtps://utilisateur:motdepasse@smtp.exemple.cg:465`. Sans elle, les e-mails ne partent pas : ils sont seulement écrits dans les journaux |
 | `MAIL_FROM`    | Non    | L'expéditeur des e-mails, ex. `Orienta <no-reply@orienta.cg>` |
-| `CORS_ORIGIN`  | Oui    | Les URLs publiques autorisées à appeler l'API, séparées par des virgules, **sans slash final** — ex. `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
+| `CORS_ORIGIN`  | Oui    | Les URLs publiques autorisées à appeler l'API, séparées par des virgules, **sans slash final** - ex. `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
 | `PORT`         | Non    | `4000` (déjà la valeur par défaut)                                                              |
 
 Au démarrage du conteneur, `backend/scripts/start.sh` s'exécute automatiquement :
@@ -69,19 +68,20 @@ il applique les migrations SQL (`psql -f migrate.sql`) puis démarre le serveur.
 Les tables sont créées toutes seules au premier déploiement, rien à faire à la
 main. Le script est idempotent : le rejouer sur une base déjà à jour ne change
 rien. En revanche, **le seed n'est jamais exécuté automatiquement**
-(il contient des données de démonstration) — voir « Créer le premier compte
+(il contient des données de démonstration) - voir « Créer le premier compte
 administrateur » plus bas.
 
 Le schéma complet (tables, colonnes, index, vue `indicators`) est documenté dans
 `docs/schema.md` (diagramme Mermaid) et `docs/schema.sql`. Le `migrate.sql` embarqué
 dans l'image en est l'application exécutable.
 
-**Base créée avec le premier schéma (Kelasi).** Ce schéma ne peut pas être
-transformé sur place. Si ses tables sont vides, `migrate.sql` les reconstruit
+**Base créée avec un ancien schéma** (identifiants numérotés, arrondissement
+écrit en toutes lettres dans l'institut). Ce schéma ne peut pas être
+transformé sur place en identifiants UUID et en tables villes / arrondissements. Si ses tables sont vides, `migrate.sql` les reconstruit
 tout seul. Si elles contiennent des données (par exemple l'ancien seed), la
 migration s'arrête avec un message explicite et **le conteneur ne démarre pas** :
 il faut alors lancer une fois, à la main, `psql $DATABASE_URL -f scripts/reset.sql`
-— il efface le catalogue mais conserve les comptes — puis redéployer.
+il efface le catalogue mais conserve les comptes - puis redéployer.
 
 **Images des instituts.** L'API enregistre les images déposées dans `/app/uploads`
 et les sert sous `/uploads`. Dans Dokploy, monte un **volume persistant** sur
@@ -125,13 +125,14 @@ Créer une deuxième **Application** dans Dokploy :
 | Argument               | Valeur                                                              |
 | ---------------------- | ------------------------------------------------------------------- |
 | `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.orienta.exemple.com`     |
+| `VITE_SITE_URL`       | L'URL publique du site lui-même, sans slash final, ex. `https://orienta.exemple.com` : elle alimente les balises de référencement et l'image d'aperçu des liens partagés |
 
 Aucune variable requise dans "Environment Settings" pour le frontend.
 
 > **Piège classique** : `VITE_API_URL` est injectée dans le code JavaScript
 > **au moment du build** (`vite build`, exécuté dans l'étape `builder` du
 > Dockerfile), pas lue au démarrage du conteneur. Une variable mise dans
-> "Environment Settings" n'existe que quand le conteneur tourne déjà — trop
+> "Environment Settings" n'existe que quand le conteneur tourne déjà - trop
 > tard. Si elle atterrit dans "Environment" au lieu de "Build Arguments", le
 > code compilé retombe sur sa valeur par défaut (`http://localhost:4000`) et
 > l'app déployée essaie d'appeler `localhost` depuis le navigateur des
@@ -140,7 +141,7 @@ Aucune variable requise dans "Environment Settings" pour le frontend.
 
 Attribue un domaine au frontend (ex. `orienta.exemple.com`), puis retourne sur
 l'application **backend** et vérifie que `CORS_ORIGIN` inclut bien ce domaine
-exact (avec `https://`, sans slash final) — sinon les requêtes CORS échoueront
+exact (avec `https://`, sans slash final) - sinon les requêtes CORS échoueront
 silencieusement.
 
 ## 4. Déployer le back-office
@@ -160,17 +161,17 @@ Créer une troisième **Application** dans Dokploy :
 | `VITE_API_URL`        | L'URL publique du backend, ex. `https://api.orienta.exemple.com`     |
 
 Attribue un domaine **distinct** au back-office (ex.
-`back-office.orienta.exemple.com`) — jamais le même que le frontend public.
+`back-office.orienta.exemple.com`) - jamais le même que le frontend public.
 
 Retourne ensuite sur l'application **backend** et ajoute ce domaine à
 `CORS_ORIGIN` (toujours `https://`, sans slash final, séparé du précédent par
-une virgule) — c'est ce qui autorise le back-office à appeler le backend en CORS
+une virgule) - c'est ce qui autorise le back-office à appeler le backend en CORS
 et à envoyer le token `Authorization: Bearer`.
 
 ## Créer le premier compte administrateur en production
 
 Le seed (`backend/scripts/seed.sql`) crée un compte admin de démonstration
-(`squad` / `orienta2026`) — pratique en local, **à ne jamais exécuter tel quel en
+(`squad` / `orienta2026`) - pratique en local, **à ne jamais exécuter tel quel en
 production** (mot de passe public dans ce dépôt). Deux options pour le premier
 admin réel :
 
@@ -184,7 +185,7 @@ admin réel :
    compte dans `users`, le seed le laisse vide).
 
 Les données de démonstration (instituts, formations) créées par le seed sont,
-elles, un bon point de départ — à ajuster ensuite depuis le back-office plutôt
+elles, un bon point de départ - à ajuster ensuite depuis le back-office plutôt
 qu'à re-seeder.
 
 ## Vérification post-déploiement
@@ -198,7 +199,7 @@ qu'à re-seeder.
 4. Créer/modifier une formation depuis le back-office → confirme l'écriture en
    base.
 
-## Variables d'environnement — résumé
+## Variables d'environnement - résumé
 
 **Backend**
 
@@ -206,21 +207,26 @@ qu'à re-seeder.
 | -------------- | ------ | ----------------------------------------------------------------- |
 | `DATABASE_URL` | Oui    | `postgresql://user:pass@host:5432/db`                          |
 | `JWT_SECRET`   | Oui    | une chaîne aléatoire longue                                     |
-| `BACKOFFICE_URL` | Oui  | `https://back-office.orienta.exemple.com`                      |
 | `SMTP_URL`     | Oui    | `smtps://utilisateur:motdepasse@smtp.exemple.cg:465`           |
 | `CORS_ORIGIN`  | Oui    | `https://orienta.exemple.com,https://back-office.orienta.exemple.com` |
 | `PORT`         | Non    | `4000` (valeur par défaut)                                      |
 
-**Frontend et back-office** (identique pour les deux)
+**Frontend et back-office**
 
 | Variable               | Requis | Type           | Exemple                                  |
 | ---------------------- | ------ | ---------------- | ------------------------------------------- |
 | `VITE_API_URL`        | Oui    | Build Argument | `https://api.orienta.exemple.com`         |
+| `VITE_SITE_URL`       | Oui (frontend seulement) | Build Argument | `https://orienta.exemple.com` |
+
+`VITE_SITE_URL` est l'adresse publique du site, sans slash final. Elle est écrite
+dans les balises de référencement et de partage (adresse canonique, image
+d'aperçu `og-image.png`). Sans elle, ces balises pointent vers `localhost` et
+l'aperçu du lien ne s'affiche pas sur WhatsApp ou Facebook.
 
 ## Dépannage
 
 - **Le frontend charge mais aucune donnée ne s'affiche** : ouvrir la console
-  navigateur — une erreur CORS signifie presque toujours que `CORS_ORIGIN`
+  navigateur - une erreur CORS signifie presque toujours que `CORS_ORIGIN`
   (backend) ou `VITE_API_URL` (frontend/back-office, au build) est mal renseigné.
 - **Erreur de connexion à la base au démarrage du backend** : vérifier que
   `DATABASE_URL` utilise le hostname **interne** Dokploy du service Postgres,

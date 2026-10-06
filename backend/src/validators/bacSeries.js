@@ -1,18 +1,18 @@
 /**
- * Schémas de validation des routes `/bac-series` et `/admin/bac-series`.
+ * Schémas de validation des routes des séries du bac.
  *
  * @module validators/bacSeries
  */
-const { z } = require("zod");
-const { requiredText } = require("./common");
+const { z } = require('zod');
+const { requiredText } = require('./common');
 
-/** Corps de `POST` et `PUT /admin/bac-series`. Le code est enregistré en majuscules. */
+/** Corps de la création et de la modification d'une série. Le libellé est facultatif. */
 const bacSeriesBody = z.object({
-  code: requiredText(10).transform((value) => value.toUpperCase()),
+  code: requiredText(10),
   label: z
-    .string({ error: "doit être un texte." })
+    .string({ error: 'doit être un texte.' })
     .trim()
-    .max(100, "ne doit pas dépasser 100 caractères.")
+    .max(100, 'ne doit pas dépasser 100 caractères.')
     .nullish()
     .transform((value) => value || null),
 });

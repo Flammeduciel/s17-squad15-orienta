@@ -1,108 +1,127 @@
-const programService = require("../services/programs");
-const httpError = require("../utils/httpError");
-const { translatePgError } = require("../utils/pgErrors");
-const courses = require("../models/courses");
-const programs = require("../models/programs");
+const httpError = require('../utils/httpError');
+const { matches } = require('../utils/text');
+const courses = require('../models/courses');
+const programService = require('../services/programs');
 
-const notFound = () =>
-  httpError(
-    404,
-    "COURS_INTROUVABLE",
-    "Aucun cours ne correspond à cet identifiant.",
-  );
+const NOT_FOUND = [404, 'COURS_INTROUVABLE', 'Aucun cours ne correspond à cet identifiant.'];
+const PROGRAM_NOT_FOUND = [404, 'FORMATION_INTROUVABLE', 'Aucune formation ne correspond à cet identifiant.'];
+const invalid = (message) => httpError(400, 'PARAMETRE_INVALIDE', message);
 
 /**
- * Vérifie chaque rattachement : la formation existe, et l'année ne dépasse
- * pas la durée de son diplôme.
+ * Regroupe les lignes « cours / formation » en cours à la forme du contrat :
+ * `{ id, name, programs: [{ program_id, program_name, institute_short_name, year }] }`.
  *
- * @param {{ program_id: number, year: number }[]} links
- * @returns {Promise<void>}
+ * @param {object[]} rows Lignes de `courses.findAllWithPrograms`.
+ * @returns {object[]}
+ */
+function groupCourses(rows) {
+  const list = [];
+  for (const row of rows) {
+    let course = list.find((item) => item.id === row.id);
+    if (!course) {
+      course = { id: row.id, name: row.name, programs: [] };
+      list.push(course);
+    }
+    if (row.program_id) {
+      course.programs.push({
+        program_id: row.program_id,
+        program_name: row.program_name,
+        institute_short_name: row.institute_short_name,
+        year: row.year,
+      });
+    }
+  }
+  return list;
+}
+
+/** Relit un cours à la forme du contrat. */
+async function getCourse(id) {
+  const all = groupCourses(await courses.findAllWithPrograms());
+  return all.find((course) => course.id === id);
+}
+
+/** `GET /admin/courses` - catalogue de cours, filtrable par nom et par formation. */
+async function listCourses(req, res) {
+  const { q, program_id: programId } = req.valid.query;
+  let list = groupCourses(await courses.findAllWithPrograms());
+  if (q) list = list.filter((course) => matches(q, course.name));
+  if (programId) list = list.filter((course) => course.programs.some((program) => program.program_id === programId));
+  res.json(list);
+}
+
+/**
+ * Vérifie les rattachements demandés : chaque formation existe, n'apparaît
+ * qu'une fois, et l'année ne dépasse pas la durée de son diplôme.
+ *
+ * @param {{ program_id: string, year: number }[]} links
  */
 async function checkLinks(links) {
-  for (const { program_id: programId, year } of links) {
-    const program = await programs.findById(programId);
-    if (!program) {
-      throw httpError(
-        400,
-        "PARAMETRE_INVALIDE",
-        `« programs » : la formation ${programId} n'existe pas.`,
-      );
-    }
-    if (year > program.duration) {
-      throw httpError(
-        400,
-        "PARAMETRE_INVALIDE",
-        `« programs » : l'année ${year} dépasse la durée (${program.duration} an${program.duration > 1 ? "s" : ""}) de « ${program.name} ».`,
-      );
+  const ids = links.map((link) => link.program_id);
+  if (new Set(ids).size !== ids.length) {
+    throw invalid('« programs » : une formation est rattachée deux fois.');
+  }
+  const found = await courses.findProgramDurations(ids);
+  for (const link of links) {
+    const program = found.find((item) => item.id === link.program_id);
+    if (!program) throw invalid(`« programs » : la formation ${link.program_id} n'existe pas.`);
+    if (link.year > program.duration) {
+      throw invalid(`« programs » : « ${program.name} » ne dure que ${program.duration} an(s).`);
     }
   }
 }
 
-const duplicate = (name) => ({
-  duplicate: `Un cours nommé « ${name} » existe déjà.`,
-  inUse: "Une des formations rattachées n'existe plus.",
-});
-
-/** `GET /admin/courses` : 200, tableau de cours avec leurs formations. */
-async function list(req, res) {
-  res.json(await courses.list(req.valid.query));
-}
-
-/** `POST /admin/courses` : 201 avec le cours créé. */
-async function create(req, res) {
-  const body = req.valid.body;
-  await checkLinks(body.programs);
-  let id;
-  try {
-    id = await courses.create(body);
-  } catch (error) {
-    throw translatePgError(error, duplicate(body.name));
+/** `POST /admin/courses` */
+async function createCourse(req, res) {
+  const { name, programs } = req.valid.body;
+  if (await courses.findByName(name)) {
+    throw httpError(409, 'DEJA_EXISTANT', `Le cours « ${name} » existe déjà au catalogue.`);
   }
-  res.status(201).json(await courses.findById(id));
+  await checkLinks(programs);
+  const id = await courses.create(name, programs);
+  res.status(201).json(await getCourse(id));
 }
 
-/** `PUT /admin/courses/:id` : 200. `programs` remplace la liste complète. */
-async function update(req, res) {
+/** `PUT /admin/courses/:id` - `programs` remplace toute la liste des rattachements. */
+async function updateCourse(req, res) {
   const { id } = req.valid.params;
-  const body = req.valid.body;
-  await checkLinks(body.programs);
-  let found;
-  try {
-    found = await courses.update(id, body);
-  } catch (error) {
-    throw translatePgError(error, duplicate(body.name));
+  const { name, programs } = req.valid.body;
+  if (!(await courses.findById(id))) throw httpError(...NOT_FOUND);
+  const sameName = await courses.findByName(name);
+  if (sameName && sameName.id !== id) {
+    throw httpError(409, 'DEJA_EXISTANT', `Le cours « ${name} » existe déjà au catalogue.`);
   }
-  if (!found) throw notFound();
-  res.json(await courses.findById(id));
+  await checkLinks(programs);
+  await courses.update(id, name, programs);
+  res.json(await getCourse(id));
 }
 
-/** `DELETE /admin/courses/:id` : 204. Le cours disparaît de toutes ses formations. */
-async function remove(req, res) {
-  if (!(await courses.remove(req.valid.params.id))) throw notFound();
+/** `DELETE /admin/courses/:id` */
+async function deleteCourse(req, res) {
+  const found = await courses.remove(req.valid.params.id);
+  if (!found) throw httpError(...NOT_FOUND);
   res.status(204).end();
 }
 
-/** `PUT /admin/programs/:id/courses/:course_id` : 200 avec la fiche formation à jour. */
-async function attachToProgram(req, res) {
+/** `PUT /admin/programs/:id/courses/:course_id` - rattache un cours, ou change son année. */
+async function linkCourse(req, res) {
   const { id: programId, course_id: courseId } = req.valid.params;
   const { year } = req.valid.body;
-  const program = await programs.findById(programId);
-  if (!program) {
-    throw httpError(404, 'FORMATION_INTROUVABLE', 'Aucune formation ne correspond à cet identifiant.');
+  if (!(await courses.findById(courseId))) throw httpError(...NOT_FOUND);
+  const [program] = await courses.findProgramDurations([programId]);
+  if (!program) throw httpError(...PROGRAM_NOT_FOUND);
+  if (year > program.duration) {
+    throw invalid(`« year » : « ${program.name} » ne dure que ${program.duration} an(s).`);
   }
-  if (!(await courses.findById(courseId))) throw notFound();
-  await checkLinks([{ program_id: programId, year }]);
-  await courses.setLink(programId, courseId, year);
+  await courses.link(programId, courseId, year);
   res.json(await programService.getDetail(programId));
 }
 
-/** `DELETE /admin/programs/:id/courses/:course_id` : 204. Le cours reste au catalogue. */
-async function detachFromProgram(req, res) {
+/** `DELETE /admin/programs/:id/courses/:course_id` - le cours reste au catalogue. */
+async function unlinkCourse(req, res) {
   const { id: programId, course_id: courseId } = req.valid.params;
-  if (!(await courses.removeLink(programId, courseId))) {
-    throw httpError(404, 'RATTACHEMENT_INTROUVABLE', "Ce cours n'est pas rattaché à cette formation.");
-  }
+  const found = await courses.unlink(programId, courseId);
+  if (!found) throw httpError(404, 'COURS_INTROUVABLE', "Ce cours n'est pas rattaché à cette formation.");
   res.status(204).end();
 }
 
-module.exports = { list, create, update, remove, attachToProgram, detachFromProgram };
+module.exports = { listCourses, createCourse, updateCourse, deleteCourse, linkCourse, unlinkCourse };

@@ -1,15 +1,16 @@
 -- ============================================================================
--- ORIENTA BRAZZAVILLE — Données de démonstration (seed)
+-- ORIENTA BRAZZAVILLE - Données de démonstration (seed)
 -- ============================================================================
 -- Exécuter avec : psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backend/scripts/seed.sql
 -- Insère le même jeu de démonstration que les maquettes (template/) :
--- 10 domaines, 4 diplômes, 7 séries du bac, 8 instituts, 26 formations,
+-- 1 ville et ses 9 arrondissements, 10 domaines, 4 diplômes, 7 séries du bac,
+-- 8 instituts, 26 formations,
 -- 65 débouchés et 165 cours, avec les tarifs par niveau, les séries admises et
 -- le programme par année de chaque formation.
 --
 -- Nomenclature alignée sur backend/scripts/migrate.sql (noms anglais).
 --
--- ATTENTION — ce seed est à exécuter UNE SEULE FOIS, sur une base fraîchement
+-- ATTENTION - ce seed est à exécuter UNE SEULE FOIS, sur une base fraîchement
 -- migrée. Un garde-fou ci-dessous le fait échouer proprement si la base
 -- contient déjà des instituts, plutôt que de mélanger démonstration et données
 -- réelles.
@@ -28,21 +29,30 @@ END $$;
 -- ---------------------------------------------------------------------------
 -- Domaines d'insertion (10)
 -- ---------------------------------------------------------------------------
-INSERT INTO domains (id, name, color) VALUES
-    ('gestion', 'Gestion & Finance', '#1E6B4A'),
-    ('info', 'Informatique', '#2B51A3'),
-    ('sante', 'Santé', '#B03352'),
-    ('btp', 'BTP & Génie', '#9A5412'),
-    ('petrole', 'Pétrole & Mines', '#2F3B45'),
-    ('com', 'Communication', '#6D40A6'),
-    ('logi', 'Transport & Logistique', '#0D6F7C'),
-    ('droit', 'Droit & Administration', '#7A2E2E'),
-    ('agro', 'Agronomie & Environnement', '#4C7A1E'),
-    ('hotel', 'Hôtellerie & Tourisme', '#B5562A')
-ON CONFLICT (id) DO NOTHING;
+-- L'icône est un nom Font Awesome, sans le préfixe « fa- ».
+-- Les identifiants sont des UUID générés par la base : ce seed ne les connaît
+-- pas d'avance. Chaque domaine reçoit donc ici un code court (`gestion`,
+-- `info`…), qui n'existe que dans ce fichier et sert à le désigner plus bas.
+CREATE TEMP TABLE seed_domains (code TEXT, name TEXT, color TEXT, icon TEXT) ON COMMIT DROP;
+
+INSERT INTO seed_domains (code, name, color, icon) VALUES
+    ('gestion', 'Gestion & Finance', '#1E6B4A', 'chart-line'),
+    ('info', 'Informatique', '#2B51A3', 'laptop-code'),
+    ('sante', 'Santé', '#B03352', 'stethoscope'),
+    ('btp', 'BTP & Génie', '#9A5412', 'helmet-safety'),
+    ('petrole', 'Pétrole & Mines', '#2F3B45', 'oil-well'),
+    ('com', 'Communication', '#6D40A6', 'bullhorn'),
+    ('logi', 'Transport & Logistique', '#0D6F7C', 'truck'),
+    ('droit', 'Droit & Administration', '#7A2E2E', 'scale-balanced'),
+    ('agro', 'Agronomie & Environnement', '#4C7A1E', 'leaf'),
+    ('hotel', 'Hôtellerie & Tourisme', '#B5562A', 'hotel');
+
+INSERT INTO domains (name, color, icon)
+SELECT name, color, icon FROM seed_domains
+ON CONFLICT (name) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- Diplômes (4) — la durée des études est portée par le diplôme.
+-- Diplômes (4) - la durée des études est portée par le diplôme.
 -- ---------------------------------------------------------------------------
 INSERT INTO degrees (name, duration) VALUES
     ('BTS', 2),
@@ -65,13 +75,35 @@ INSERT INTO bac_series (code, label) VALUES
 ON CONFLICT (code) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
+-- Ville et arrondissements : Brazzaville et ses 9 arrondissements.
+-- ---------------------------------------------------------------------------
+INSERT INTO cities (name) VALUES ('Brazzaville')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO districts (city_id, name)
+SELECT c.id, v.name
+FROM cities c
+CROSS JOIN (VALUES
+    ('Makélékélé'), ('Bacongo'), ('Poto-Poto'), ('Moungali'), ('Ouenzé'),
+    ('Talangaï'), ('Mfilou'), ('Madibou'), ('Djoué')
+) AS v(name)
+WHERE c.name = 'Brazzaville'
+ON CONFLICT (city_id, name) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
 -- Instituts (8)
--- `district` : un des 9 arrondissements de Brazzaville, écrit comme dans les
--- maquettes (contrainte CHECK de migrate.sql). Un numéro d'agrément NULL
+-- La liste est posée dans une table temporaire, avec le nom de l'arrondissement :
+-- l'insertion retrouve ensuite son identifiant. Un numéro d'agrément NULL
 -- signifie « non agréé » : l'institut apparaît sans badge.
 -- ---------------------------------------------------------------------------
-INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, email, color, description,
-                         registration_fee, registration_deadline, start_date, accreditation_number) VALUES
+CREATE TEMP TABLE seed_institutes (
+    name TEXT, short_name TEXT, district TEXT, address TEXT, phone TEXT, whatsapp TEXT, email TEXT,
+    color TEXT, description TEXT, registration_fee INT, registration_deadline DATE, start_date DATE,
+    accreditation_number TEXT
+) ON COMMIT DROP;
+
+INSERT INTO seed_institutes (name, short_name, district, address, phone, whatsapp, email, color, description,
+                             registration_fee, registration_deadline, start_date, accreditation_number) VALUES
     ('Institut Supérieur de Gestion du Fleuve', 'ISGF', 'Poto-Poto', 'Avenue de la Paix, Poto-Poto',
      '+242 06 612 40 18', '242066124018', 'contact@isgf.cg', '#1E6B4A',
      'Spécialisé dans la gestion, la comptabilité et la banque depuis 2009. Cours en journée et en soirée.',
@@ -112,22 +144,31 @@ INSERT INTO institutes (name, short_name, district, address, phone, whatsapp, em
      'Agronomie, environnement et tourisme, avec une ferme-école et un hôtel d''application.',
      35000, '2026-10-10', '2026-10-27', NULL);
 
+INSERT INTO institutes (name, short_name, district_id, address, phone, whatsapp, email, color, description,
+                        registration_fee, registration_deadline, start_date, accreditation_number)
+SELECT v.name, v.short_name, ds.id, v.address, v.phone, v.whatsapp, v.email, v.color, v.description,
+       v.registration_fee, v.registration_deadline, v.start_date, v.accreditation_number
+FROM seed_institutes v
+JOIN districts ds ON ds.name = v.district
+JOIN cities c ON c.id = ds.city_id AND c.name = 'Brazzaville';
+
 -- ---------------------------------------------------------------------------
 -- Formations (26)
 -- La liste est posée dans une table temporaire : elle alimente ensuite les
 -- formations, leurs tarifs par niveau et leurs séries admises. `pos` garde
 -- l'ordre de la liste. Dans ce jeu, chaque intitulé de formation est unique :
 -- les sections suivantes s'en servent comme clé.
+--   domain     : code du domaine, donné plus haut dans seed_domains.
 --   duration   : rappel de la durée du diplôme, vérifié plus bas.
 --   tuition    : frais annuels, identiques pour chaque niveau dans ce jeu.
 --   bac_series : lettres des séries admises ; NULL = pas de critère de série.
 -- ---------------------------------------------------------------------------
 CREATE TEMP TABLE seed_programs (
-    pos SERIAL, institute TEXT, domain_id TEXT, name TEXT, degree TEXT, duration INT, tuition INT,
+    pos SERIAL, institute TEXT, domain TEXT, name TEXT, degree TEXT, duration INT, tuition INT,
     bac_series TEXT, evening BOOLEAN, internship_months INT, installments BOOLEAN
 ) ON COMMIT DROP;
 
-INSERT INTO seed_programs (institute, domain_id, name, degree, duration, tuition, bac_series, evening, internship_months, installments) VALUES
+INSERT INTO seed_programs (institute, domain, name, degree, duration, tuition, bac_series, evening, internship_months, installments) VALUES
     -- ISGF (gestion)
     ('Institut Supérieur de Gestion du Fleuve', 'gestion', 'Comptabilité et gestion des entreprises', 'BTS',        2, 420000, 'BCDG',   TRUE,  3, TRUE),
     ('Institut Supérieur de Gestion du Fleuve', 'gestion', 'Banque et assurance',                    'Licence pro', 3, 520000, 'BCD',    FALSE, 4, TRUE),
@@ -172,14 +213,16 @@ BEGIN
 END $$;
 
 INSERT INTO programs (institute_id, domain_id, degree_id, name, evening, internship_months, installments, status)
-SELECT i.id, v.domain_id, d.id, v.name, v.evening, v.internship_months, v.installments, 'published'
+SELECT i.id, dom.id, d.id, v.name, v.evening, v.internship_months, v.installments, 'published'
 FROM seed_programs v
 JOIN institutes i ON i.name = v.institute
 JOIN degrees d ON d.name = v.degree
+JOIN seed_domains sd ON sd.code = v.domain
+JOIN domains dom ON dom.name = sd.name
 ORDER BY v.pos;
 
 -- ---------------------------------------------------------------------------
--- Tarifs par niveau — un montant par année d'études du diplôme.
+-- Tarifs par niveau - un montant par année d'études du diplôme.
 -- ---------------------------------------------------------------------------
 INSERT INTO program_fees (program_id, year, amount)
 SELECT p.id, g.year, v.tuition
@@ -189,7 +232,7 @@ JOIN degrees d ON d.id = p.degree_id
 CROSS JOIN generate_series(1, d.duration) AS g(year);
 
 -- ---------------------------------------------------------------------------
--- Séries du bac admises par formation — une ligne par lettre.
+-- Séries du bac admises par formation - une ligne par lettre.
 -- ---------------------------------------------------------------------------
 INSERT INTO program_bac_series (program_id, series_id)
 SELECT p.id, s.id
@@ -235,9 +278,11 @@ FROM (VALUES
 CROSS JOIN LATERAL UNNEST(m.careers) AS career_name;
 
 INSERT INTO careers (name, domain_id)
-SELECT DISTINCT ON (pc.career_name) pc.career_name, v.domain_id
+SELECT DISTINCT ON (pc.career_name) pc.career_name, dom.id
 FROM seed_program_careers pc
 JOIN seed_programs v ON v.name = pc.program_name
+JOIN seed_domains sd ON sd.code = v.domain
+JOIN domains dom ON dom.name = sd.name
 ORDER BY pc.career_name, v.pos
 ON CONFLICT (name) DO NOTHING;
 
@@ -301,13 +346,12 @@ JOIN (SELECT program_name, COUNT(*) AS total FROM seed_program_courses GROUP BY 
   ON n.program_name = pc.program_name;
 
 -- ---------------------------------------------------------------------------
--- Compte Squad par défaut (mot de passe : orienta2026 — À CHANGER)
+-- Compte Squad par défaut : squad@orienta.cg / orienta2026 (À CHANGER)
 -- Le hash ci-dessous est un bcrypt réel, généré pour ce mot de passe.
 -- Ne jamais exécuter ce seed en production : changez d'abord le mot de passe.
--- `email` reste vide : à renseigner pour que « mot de passe oublié » fonctionne.
 -- ---------------------------------------------------------------------------
-INSERT INTO users (username, password_hash, name, role)
-VALUES ('squad', '$2b$10$6x9Auqu6/4/0L7O341ZcS./yDm2B/wU.K/mWKFDu8wmB1RtQScNdC', 'Squad', 'superadmin')
-ON CONFLICT (username) DO NOTHING;
+INSERT INTO users (email, password_hash, name, role)
+VALUES ('squad@orienta.cg', '$2b$10$6x9Auqu6/4/0L7O341ZcS./yDm2B/wU.K/mWKFDu8wmB1RtQScNdC', 'Squad', 'superadmin')
+ON CONFLICT (email) DO NOTHING;
 
 COMMIT;

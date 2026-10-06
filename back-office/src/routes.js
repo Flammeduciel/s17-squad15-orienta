@@ -2,7 +2,6 @@
 // Pour changer une adresse, on ne modifie que ce fichier.
 export const ROUTES = {
   connexion: '/connexion',
-  reinitialisation: '/reinitialiser-mot-de-passe',
   accueil: '/admin', // tableau de bord (P11)
   compte: '/compte', // P10
   instituts: '/admin/instituts',
@@ -12,4 +11,6 @@ export const ROUTES = {
   debouches: '/admin/debouches',
   series: '/admin/series',
   domaines: '/admin/domaines',
+  villes: '/admin/villes',
+  arrondissements: '/admin/arrondissements',
 };

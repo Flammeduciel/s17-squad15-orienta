@@ -1,200 +1,244 @@
+/* Formulaire formation - routes /admin/formations/nouvelle et /admin/formations/:id (ticket P15).
+   Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { errorMessage, request } from '../../api/http';
-import Icon from '../../components/Icon';
-import Status from '../../components/Status';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import {
+  createProgram,
+  getBacSeries,
+  getCareers,
+  getDegrees,
+  getDomains,
+  getInstitutes,
+  getProgram,
+  getPrograms,
+  updateProgram,
+} from '../../api/catalogue';
+import Modal from '../../components/Modal';
+import PageState from '../../components/PageState';
 import { useToast } from '../../context/toast-context';
-import { useFetch } from '../../hooks/useFetch';
+import { useApi } from '../../hooks/useApi';
 import { ROUTES } from '../../routes';
-import { plural } from '../../utils/format';
-import { EMPTY, toPayload, toValues, validate } from './formulaire';
+import { ans, errorMessage, matches, niveau } from '../../utils/format';
 
-/* Formulaire formation — routes /admin/formations/nouvelle et /admin/formations/:id (ticket P15).
-   Maquette : template/back-office.html. */
+const linkStyle = { color: 'var(--green)', fontWeight: 700 };
+const DEFAULT_FEE = 400000;
 
-// Pour comparer des noms : sans accents ni majuscules.
-const plain = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
-// (0) → « 1re année », (1) → « 2e année »… Libellé des lignes de frais et des cours.
-const niveau = (index) => `${index === 0 ? '1re' : `${index + 1}e`} année`;
-
-// Champ de formulaire : étiquette, saisie, aide et message d'erreur. Le reste des attributs va à la saisie.
-function Field({ id, label, hint, error, as: Input = 'input', ...props }) {
-  return (
-    <div className={`fld${error ? ' bad' : ''}`}>
-      <label htmlFor={id}>{label}</label>
-      <Input id={id} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-err` : undefined} {...props} />
-      {hint && <span className="hint">{hint}</span>}
-      {error && (
-        <span className="err" id={`${id}-err`}>
-          {error}
-        </span>
-      )}
-    </div>
-  );
+// Valeurs de départ du formulaire. L'API renvoie les débouchés et les séries
+// par leur nom : on retrouve leurs identifiants dans les référentiels.
+function toForm(program, lists) {
+  if (!program) {
+    return {
+      name: '',
+      degree_id: lists.degrees[0]?.id ?? '',
+      institute_id: lists.institutes[0]?.id ?? '',
+      domain_id: lists.domains[0]?.id ?? '',
+      description: '',
+      internship_months: 0,
+      fees: [],
+      evening: false,
+      installments: false,
+      bac_series_ids: [],
+      admission_requirements: '',
+      career_ids: [],
+      status: 'published',
+    };
+  }
+  return {
+    name: program.name,
+    degree_id: program.degree.id,
+    institute_id: program.institute.id,
+    domain_id: program.domain.id,
+    description: program.description ?? '',
+    internship_months: program.internship_months,
+    fees: program.fees.map((fee) => String(fee.amount)),
+    evening: program.evening,
+    installments: program.installments,
+    bac_series_ids: lists.bacSeries
+      .filter((series) => program.bac_series.includes(series.code))
+      .map((series) => series.id),
+    admission_requirements: program.admission_requirements ?? '',
+    career_ids: lists.careers.filter((career) => program.careers.includes(career.name)).map((career) => career.id),
+    status: program.status,
+  };
 }
 
-function Formulaire({ program, institutes, domains, degrees, series, careers }) {
+// Une liste de montants de la bonne longueur : on garde ceux déjà saisis, et une
+// année ajoutée reprend le montant de la précédente.
+function resizeFees(fees, duration) {
+  const next = fees.slice(0, duration);
+  while (next.length < duration) {
+    next.push(next.length ? next[next.length - 1] : String(DEFAULT_FEE));
+  }
+  return next;
+}
+
+// Ajoute l'identifiant à la liste s'il n'y est pas, l'enlève sinon.
+const toggle = (list, id) => (list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
+
+function ProgramForm({ program, lists, onClose, onSaved }) {
   const toast = useToast();
   const navigate = useNavigate();
-  const editing = Boolean(program);
-
-  const [values, setValues] = useState(() =>
-    editing
-      ? toValues(program, series, careers)
-      : {
-          ...EMPTY,
-          institute_id: String(institutes[0]?.id ?? ''),
-          domain_id: domains[0]?.id ?? '',
-          degree_id: String(degrees[0]?.id ?? ''),
-          fees: Array.from({ length: degrees[0]?.duration ?? 0 }, () => ''),
-        },
-  );
+  const [form, setForm] = useState(() => {
+    const initial = toForm(program, lists);
+    const degree = lists.degrees.find((item) => item.id === initial.degree_id);
+    return {
+      ...initial,
+      fees: resizeFees(initial.fees, degree?.duration ?? 1),
+    };
+  });
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [careerQuery, setCareerQuery] = useState('');
+  const [apiError, setApiError] = useState('');
+  const [careerSearch, setCareerSearch] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const degree = degrees.find((item) => item.id === Number(values.degree_id));
-  const careerWords = plain(careerQuery).split(/\s+/).filter(Boolean);
+  // La durée des études vient du diplôme choisi : elle n'est pas saisie.
+  const degree = lists.degrees.find((item) => item.id === form.degree_id);
+  const duration = degree?.duration ?? 1;
+  const instituteCount = lists.programs.filter((item) => item.institute.id === form.institute_id).length;
+  const careers = lists.careers.filter((career) => matches(careerSearch, career.name));
 
-  const set = (field) => (event) => {
-    setValues((current) => ({ ...current, [field]: event.target.value }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
-  };
+  const onChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
 
-  const toggle = (field) => () => {
-    setValues((current) => ({ ...current, [field]: !current[field] }));
-  };
-
-  // Une case à cocher d'une liste d'identifiants : série ou débouché.
-  const toggleId = (field) => (id) => {
-    setValues((current) => {
-      const ids = current[field].includes(id) ? current[field].filter((item) => item !== id) : [...current[field], id];
-      return { ...current, [field]: ids };
+  // Changer de diplôme change le nombre d'années, donc le nombre de montants.
+  const onDegree = (event) => {
+    const next = lists.degrees.find((item) => item.id === event.target.value);
+    setForm({
+      ...form,
+      degree_id: next.id,
+      fees: resizeFees(form.fees, next.duration),
     });
-    setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
-  // Le diplôme choisi donne le nombre d'années, donc le nombre de lignes de frais.
-  function changeDegree(event) {
-    const degreeId = event.target.value;
-    const duration = degrees.find((item) => item.id === Number(degreeId))?.duration ?? 0;
-    setValues((current) => ({
-      ...current,
-      degree_id: degreeId,
-      fees: Array.from({ length: duration }, (_, index) => current.fees[index] ?? ''),
-    }));
-    setErrors((current) => ({ ...current, degree_id: undefined, fees: undefined }));
-  }
-
-  const setFee = (index) => (event) => {
-    setValues((current) => {
-      const fees = current.fees.slice();
-      fees[index] = event.target.value;
-      return { ...current, fees };
-    });
-    setErrors((current) => ({ ...current, fees: undefined }));
+  const onFee = (index, value) => {
+    const fees = [...form.fees];
+    fees[index] = value;
+    setForm({ ...form, fees });
   };
 
-  async function submit(event) {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    const found = validate(values);
+    setApiError('');
+    const found = {};
+    if (!form.name.trim()) found.name = "L'intitulé est obligatoire.";
+    if (form.fees.some((fee) => !(Number(fee) > 0))) found.fees = 'Indiquez les frais de chaque niveau.';
+    if (form.career_ids.length === 0) found.careers = 'Cochez au moins un débouché.';
     setErrors(found);
     const count = Object.keys(found).length;
     if (count > 0) {
-      toast(`${plural(count, 'erreur')} dans le formulaire.`, true);
-      document.querySelector('.fld.bad')?.scrollIntoView?.({ block: 'center' });
+      toast(`${count} erreur${count > 1 ? 's' : ''} dans le formulaire.`, true);
       return;
     }
-
-    setSaving(true);
+    const body = {
+      name: form.name.trim(),
+      institute_id: form.institute_id,
+      domain_id: form.domain_id,
+      degree_id: form.degree_id,
+      description: form.description.trim() || null,
+      admission_requirements: form.admission_requirements.trim() || null,
+      fees: form.fees.map(Number),
+      bac_series_ids: form.bac_series_ids,
+      career_ids: form.career_ids,
+      evening: form.evening,
+      internship_months: Number(form.internship_months) || 0,
+      installments: form.installments,
+      status: form.status,
+    };
+    setSubmitting(true);
     try {
-      const payload = toPayload(values);
-      if (editing) {
-        await request(`/admin/programs/${program.id}`, { method: 'PUT', body: payload });
+      if (program) {
+        await updateProgram(program.id, body);
         toast('Formation mise à jour.');
-        navigate(ROUTES.formations);
+        onSaved();
       } else {
-        const created = await request('/admin/programs', { method: 'POST', body: payload });
-        toast('Formation créée. Ajoutez maintenant ses cours.');
-        navigate(`${ROUTES.cours}?formation=${created.id}`);
+        // Une formation neuve n'a pas encore de programme : on enchaîne sur ses cours.
+        const created = await createProgram(body);
+        toast('Formation ajoutée. Ajoutez maintenant ses cours.');
+        navigate(`${ROUTES.cours}?formation=${created.id}&ajout=1`);
       }
-    } catch (error) {
-      toast(errorMessage(error), true);
-      setSaving(false);
+    } catch (err) {
+      setApiError(errorMessage(err));
+      setSubmitting(false);
     }
-  }
-
-  const careersFiltered = careers.filter((career) =>
-    careerWords.every((word) => plain(career.name).includes(word)),
-  );
+  };
 
   return (
-    <>
-      <div className="pagehead">
-        <div>
-          <Link className="btn ghost sm" to={ROUTES.formations}>
-            <Icon name="back" />
-            Retour à la liste
-          </Link>
-          <h1>{editing ? 'Modifier la formation' : 'Ajouter une formation'}</h1>
-          <p>
-            {editing
-              ? 'Les modifications sont reprises par le site public.'
-              : "Renseignez l'intitulé, le diplôme visé et l'institut qui porte la formation."}
-          </p>
-        </div>
-      </div>
-
-      <form className="form" noValidate onSubmit={submit}>
+    <Modal
+      title={program ? 'Modifier la formation' : 'Ajouter une formation'}
+      subtitle={
+        program
+          ? 'Les modifications sont reprises par le site public.'
+          : "Renseignez l'intitulé, le diplôme visé et l'institut qui porte la formation."
+      }
+      onClose={onClose}
+    >
+      <form className="form" onSubmit={onSubmit} noValidate>
         <fieldset>
           <legend>Identification</legend>
           <div className="row two">
-            <Field
-              id="f-name"
-              label="Intitulé de la filière"
-              required
-              value={values.name}
-              onChange={set('name')}
-              placeholder="ex. Comptabilité et gestion des entreprises"
-              error={errors.name}
-            />
-            <Field id="f-degree" label="Diplôme délivré" as="select" value={values.degree_id} onChange={changeDegree} error={errors.degree_id}>
-              <option value="">Choisir…</option>
-              {degrees.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} — {item.duration} an{item.duration > 1 ? 's' : ''}
-                </option>
-              ))}
-            </Field>
+            <div className={`fld${errors.name ? ' bad' : ''}`}>
+              <label htmlFor="f-nom">Intitulé de la filière</label>
+              <input
+                id="f-nom"
+                name="name"
+                placeholder="ex. Comptabilité et gestion des entreprises"
+                value={form.name}
+                onChange={onChange}
+              />
+              {errors.name && <span className="err">{errors.name}</span>}
+            </div>
+            <div className="fld">
+              <label htmlFor="f-dip">Diplôme délivré</label>
+              <select id="f-dip" value={form.degree_id} onChange={onDegree}>
+                {lists.degrees.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({ans(item.duration)})
+                  </option>
+                ))}
+              </select>
+              <span className="hint">
+                <Link to={ROUTES.diplomes} style={linkStyle}>
+                  Gérer les diplômes
+                </Link>
+              </span>
+            </div>
           </div>
           <div className="row two">
-            <Field id="f-institute" label="Institut" as="select" value={values.institute_id} onChange={set('institute_id')} error={errors.institute_id}>
-              <option value="">Choisir…</option>
-              {institutes.map((institut) => (
-                <option key={institut.id} value={institut.id}>
-                  {institut.short_name} — {institut.name}
-                </option>
-              ))}
-            </Field>
-            <Field id="f-domain" label="Domaine" as="select" value={values.domain_id} onChange={set('domain_id')} error={errors.domain_id}>
-              <option value="">Choisir…</option>
-              {domains.map((domaine) => (
-                <option key={domaine.id} value={domaine.id}>
-                  {domaine.name}
-                </option>
-              ))}
-            </Field>
+            <div className="fld">
+              <label htmlFor="f-inst">Institut</label>
+              <select id="f-inst" name="institute_id" value={form.institute_id} onChange={onChange}>
+                {lists.institutes.map((institute) => (
+                  <option key={institute.id} value={institute.id}>
+                    {institute.short_name} - {institute.name}
+                  </option>
+                ))}
+              </select>
+              <span className="hint">
+                {instituteCount} formation{instituteCount > 1 ? 's' : ''} déjà rattachée{instituteCount > 1 ? 's' : ''}{' '}
+                à cet institut.
+              </span>
+            </div>
+            <div className="fld">
+              <label htmlFor="f-dom">Domaine</label>
+              <select id="f-dom" name="domain_id" value={form.domain_id} onChange={onChange}>
+                {lists.domains.map((domain) => (
+                  <option key={domain.id} value={domain.id}>
+                    {domain.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="row">
-            <Field
-              id="f-description"
-              label="Description"
-              as="textarea"
-              value={values.description}
-              onChange={set('description')}
-              placeholder="Présentation courte de la formation, affichée sur sa fiche publique"
-            />
+            <div className="fld">
+              <label htmlFor="f-desc">Description</label>
+              <textarea
+                id="f-desc"
+                name="description"
+                placeholder="Présentation courte de la formation, affichée sur sa fiche publique"
+                value={form.description}
+                onChange={onChange}
+              />
+            </div>
           </div>
         </fieldset>
 
@@ -203,63 +247,61 @@ function Formulaire({ program, institutes, domains, degrees, series, careers }) 
           <div className="row two">
             <div className="fld">
               <label>Durée des études</label>
-              <p>
-                {values.degree_id
-                  ? `${degree?.duration ?? 0} an${degree?.duration > 1 ? 's' : ''} (${degree?.name ?? ''})`
-                  : "Choisissez d'abord le diplôme."}
-              </p>
+              <p style={{ fontWeight: 700, padding: '11px 0' }}>{ans(duration)}</p>
               <span className="hint">Définie par le diplôme délivré.</span>
             </div>
-            <Field
-              id="f-stage"
-              label="Stage (mois)"
-              type="number"
-              min="0"
-              max="12"
-              value={values.internship_months}
-              onChange={set('internship_months')}
-              hint="0 signifie qu'aucun stage n'est prévu."
-              error={errors.internship_months}
-            />
+            <div className="fld">
+              <label htmlFor="f-stage">Stage (mois)</label>
+              <input
+                id="f-stage"
+                name="internship_months"
+                type="number"
+                min="0"
+                max="12"
+                value={form.internship_months}
+                onChange={onChange}
+              />
+              <span className="hint">0 signifie qu'aucun stage n'est prévu.</span>
+            </div>
           </div>
-          <div className="row">
+          <div className="row" style={{ marginTop: 16 }}>
             <div className={`fld${errors.fees ? ' bad' : ''}`}>
               <label>Frais par niveau (FCFA par an)</label>
               <div className="tarifs">
-                {values.fees.length > 0 ? (
-                  values.fees.map((montant, index) => (
-                    <label key={index}>
-                      {niveau(index)}
-                      <input
-                        type="number"
-                        min="0"
-                        step="10000"
-                        value={montant}
-                        onChange={setFee(index)}
-                        aria-label={`Frais ${niveau(index)}`}
-                      />
-                    </label>
-                  ))
-                ) : (
-                  <span className="hint">Choisissez un diplôme pour fixer les frais par niveau.</span>
-                )}
+                {form.fees.map((fee, index) => (
+                  <label key={index}>
+                    {niveau(index + 1)}
+                    <input
+                      type="number"
+                      min="0"
+                      step="10000"
+                      aria-label={`Frais ${niveau(index + 1)}`}
+                      value={fee}
+                      onChange={(event) => onFee(index, event.target.value)}
+                    />
+                  </label>
+                ))}
               </div>
-              {errors.fees && (
-                <span className="err" role="alert">
-                  {errors.fees}
-                </span>
-              )}
+              {errors.fees && <span className="err">{errors.fees}</span>}
             </div>
           </div>
-          <div className="row">
+          <div className="row" style={{ marginTop: 16 }}>
             <div className="fld">
               <label>Options</label>
               <label className="check">
-                <input type="checkbox" checked={values.evening} onChange={toggle('evening')} />
+                <input
+                  type="checkbox"
+                  checked={form.evening}
+                  onChange={(event) => setForm({ ...form, evening: event.target.checked })}
+                />
                 Cours du soir
               </label>
               <label className="check">
-                <input type="checkbox" checked={values.installments} onChange={toggle('installments')} />
+                <input
+                  type="checkbox"
+                  checked={form.installments}
+                  onChange={(event) => setForm({ ...form, installments: event.target.checked })}
+                />
                 Paiement en plusieurs fois
               </label>
             </div>
@@ -272,100 +314,112 @@ function Formulaire({ program, institutes, domains, degrees, series, careers }) 
             <div className="fld">
               <label>Séries du bac acceptées</label>
               <div className="sergrid">
-                {series.length > 0 ? (
-                  series.map((serie) => (
-                    <label className="check" key={serie.id}>
-                      <input
-                        type="checkbox"
-                        checked={values.series_ids.includes(serie.id)}
-                        onChange={() => toggleId('series_ids')(serie.id)}
-                      />
-                      Série {serie.code}
-                      {serie.label ? ` — ${serie.label}` : ''}
-                    </label>
-                  ))
-                ) : (
-                  <span className="hint">Aucune série au référentiel.</span>
-                )}
+                {lists.bacSeries.length === 0 && <span className="hint">Aucune série au référentiel.</span>}
+                {lists.bacSeries.map((series) => (
+                  <label className="check" key={series.id}>
+                    <input
+                      type="checkbox"
+                      checked={form.bac_series_ids.includes(series.id)}
+                      onChange={() =>
+                        setForm({
+                          ...form,
+                          bac_series_ids: toggle(form.bac_series_ids, series.id),
+                        })
+                      }
+                    />
+                    Série {series.code}
+                    {series.label ? ` (${series.label})` : ''}
+                  </label>
+                ))}
               </div>
               <span className="hint">
                 Aucune case cochée : la série n'est pas un critère d'admission.{' '}
-                <Link to={ROUTES.series}>Gérer les séries</Link>
+                <Link to={ROUTES.series} style={linkStyle}>
+                  Gérer les séries
+                </Link>
               </span>
             </div>
-            <Field
-              id="f-admission"
-              label="Autres conditions"
-              value={values.admission_requirements}
-              onChange={set('admission_requirements')}
-              placeholder="ex. Étude de dossier et entretien"
-            />
+            <div className="fld">
+              <label htmlFor="f-admission">Autres conditions</label>
+              <input
+                id="f-admission"
+                name="admission_requirements"
+                placeholder="ex. Étude de dossier et entretien"
+                value={form.admission_requirements}
+                onChange={onChange}
+              />
+            </div>
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Contenu</legend>
           <div className="row">
-            <div className={`fld${errors.career_ids ? ' bad' : ''}`}>
+            <div className={`fld${errors.careers ? ' bad' : ''}`}>
               <label htmlFor="deb-find">Débouchés</label>
               <input
                 id="deb-find"
                 type="search"
                 placeholder="Filtrer les débouchés"
-                value={careerQuery}
-                onChange={(event) => setCareerQuery(event.target.value)}
+                value={careerSearch}
+                onChange={(event) => setCareerSearch(event.target.value)}
               />
               <div className="deblist">
-                {careersFiltered.length > 0 ? (
-                  careersFiltered.map((career) => (
-                    <label className="check" key={career.id}>
-                      <input
-                        type="checkbox"
-                        checked={values.career_ids.includes(career.id)}
-                        onChange={() => toggleId('career_ids')(career.id)}
-                      />
-                      {career.name}
-                    </label>
-                  ))
-                ) : (
-                  <span className="hint">
-                    {careers.length === 0 ? 'Aucun débouché au référentiel.' : 'Aucun débouché ne correspond à ce filtre.'}
-                  </span>
-                )}
+                {lists.careers.length === 0 && <span className="hint">Aucun débouché au référentiel.</span>}
+                {careers.map((career) => (
+                  <label className="check" key={career.id}>
+                    <input
+                      type="checkbox"
+                      checked={form.career_ids.includes(career.id)}
+                      onChange={() =>
+                        setForm({
+                          ...form,
+                          career_ids: toggle(form.career_ids, career.id),
+                        })
+                      }
+                    />
+                    {career.name}
+                  </label>
+                ))}
               </div>
               <span className="hint">
-                Au moins un débouché est obligatoire. <Link to={ROUTES.debouches}>Gérer les débouchés</Link>
+                <Link to={ROUTES.debouches} style={linkStyle}>
+                  Gérer les débouchés
+                </Link>
               </span>
-              {errors.career_ids && (
-                <span className="err" role="alert">
-                  {errors.career_ids}
-                </span>
-              )}
+              {errors.careers && <span className="err">{errors.careers}</span>}
             </div>
           </div>
-          <div className="row">
+          <div className="row" style={{ marginTop: 16 }}>
             <div className="fld">
               <label>Programme</label>
-              {editing ? (
+              {program ? (
                 <>
                   <div className="programme">
-                    {program.years.map((annee) => (
-                      <div className="annee" key={annee.year}>
-                        <b>{annee.label}</b>
-                        {annee.courses.length > 0 ? (
-                          <ul>
-                            {annee.courses.map((cours) => (
-                              <li key={cours}>{cours}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <span className="hint">Aucun cours.</span>
-                        )}
-                      </div>
-                    ))}
+                    {Array.from({ length: duration }, (_, index) => {
+                      const year = program.years.find((item) => item.year === index + 1);
+                      return (
+                        <div className="annee" key={index}>
+                          <b>{niveau(index + 1)}</b>
+                          {year ? (
+                            <ul>
+                              {year.courses.map((course) => (
+                                <li key={course}>{course}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="hint" style={{ display: 'block' }}>
+                              Aucun cours.
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   <span className="hint">
-                    <Link to={`${ROUTES.cours}?formation=${program.id}`}>Gérer les cours de cette formation</Link>
+                    <Link to={`${ROUTES.cours}?formation=${program.id}`} style={linkStyle}>
+                      Gérer les cours de cette formation
+                    </Link>
                   </span>
                 </>
               ) : (
@@ -379,70 +433,93 @@ function Formulaire({ program, institutes, domains, degrees, series, careers }) 
 
         <fieldset>
           <legend>Publication</legend>
-          <Field id="f-status" label="Statut" as="select" value={values.status} onChange={set('status')}>
-            <option value="published">Publiée — visible sur le site public</option>
-            <option value="draft">Brouillon — invisible du public</option>
-          </Field>
+          <div className="fld">
+            <label htmlFor="f-statut">Statut</label>
+            <select id="f-statut" name="status" value={form.status} onChange={onChange}>
+              <option value="published">Publiée : visible sur le site public</option>
+              <option value="draft">Brouillon : invisible du public</option>
+            </select>
+          </div>
         </fieldset>
 
+        {apiError && (
+          <div className="err" role="alert">
+            {apiError}
+          </div>
+        )}
+
         <div className="formfoot">
-          <button className="btn" type="submit" disabled={saving}>
-            {saving ? 'Enregistrement…' : editing ? 'Enregistrer les modifications' : 'Créer la formation'}
+          <button className="btn" type="submit" disabled={submitting}>
+            {program ? 'Enregistrer les modifications' : 'Créer la formation'}
           </button>
-          <Link className="btn line" to={ROUTES.formations}>
+          <button className="btn line" type="button" onClick={onClose}>
             Annuler
-          </Link>
-          <span className="sp">
-            {editing ? `Identifiant : ${program.id}` : "L'identifiant sera généré automatiquement."}
-          </span>
+          </button>
         </div>
       </form>
-    </>
+    </Modal>
   );
 }
 
+// Route /admin/formations/nouvelle ou /admin/formations/:id : le formulaire
+// s'ouvre dans une fenêtre, par-dessus la liste des formations. Les référentiels
+// et la formation sont chargés d'abord, pour partir directement des bonnes valeurs.
 function FormulaireFormation() {
   const { id } = useParams();
-  const editing = id !== undefined;
-  // Une adresse qui n'est pas un identifiant (/admin/formations/abc) ne mène à aucune formation.
-  const validId = !editing || /^[1-9]\d*$/.test(id);
+  const navigate = useNavigate();
+  // La liste, affichée derrière, fournit de quoi se recharger après un enregistrement.
+  const { reloadList } = useOutletContext();
+  const { data, loading, error } = useApi(async () => {
+    const [degrees, domains, bacSeries, careers, institutes, programs, program] = await Promise.all([
+      getDegrees(),
+      getDomains(),
+      getBacSeries(),
+      getCareers(),
+      getInstitutes(),
+      getPrograms(),
+      id ? getProgram(id) : null,
+    ]);
+    return {
+      lists: { degrees, domains, bacSeries, careers, institutes, programs },
+      program,
+    };
+  }, [id]);
 
-  const program = useFetch(editing && validId ? `/admin/programs/${id}` : null);
-  const institutes = useFetch('/institutes');
-  const domains = useFetch('/domains');
-  const degrees = useFetch('/degrees');
-  const series = useFetch('/bac-series');
-  const careers = useFetch('/admin/careers');
+  const close = () => navigate(ROUTES.formations);
+  const title = id ? 'Modifier la formation' : 'Ajouter une formation';
 
-  if (!validId || program.error?.status === 404) {
+  if (!data || loading) {
     return (
-      <div className="empty">
-        <h3>Formation introuvable</h3>
-        <p>Cette formation n'existe pas ou a été supprimée.</p>
-        <Link className="btn line" to={ROUTES.formations}>
-          Retour à la liste
-        </Link>
-      </div>
+      <Modal title={title} onClose={close}>
+        <PageState loading={loading} error={error} />
+      </Modal>
     );
   }
-
-  const failed = [program, institutes, domains, degrees, series, careers].find((source) => source.error);
-  if (failed) return <Status error={failed.error} onRetry={failed.reload} />;
-  if (!institutes.data || !domains.data || !degrees.data || !series.data || !careers.data || (editing && !program.data)) {
-    return <Status loading />;
+  if (data.lists.institutes.length === 0 || data.lists.degrees.length === 0) {
+    return (
+      <Modal title={title} size="medium" onClose={close}>
+        <div className="empty">
+          <h3>Il manque un institut ou un diplôme</h3>
+          <p>Une formation appartient à un institut et délivre un diplôme : créez-les d'abord.</p>
+          <Link className="btn line" to={ROUTES.instituts}>
+            Voir les instituts
+          </Link>
+        </div>
+      </Modal>
+    );
   }
-
   return (
-    <Formulaire
-      key={id ?? 'nouveau'}
-      program={program.data}
-      institutes={institutes.data.items}
-      domains={domains.data}
-      degrees={degrees.data}
-      series={series.data}
-      careers={careers.data}
+    <ProgramForm
+      key={id ?? 'nouvelle'}
+      program={data.program}
+      lists={data.lists}
+      onClose={close}
+      onSaved={() => {
+        reloadList();
+        close();
+      }}
     />
   );
 }
 
-export default FormulaireFormation;
+export default FormulaireFormation

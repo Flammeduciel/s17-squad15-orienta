@@ -1,4 +1,4 @@
-# Cadrage Jira — Orienta Brazzaville
+# Cadrage Jira - Orienta Brazzaville
 
 Document destiné au Business Analyst, pour créer et organiser le backlog dans
 Jira. Il ne contient aucune décision : il reprend le périmètre et les
@@ -23,7 +23,7 @@ transposer, compléter les champs Jira et créer les liens.
 
 | Source | Rôle | Règle |
 |--------|------|-------|
-| `docs/openapi.yaml` | Contrat d'API (version 2.0.0). Ses 43 opérations décrivent ce que le système expose. | Une divergence entre le code et ce fichier se corrige dans le contrat, par PR dédié — jamais par une dérogation dans le code. |
+| `docs/openapi.yaml` | Contrat d'API (version 2.0.0). Ses 47 opérations décrivent ce que le système expose. | Une divergence entre le code et ce fichier se corrige dans le contrat, par PR dédié - jamais par une dérogation dans le code. |
 | `template/index.html` et `template/back-office.html` | Maquettes du site public et du back-office. Définissent l'apparence, les libellés et les parcours. | Une page peut diverger d'une maquette si le contrat l'impose ; dans ce cas, le signaler. |
 | `docs/roadmap-dev.md` | Répartition validée des pages et chantiers. | N'est pas modifiable par le BA sans arbitrage du lead technique. |
 | `docs/schema.sql` | Schéma de la base, 13 tables et une vue. | Toute colonne utilisée par un critère d'acceptation doit exister ici. |
@@ -44,13 +44,13 @@ Un epic par module fonctionnel, jamais par sprint ni par développeur.
 |----------|-----|---------|
 | `SOCR` | Socle des interfaces | S4, S5, S6 |
 | `BACK` | Backend | BK1 à BK6 |
-| `PUBC` | Site public — catalogue et pages | P2, P3, P4, P5, P6, P7 |
-| `PUBD` | Site public — contact | P9 |
-| `ADMA` | Back-office — accès | P1, P10 |
-| `ADMD` | Back-office — pilotage | P11 |
-| `ADMF` | Back-office — formations | P14, P15 |
-| `ADMI` | Back-office — instituts | P16, P17 |
-| `ADMR` | Back-office — cours et référentiels | P19, P20, P21, P22, P23 |
+| `PUBC` | Site public - catalogue et pages | P2, P3, P4, P5, P6, P7 |
+| `PUBD` | Site public - contact | P9 |
+| `ADMA` | Back-office - accès | P1, P10 |
+| `ADMD` | Back-office - pilotage | P11 |
+| `ADMF` | Back-office - formations | P14, P15 |
+| `ADMI` | Back-office - instituts | P16, P17 |
+| `ADMR` | Back-office - cours et référentiels | P19, P20, P21, P22, P23 |
 
 ### 3.2 Champs à renseigner pour chaque ticket
 
@@ -66,12 +66,12 @@ Un epic par module fonctionnel, jamais par sprint ni par développeur.
 
 ---
 
-## 4. Stories — pages
+## 4. Stories - pages
 
 Chaque ligne contient la User Story et deux critères d'acceptation. Si l'écran
 exige davantage de critères, le BA les ajoute sans contredire ceux-ci.
 
-### 4.1 Site public — catalogue et pages (epic `PUBC`)
+### 4.1 Site public - catalogue et pages (epic `PUBC`)
 
 | Réf | Page | Assigné |
 |---|---|---|
@@ -82,46 +82,46 @@ exige davantage de critères, le BA les ajoute sans contredire ceux-ci.
 | P6 | Fiche institut `/instituts/:id` | Arsène AKIANA |
 | P7 | À propos `/a-propos` | Fresnel OBA VERCHY |
 
-**P2 — Accueil et recherche**
+**P2 - Accueil et recherche**
 - US : En tant que visiteur, je veux trouver un institut, une filière ou un diplôme depuis l'accueil, afin de repérer les établissements qui correspondent à mon projet.
-- CA1 : *Given* j'ouvre la page d'accueil, *Then* une barre de recherche « institut, filière ou diplôme » et quatre accès — instituts, formations, diplômes, débouchés — s'affichent, et la liste des instituts est présentée par défaut avec leur arrondissement, leur badge d'agrément et leurs frais d'inscription.
+- CA1 : *Given* j'ouvre la page d'accueil, *Then* une barre de recherche « institut, filière ou diplôme » et quatre accès - instituts, formations, diplômes, débouchés - s'affichent, et la liste des instituts est présentée par défaut avec leur arrondissement, leur badge d'agrément et leurs frais d'inscription.
 - CA2 : *Given* aucun résultat ne correspond à ma recherche ou à mes filtres, *When* la liste se recharge, *Then* le message « Résultat introuvable » s'affiche, invite à vérifier l'orthographe et propose d'effacer les filtres.
 - Compléments à vérifier : chaque accès change la grille (instituts, formations, diplômes avec leur durée, débouchés) ; les filtres du prototype (arrondissement, débouché visé, diplôme, durée, budget annuel, série du bac, organisation) ; les séries, durées et domaines proposés viennent des référentiels, pas de listes figées ; les filtres se reflètent dans l'adresse.
 
-**P3 — Favoris**
+**P3 - Favoris**
 - US : En tant que visiteur, je veux mettre de côté les formations qui m'intéressent, afin de les retrouver plus tard.
 - CA1 : *Given* j'ai mis une formation de côté, *When* je quitte le site puis j'y reviens, *Then* elle figure toujours dans mes favoris.
 - CA2 : *Given* j'ai retiré une formation de mes favoris, *When* j'ouvre la page des favoris, *Then* elle n'y figure plus.
 
-**P4 — Fiche formation**
+**P4 - Fiche formation**
 - US : En tant que visiteur, je veux consulter le détail d'une formation, afin de vérifier qu'elle correspond à mon projet avant de me déplacer.
 - CA1 : *Given* une formation existe, *When* j'ouvre sa fiche, *Then* j'y vois le diplôme et sa durée, les frais par niveau, les séries du bac admises et les autres conditions d'admission, l'existence de cours du soir, la durée de stage, le paiement en tranches, le programme année par année et les débouchés.
 - CA2 : *Given* la formation appartient à un institut, *When* j'ouvre sa fiche, *Then* les autres formations de cet institut sont proposées, ainsi qu'un moyen de contacter l'institut par téléphone, par WhatsApp et par le formulaire de question.
 - Compléments à vérifier : les débouchés de la formation sont cliquables et mènent à P5 ; une formation en brouillon n'est pas consultable ; l'identifiant absent de la fiche affiche une page d'erreur et non un écran vide.
 
-**P5 — Débouchés**
+**P5 - Débouchés**
 - US : En tant que visiteur, je veux voir les formations qui mènent à un débouché donné, afin de savoir quelles études viser pour ce métier.
 - CA1 : *Given* j'ai sélectionné un débouché depuis une fiche ou depuis l'accueil, *When* j'arrive sur sa page, *Then* les formations sont filtrées sur ce débouché et son nom est lisible dans l'adresse.
 - CA2 : *Given* un débouché n'a aucune formation publiée, *When* j'ouvre sa page, *Then* un message l'indique et propose de revenir à l'accueil.
 
-**P6 — Fiche institut**
+**P6 - Fiche institut**
 - US : En tant que visiteur, je veux consulter la fiche d'un institut, afin de vérifier qu'il est sérieux avant de m'y inscrire.
 - CA1 : *Given* un institut existe, *When* j'ouvre sa fiche, *Then* j'y vois son image, sa présentation, son adresse, ses contacts, ses frais d'inscription, sa clôture d'inscription et sa date de rentrée ; s'il est agréé, un badge bleu et son numéro d'agrément, sinon son nom seul.
 - CA2 : *Given* un institut publie des formations, *When* j'ouvre sa fiche, *Then* j'y vois ses diplômes délivrés, ses débouchés, et pour chaque formation publiée ses tarifs par niveau et ses conditions d'admission.
 - Compléments : avantages de l'institut s'il en a ; contact par WhatsApp avec message pré-rempli, par e-mail et par appel.
 
-**P7 — À propos**
+**P7 - À propos**
 - US : En tant que visiteur, je veux comprendre à quoi sert Orienta, afin de savoir si je peux m'y fier pour choisir mon orientation.
 - CA1 : *Given* j'ouvre la page À propos, *Then* le problème décrit, ce que fait Orienta, le public visé et l'engagement sur l'information sont présentés.
 - Complément : le contenu reprend les quatre sections du prototype.
 
-### 4.2 Site public — contact (epic `PUBD`)
+### 4.2 Site public - contact (epic `PUBD`)
 
 | Réf | Page | Assigné |
 |---|---|---|
 | P9 | Question à un institut (formulaire de la fiche formation) | Samuel AKOMBO |
 
-**P9 — Question à un institut**
+**P9 - Question à un institut**
 - US : En tant que visiteur, je veux poser une question à un institut depuis la fiche d'une formation, afin d'obtenir une réponse avant de me déplacer.
 - CA1 : *Given* j'ai renseigné mon nom, mon adresse e-mail et ma question, *When* j'envoie le formulaire, *Then* la question est transmise à l'institut et un accusé de réception s'affiche.
 - CA2 : *Given* j'ouvre le formulaire depuis la fiche d'une formation, *When* la demande part, *Then* elle porte déjà cette formation et son institut.
@@ -130,32 +130,32 @@ exige davantage de critères, le BA les ajoute sans contredire ceux-ci.
 La page « Référencer un institut » (P8) est retirée : aucune exigence ne la
 demande, et la Squad collecte elle-même les informations des instituts.
 
-### 4.3 Back-office — accès (epic `ADMA`)
+### 4.3 Back-office - accès (epic `ADMA`)
 
 | Réf | Page | Assigné |
 |---|---|---|
 | P1 | Connexion `/connexion` | Samuel AKOMBO |
 | P10 | Compte `/compte` | Samuel AKOMBO |
 
-**P1 — Connexion**
+**P1 - Connexion**
 - US : En tant qu'administrateur, je veux me connecter avec mon nom d'utilisateur et mon mot de passe, afin d'accéder aux pages d'administration.
 - CA1 : *Given* mon identifiant et mon mot de passe sont valides, *When* je les saisis, *Then* j'accède au tableau de bord.
 - CA2 : *Given* mon identifiant ou mon mot de passe est erroné, *When* je les saisis, *Then* un message explicite s'affiche sans révéler lequel des deux est incorrect.
 - CA3 : *Given* j'ai oublié mon mot de passe, *When* je clique sur « Mot de passe oublié » et saisis l'e-mail de mon compte, *Then* un lien de réinitialisation m'est envoyé (EX-17).
 - Compléments : la session se maintient d'une visite à l'autre ; toute page d'administration est inaccessible sans session ; la page ne propose aucune inscription, les comptes sont ouverts par un SuperAdmin.
 
-**P10 — Compte**
+**P10 - Compte**
 - US : En tant qu'administrateur, je veux consulter mon compte et me déconnecter, afin de clôturer mon travail en toute sécurité.
 - CA1 : *Given* je suis connecté, *When* j'ouvre la page compte, *Then* mon identité et mon rôle s'affichent.
 - CA2 : *Given* je suis connecté, *When* je me déconnecte, *Then* la session est fermée et je reviens à la page de connexion.
 
-### 4.4 Back-office — pilotage (epic `ADMD`)
+### 4.4 Back-office - pilotage (epic `ADMD`)
 
 | Réf | Page | Assigné |
 |---|---|---|
 | P11 | Tableau de bord `/admin` | Fresnel OBA VERCHY |
 
-**P11 — Tableau de bord**
+**P11 - Tableau de bord**
 - US : En tant qu'administrateur, je veux voir les indicateurs clés du catalogue, afin de piloter la plateforme.
 - CA1 : *Given* le catalogue contient des données, *When* j'ouvre le tableau de bord, *Then* les 5 indicateurs s'affichent : nombre d'établissements, de formations et filières, d'arrondissements couverts, de diplômes délivrés et de débouchés (EX-07).
 - CA2 : *Given* la base de données est injoignable, *When* j'ouvre le tableau de bord, *Then* un message d'erreur s'affiche plutôt qu'un tableau vide.
@@ -165,38 +165,38 @@ Les pages « Demandes de contact » (P12) et « Demandes de référencement » (
 sont retirées : aucune exigence ne prévoit de boîte de réception dans le
 back-office.
 
-### 4.5 Back-office — formations (epic `ADMF`)
+### 4.5 Back-office - formations (epic `ADMF`)
 
 | Réf | Page | Assigné |
 |---|---|---|
 | P14 | Liste des formations `/admin/formations` | Elie NGANGA |
 | P15 | Formulaire formation `/admin/formations/nouvelle` et `/:id` | Elie NGANGA |
 
-**P14 — Liste des formations**
+**P14 - Liste des formations**
 - US : En tant qu'administrateur, je veux parcourir les formations, publiées ou en brouillon, afin de corriger ou retirer celles qui sont incomplètes.
 - CA1 : *Given* le catalogue contient des formations, *When* j'ouvre la liste, *Then* elles s'affichent avec l'institut, le domaine, le diplôme et les frais annuels.
 - CA2 : *Given* la liste est longue, *When* j'atteins la fin des résultats, *Then* la liste est paginée et je peux passer à la page suivante.
 - Compléments : recherche, filtres par domaine et par statut ; chaque ligne offre l'édition et la suppression avec confirmation.
 
-**P15 — Formulaire formation**
+**P15 - Formulaire formation**
 - US : En tant qu'administrateur, je veux créer et modifier une formation, afin que le catalogue reste à jour.
 - CA1 : *Given* je remplis tous les champs d'une nouvelle formation au statut publié, *When* je l'enregistre, *Then* elle apparaît sur le site public ; au statut brouillon, elle n'y apparaît pas.
 - CA2 : *Given* je choisis un diplôme, *When* je le sélectionne, *Then* la durée des études s'affiche d'après ce diplôme, sans être saisie, et un champ de frais est proposé pour chaque année.
 - Compléments à vérifier : les séries du bac et les débouchés se cochent dans leurs référentiels ; aucune série cochée signifie que la série n'est pas un critère ; le programme s'affiche année par année et renvoie vers la page Cours (P19) ; une formation créée enchaîne sur l'ajout de ses cours ; un même institut ne peut pas avoir deux formations du même nom ; la modification reprend toutes les valeurs.
 
-### 4.6 Back-office — instituts (epic `ADMI`)
+### 4.6 Back-office - instituts (epic `ADMI`)
 
 | Réf | Page | Assigné |
 |---|---|---|
 | P16 | Liste des instituts `/admin/instituts` | Arsène AKIANA |
 | P17 | Formulaire institut `/admin/instituts/nouveau` et `/:id` | Arsène AKIANA |
 
-**P16 — Liste des instituts**
+**P16 - Liste des instituts**
 - US : En tant qu'administrateur, je veux parcourir les instituts référencés, afin de vérifier leurs informations et leur agrément.
 - CA1 : *Given* des instituts sont référencés, *When* j'ouvre la liste, *Then* ils s'affichent avec leur sigle, leur nom, leur arrondissement et leur numéro d'agrément, ou la mention « Non agréé ».
 - CA2 : *Given* plusieurs arrondissements sont représentés, *When* je filtre par arrondissement ou par agrément, *Then* seuls les instituts correspondants restent affichés.
 
-**P17 — Formulaire institut**
+**P17 - Formulaire institut**
 - US : En tant qu'administrateur, je veux créer et modifier un institut, afin que sa fiche publique soit exacte.
 - CA1 : *Given* je remplis tous les champs obligatoires d'un nouvel institut, *When* je l'enregistre, *Then* sa fiche publique est accessible.
 - CA2 : *Given* je laisse le numéro d'agrément vide, *When* j'enregistre, *Then* l'institut est enregistré comme non agréé et sa fiche publique affiche son nom seul, sans badge (EX-14).
@@ -204,7 +204,7 @@ back-office.
 - CA4 : *Given* je choisis un fichier d'un autre format ou trop lourd, *When* je le sélectionne, *Then* il est refusé avec un message explicite et l'aperçu en place est conservé.
 - Compléments : identité, arrondissement, adresse, téléphone, WhatsApp, courriel, frais d'inscription, clôture des inscriptions, rentrée (jamais avant la clôture), description, avantages, image (dépôt, remplacement, retrait) ; nom et sigle uniques ; supprimer un institut supprime ses formations, après confirmation.
 
-### 4.7 Back-office — cours et référentiels (epic `ADMR`)
+### 4.7 Back-office - cours et référentiels (epic `ADMR`)
 
 | Réf | Page | Assigné |
 |---|---|---|
@@ -214,30 +214,30 @@ back-office.
 | P22 | Séries du bac `/admin/series` | Fresnel OBA VERCHY |
 | P23 | Domaines d'insertion `/admin/domaines` | Fresnel OBA VERCHY |
 
-**P19 — Cours**
+**P19 - Cours**
 - US : En tant qu'administrateur, je veux gérer un catalogue de cours et les rattacher aux formations, afin que le programme de chaque formation soit exact, année par année.
 - CA1 : *Given* je crée un cours et je le rattache à deux formations en précisant l'année d'études de chacune, *When* j'enregistre, *Then* il apparaît dans le programme des deux formations, à l'année choisie.
 - CA2 : *Given* la liste est filtrée sur une formation, *When* je rattache un cours déjà au catalogue ou que j'en retire un, *Then* le programme de cette formation change et le cours reste au catalogue.
 - Compléments : les années proposées viennent du diplôme de la formation ; un intitulé déjà présent au catalogue est refusé ; supprimer un cours le retire de toutes ses formations, après confirmation.
 
-**P20 — Diplômes**
+**P20 - Diplômes**
 - US : En tant qu'administrateur, je veux gérer les diplômes et leur durée, afin que chaque formation affiche la bonne durée d'études.
 - CA1 : *Given* j'ajoute un diplôme avec une durée de 1 à 5 ans, *When* j'enregistre, *Then* il est proposé dans le formulaire formation et dans la recherche publique.
 - CA2 : *Given* un diplôme est délivré par au moins une formation, *When* je tente de le supprimer, *Then* la suppression est refusée et le nombre de formations concernées est indiqué.
 - Complément : modifier la durée s'applique à toutes les formations du diplôme (frais et programme ajustés).
 
-**P21 — Débouchés**
+**P21 - Débouchés**
 - US : En tant qu'administrateur, je veux gérer les débouchés et leur domaine d'insertion, afin de les rattacher aux formations (EX-08).
 - CA1 : *Given* j'ajoute un débouché avec son domaine, *When* j'enregistre, *Then* il est proposé dans le formulaire formation.
 - CA2 : *Given* un débouché est porté par une formation, *When* je tente de le supprimer, *Then* la suppression est refusée.
 - Complément : renommer un débouché se répercute dans les formations qui le portent.
 
-**P22 — Séries du bac**
+**P22 - Séries du bac**
 - US : En tant qu'administrateur, je veux gérer les séries du bac, afin de les rattacher aux formations comme conditions d'admission.
 - CA1 : *Given* j'ajoute une série avec son code et son libellé, *When* j'enregistre, *Then* elle est proposée dans le formulaire formation et dans le filtre public « Ma série du bac ».
 - CA2 : *Given* une série est admise par une formation, *When* je tente de la supprimer, *Then* la suppression est refusée.
 
-**P23 — Domaines d'insertion**
+**P23 - Domaines d'insertion**
 - US : En tant qu'administrateur, je veux gérer les domaines d'insertion, afin de classer les formations et les débouchés.
 - CA1 : *Given* j'ajoute un domaine avec sa couleur, *When* j'enregistre, *Then* il est proposé dans les formulaires formation et débouché, et dans la barre de catégories du site public.
 - CA2 : *Given* un domaine classe une formation ou un débouché, *When* je tente de le supprimer, *Then* la suppression est refusée.
@@ -245,7 +245,7 @@ back-office.
 
 ---
 
-## 5. Tâches — backend et socle
+## 5. Tâches - backend et socle
 
 Ce ne sont pas des User Stories : ce sont des chantiers techniques. Les
 enregistrer comme **tâches**. Le détail du contenu de chacun est dans
@@ -256,7 +256,7 @@ enregistrer comme **tâches**. Le détail du contenu de chacun est dans
 | Réf | Bloc | Assigné | Terminé quand |
 |---|---|---|---|
 | BK1 | Socle de l'API | Flamme | L'API démarre, se connecte à la base et renvoie ses erreurs au format commun. |
-| BK2 | Authentification | Flamme | La connexion délivre un jeton, toute route `/admin` le réclame, « mot de passe oublié » envoie un lien de réinitialisation. |
+| BK2 | Authentification | Flamme | La connexion délivre un jeton, toute route `/admin` le réclame. La connexion se fait par adresse e-mail et mot de passe. |
 | BK3 | Référentiels | Gilles BITEMO | Domaines, diplômes, séries du bac et débouchés se lisent publiquement et s'administrent ; un élément utilisé ne peut pas être supprimé. |
 | BK4 | Instituts | Gilles BITEMO | Les instituts se listent, se consultent et s'administrent ; leur image se dépose. |
 | BK5 | Formations | Flamme | Les formations se recherchent, se consultent et s'administrent avec leurs frais par niveau, séries et débouchés ; les 5 KPI sont servis. |
@@ -283,11 +283,11 @@ planifiés après l'implémentation.
 
 | Développeur | Sujet | Backend / socle | Site public | Back-office |
 |---|---|---|---|---|
-| Flamme (lead technique) | Backend | BK1, BK2, BK5, S4 | — | — |
-| Gilles BITEMO | Backend | BK3, BK4, BK6 | — | — |
-| Elie NGANGA | Formations | — | P4, P5 | P14, P15 |
+| Flamme (lead technique) | Backend | BK1, BK2, BK5, S4 | - | - |
+| Gilles BITEMO | Backend | BK3, BK4, BK6 | - | - |
+| Elie NGANGA | Formations | - | P4, P5 | P14, P15 |
 | Arsène AKIANA | Instituts | S5 | P2, P6 | P16, P17 |
-| Fresnel OBA VERCHY | Pilotage et référentiels | — | P7 | P11, P20, P21, P22, P23 |
+| Fresnel OBA VERCHY | Pilotage et référentiels | - | P7 | P11, P20, P21, P22, P23 |
 | Samuel AKOMBO | Accès et cours | S6 | P3, P9 | P1, P10, P19 |
 
 Le backend est porté par Flamme et Gilles ; les quatre autres développeurs ont
@@ -346,14 +346,14 @@ développé contre le contrat `docs/openapi.yaml`, mais pas recetté.
 | P4 | BK5, BK6 | Fiche de la formation ; programme par année issu des cours |
 | P5 | P2, P4, BK3, BK5 | Réutilise la grille de l'accueil ; on y arrive depuis une fiche formation |
 | P6 | P2, BK4, BK5 | Fiche de l'institut ; réutilise la carte de formation et liste ses formations |
-| P7 | — | Page statique : seulement le socle |
+| P7 | - | Page statique : seulement le socle |
 | P9 | P4, BK6 | S'intègre à la fiche formation ; appelle `POST /contact` |
 
 **Back-office**
 
 | Ticket | Est bloqué par | Raison |
 |---|---|---|
-| P1 | BK2 | Connexion et mot de passe oublié |
+| P1 | BK2 | Connexion |
 | P10 | P1 | Affiche la session ouverte et la ferme |
 | P11 | BK5 | Lit les 5 KPI |
 | P14 | BK5 | Liste, filtre et supprime les formations |
@@ -374,7 +374,7 @@ jeu de démonstration.
 | 2 | BK2 ; BK3 et BK4 en parallèle | S6 avec P1 et P10 |
 | 3 | BK5 | P16, P17, P6 ; P20 à P23 |
 | 4 | BK6 | P2 ; P14, P15, P4 ; P11 ; P3 |
-| 5 | — | P5 ; P19, P9 |
+| 5 | - | P5 ; P19, P9 |
 
 ---
 

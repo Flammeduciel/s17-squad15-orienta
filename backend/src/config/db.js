@@ -17,7 +17,7 @@ const pool = databaseUrl
 // erreur sur le pool : sans écouteur, elle arrêterait le processus.
 if (pool) {
   pool.on('error', (error) => {
-    console.error('PostgreSQL : connexion inactive perdue —', error.message);
+    console.error('PostgreSQL : connexion inactive perdue -', error.message);
   });
 }
 
@@ -45,7 +45,7 @@ async function checkDatabase() {
     await pool.query('SELECT 1');
     return { status: 'up', latency_ms: Date.now() - start };
   } catch (error) {
-    console.error('PostgreSQL injoignable —', error.message);
+    console.error('PostgreSQL injoignable -', error.message);
     return { status: 'down' };
   }
 }
@@ -62,7 +62,7 @@ async function checkDatabase() {
  * @throws {Error} 503 `BASE_INDISPONIBLE` si aucune base n'est configurée.
  *
  * @example
- * const { rows } = await query('SELECT * FROM users WHERE username = $1', [username]);
+ * const { rows } = await query('SELECT * FROM users WHERE email = $1', [email]);
  */
 async function query(sql, params = []) {
   if (!pool) {
@@ -80,8 +80,8 @@ async function query(sql, params = []) {
  *
  * @example
  * await transaction(async (client) => {
- *   await client.query('INSERT INTO programs (name) VALUES ($1)', [name]);
- *   await client.query('INSERT INTO program_fees (program_id, year, amount) VALUES ($1, 1, $2)', [id, amount]);
+ *   await client.query('UPDATE degrees SET duration = $1 WHERE id = $2', [3, id]);
+ *   await client.query('DELETE FROM program_fees WHERE year > $1', [3]);
  * });
  */
 async function transaction(work) {

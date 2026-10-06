@@ -1,188 +1,134 @@
 /**
- * Requêtes SQL de lecture sur la table `institutes`.
+ * Requêtes SQL sur la table `institutes`.
  *
  * @module models/institutes
  */
-const { query } = require("../config/db");
+const { query } = require('../config/db');
 
-/**
- * @typedef {object} InstituteSummary
- * @property {number} id
- * @property {string} short_name
- * @property {string} name
- * @property {string} district
- * @property {boolean} accredited
- * @property {string|null} accreditation_number
- * @property {string|null} color
- * @property {string|null} image_url
- * @property {number} registration_fee FCFA.
- * @property {number} program_count Formations publiées.
- * @property {string[]} degrees Noms des diplômes délivrés par ces formations.
- */
-
-/** Colonnes de la liste, avec les deux agrégats des formations publiées. */
-const SUMMARY_COLUMNS = `
-  i.id, i.short_name, i.name, i.district, i.accredited, i.accreditation_number,
+/* Colonnes de la liste : celles de `InstituteSummary` dans le contrat. Le nombre
+   de formations et les diplômes ne comptent que les formations publiées. */
+const SUMMARY = `
+  i.id, i.short_name, i.name, i.district_id, ds.name AS district, c.name AS city, i.accredited, i.accreditation_number,
   i.color, i.image_url, i.registration_fee,
-  (SELECT COUNT(*)::int FROM programs p
-    WHERE p.institute_id = i.id AND p.status = 'published') AS program_count,
-  COALESCE(
-    (SELECT array_agg(DISTINCT d.name ORDER BY d.name)
-       FROM programs p JOIN degrees d ON d.id = p.degree_id
-      WHERE p.institute_id = i.id AND p.status = 'published'),
-    ARRAY[]::varchar[]
-  ) AS degrees`;
+  (SELECT COUNT(*) FROM programs p
+    WHERE p.institute_id = i.id AND p.status = 'published')::int AS program_count,
+  (SELECT COALESCE(array_agg(DISTINCT d.name), '{}')
+     FROM programs p JOIN degrees d ON d.id = p.degree_id
+    WHERE p.institute_id = i.id AND p.status = 'published') AS degrees`;
 
-/** Colonnes supplémentaires de la fiche. Les dates sortent en `YYYY-MM-DD`. */
-const DETAIL_COLUMNS = `
-  i.address, i.phone, i.whatsapp, i.email, i.description, i.benefits,
+/* Un institut est lu avec son arrondissement et sa ville. */
+const FROM = `
+  FROM institutes i
+  JOIN districts ds ON ds.id = i.district_id
+  JOIN cities c ON c.id = ds.city_id`;
+
+/* Colonnes de la fiche : `InstituteDetail`. Les dates sont renvoyées en texte
+   `AAAA-MM-JJ` pour ne pas dépendre du fuseau horaire du serveur. */
+const DETAIL = `${SUMMARY},
+  i.banner_url, i.address, i.phone, i.whatsapp, i.email, i.description, i.benefits,
   to_char(i.registration_deadline, 'YYYY-MM-DD') AS registration_deadline,
   to_char(i.start_date, 'YYYY-MM-DD') AS start_date`;
 
 /**
- * Minuscules et sans accents, côté SQL. Même transformation que `fold()` côté JS.
- *
- * @param {string} column
- * @returns {string}
+ * @param {object} filters
+ * @param {string[]} [filters.district_id] Un de ces arrondissements.
+ * @param {boolean} [filters.accredited] Vrai : seulement les instituts agréés.
+ * @returns {Promise<object[]>} Instituts triés par sigle.
  */
-const sqlFold = (column) =>
-  `translate(lower(${column}), 'àâäéèêëîïôöùûüç', 'aaaeeeeiioouuuc')`;
-
-/**
- * @param {string} text
- * @returns {string}
- */
-const fold = (text) =>
-  text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-
-/**
- * Liste des instituts. Sans critère : tous. `strpos` plutôt que `ILIKE`, pour
- * que `%` et `_` saisis par le visiteur restent des caractères ordinaires.
- *
- * Seuls `q`, `district` et `accredited` sont appliqués ici. Les filtres qui
- * portent sur les formations sont appliqués par le contrôleur, à partir de la
- * recherche des formations (bloc BK5).
- *
- * @param {{ q?: string, district?: string, accredited?: boolean }} filters
- * @returns {Promise<InstituteSummary[]>}
- */
-async function list({ q, district, accredited } = {}) {
-  const conditions = [];
+async function findAll({ district_id, accredited }) {
+  const where = [];
   const params = [];
-
-  if (q) {
-    params.push(fold(q));
-    const p = `$${params.length}`;
-    conditions.push(
-      `(strpos(${sqlFold("i.name")}, ${p}) > 0
-        OR strpos(${sqlFold("i.short_name")}, ${p}) > 0
-        OR strpos(${sqlFold("i.district")}, ${p}) > 0)`,
-    );
-  }
-  if (district) {
-    params.push(district);
-    conditions.push(`i.district = $${params.length}`);
+  if (district_id) {
+    params.push(district_id);
+    where.push(`i.district_id = ANY($${params.length}::uuid[])`);
   }
   if (accredited) {
-    conditions.push("i.accredited");
+    where.push('i.accredited');
   }
-
-  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   const { rows } = await query(
-    `SELECT ${SUMMARY_COLUMNS} FROM institutes i ${where} ORDER BY i.name`,
+    `SELECT ${SUMMARY} ${FROM}
+     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
+     ORDER BY i.short_name`,
     params,
   );
   return rows;
 }
 
-/**
- * Fiche d'un institut. `programs` (formations publiées) est ajouté par le
- * contrôleur.
- *
- * @param {number} id
- * @returns {Promise<(InstituteSummary & object)|null>}
- */
+/** @param {string} id */
 async function findById(id) {
+  const { rows } = await query(`SELECT ${DETAIL} ${FROM} WHERE i.id = $1`, [id]);
+  return rows[0] || null;
+}
+
+/**
+ * Cherche un autre institut portant ce nom ou ce sigle.
+ *
+ * @param {string} name
+ * @param {string} shortName
+ * @returns {Promise<{ id: string, name: string, short_name: string }|null>}
+ */
+async function findByNameOrShortName(name, shortName) {
   const { rows } = await query(
-    `SELECT ${SUMMARY_COLUMNS}, ${DETAIL_COLUMNS} FROM institutes i WHERE i.id = $1`,
-    [id],
+    `SELECT id, name, short_name FROM institutes
+     WHERE lower(name) = lower($1) OR lower(short_name) = lower($2)`,
+    [name, shortName],
   );
   return rows[0] || null;
 }
 
-const DEFAULT_COLOR = "#17693F";
+/* Ordre des valeurs partagé par la création et la modification. */
+function values(institute) {
+  return [
+    institute.name,
+    institute.short_name,
+    institute.district_id,
+    institute.address,
+    institute.phone,
+    institute.whatsapp,
+    institute.email,
+    institute.color,
+    institute.image_url,
+    institute.banner_url,
+    institute.description,
+    institute.benefits,
+    institute.registration_fee,
+    institute.registration_deadline,
+    institute.start_date,
+    institute.accreditation_number,
+  ];
+}
 
-/** Valeurs d'écriture, dans l'ordre des colonnes de `create` et `update`. */
-const writeParams = (d) => [
-  d.name,
-  d.short_name,
-  d.district,
-  d.address,
-  d.phone,
-  d.whatsapp,
-  d.email,
-  d.color,
-  d.image_url,
-  d.description,
-  d.benefits,
-  d.registration_fee,
-  d.registration_deadline,
-  d.start_date,
-  d.accreditation_number,
-];
-
-/**
- * @param {object} data Corps validé de `POST /admin/institutes`.
- * @returns {Promise<number>} Identifiant du nouvel institut.
- */
-async function create(data) {
+/** @returns {Promise<string>} Identifiant du nouvel institut. */
+async function create(institute) {
   const { rows } = await query(
-    `INSERT INTO institutes
-       (name, short_name, district, address, phone, whatsapp, email, color, image_url,
-        description, benefits, registration_fee, registration_deadline, start_date,
-        accreditation_number)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,COALESCE($8, '${DEFAULT_COLOR}'),$9,$10,$11,$12,$13,$14,$15)
+    `INSERT INTO institutes (name, short_name, district_id, address, phone, whatsapp, email, color,
+                             image_url, banner_url, description, benefits, registration_fee,
+                             registration_deadline, start_date, accreditation_number)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, '#17693F'), $9, $10, $11, $12, $13, $14, $15, $16)
      RETURNING id`,
-    writeParams(data),
+    values(institute),
   );
   return rows[0].id;
 }
 
-/**
- * Remplace les champs de l'institut. `color` absente : l'ancienne est gardée.
- * `accredited` n'est pas écrite (colonne générée).
- *
- * @param {number} id
- * @param {object} data Corps validé de `PUT /admin/institutes/:id`.
- * @returns {Promise<boolean>} `false` si l'institut n'existe pas.
- */
-async function update(id, data) {
+/** @returns {Promise<boolean>} Faux si l'institut n'existe pas. */
+async function update(id, institute) {
   const { rowCount } = await query(
     `UPDATE institutes SET
-       name = $2, short_name = $3, district = $4, address = $5, phone = $6, whatsapp = $7,
-       email = $8, color = COALESCE($9, color), image_url = $10, description = $11,
-       benefits = $12, registration_fee = $13, registration_deadline = $14,
-       start_date = $15, accreditation_number = $16, updated_at = NOW()
-     WHERE id = $1`,
-    [id, ...writeParams(data)],
+       name = $1, short_name = $2, district_id = $3, address = $4, phone = $5, whatsapp = $6,
+       email = $7, color = COALESCE($8, color), image_url = $9, banner_url = $10, description = $11,
+       benefits = $12, registration_fee = $13, registration_deadline = $14, start_date = $15,
+       accreditation_number = $16, updated_at = NOW()
+     WHERE id = $17`,
+    [...values(institute), id],
   );
   return rowCount > 0;
 }
 
-/**
- * Supprime l'institut ; ses formations partent avec lui (ON DELETE CASCADE).
- *
- * @param {number} id
- * @returns {Promise<boolean>}
- */
+/** Supprime l'institut ; ses formations partent avec lui (cascade en base). */
 async function remove(id) {
-  const { rowCount } = await query("DELETE FROM institutes WHERE id = $1", [
-    id,
-  ]);
+  const { rowCount } = await query('DELETE FROM institutes WHERE id = $1', [id]);
   return rowCount > 0;
 }
 
-module.exports = { list, findById, create, update, remove };
+module.exports = { findAll, findById, findByNameOrShortName, create, update, remove };

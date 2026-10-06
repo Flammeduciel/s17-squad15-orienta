@@ -5,21 +5,20 @@ const { programsQuery, adminProgramsQuery, programBody } = require('../validator
 const programs = require('../controllers/programs');
 
 /**
- * Formations et indicateurs (bloc BK5) : recherche publique et écriture de la Squad.
- * Les chemins `/admin/...` sont protégés par `app.use('/admin', requireAuth)`.
+ * Routes des formations et des indicateurs (bloc BK5).
  *
  * @type {import('express').Router}
  */
 const router = express.Router();
 
-router.get('/programs', validate({ query: programsQuery }), programs.list);
-router.get('/programs/:id', validate({ params: idParams }), programs.get);
+router.get('/programs', validate({ query: programsQuery }), programs.listPrograms);
+router.get('/programs/:id', validate({ params: idParams }), programs.getProgram);
 
-router.get('/admin/indicators', programs.indicators);
-router.get('/admin/programs', validate({ query: adminProgramsQuery }), programs.listAll);
-router.get('/admin/programs/:id', validate({ params: idParams }), programs.getAny);
-router.post('/admin/programs', validate({ body: programBody }), programs.create);
-router.put('/admin/programs/:id', validate({ params: idParams, body: programBody }), programs.update);
-router.delete('/admin/programs/:id', validate({ params: idParams }), programs.remove);
+router.get('/admin/indicators', programs.getIndicators);
+router.get('/admin/programs', validate({ query: adminProgramsQuery }), programs.listAllPrograms);
+router.get('/admin/programs/:id', validate({ params: idParams }), programs.getAnyProgram);
+router.post('/admin/programs', validate({ body: programBody }), programs.createProgram);
+router.put('/admin/programs/:id', validate({ params: idParams, body: programBody }), programs.updateProgram);
+router.delete('/admin/programs/:id', validate({ params: idParams }), programs.deleteProgram);
 
 module.exports = router;

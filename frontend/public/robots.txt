@@ -1,0 +1,4 @@
+# Site public : tout peut être indexé, sauf la page personnelle des favoris.
+User-agent: *
+Allow: /
+Disallow: /favoris

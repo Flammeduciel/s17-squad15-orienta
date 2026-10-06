@@ -1,17 +1,15 @@
 /**
- * Schémas de validation des routes `/careers` et `/admin/careers`.
+ * Schémas de validation des routes des débouchés.
  *
  * @module validators/careers
  */
-const { z } = require("zod");
-const { requiredText } = require("./common");
+const { z } = require('zod');
+const { id, requiredText } = require('./common');
 
-/** Corps de `POST` et `PUT /admin/careers`. */
+/** Corps de la création et de la modification d'un débouché. */
 const careerBody = z.object({
   name: requiredText(100),
-  domain_id: z
-    .string({ error: "est obligatoire." })
-    .regex(/^[a-z0-9-]{1,20}$/, "doit être un identifiant de domaine valide."),
+  domain_id: id,
 });
 
 module.exports = { careerBody };
