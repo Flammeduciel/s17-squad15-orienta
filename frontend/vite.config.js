@@ -1,11 +1,22 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
+
+// Remplace %SITE_URL% dans index.html par l'adresse publique du site
+// (variable VITE_SITE_URL, sans barre finale). Les balises de partage et de
+// référencement ont besoin d'adresses complètes : https://…/og-image.png.
+function siteUrl(url) {
+  return {
+    name: 'site-url',
+    transformIndexHtml: (html) => html.replaceAll('%SITE_URL%', url),
+  }
+}
 
 // https://vite.dev/config/
-// Le port est fixé (5173 pour le site public, 5174 pour le back-office) : l'API est
-// réglée sur ces deux adresses (CORS_ORIGIN) et le back-office renvoie vers le site
-// public à la sienne. Si le port est pris, Vite s'arrête au lieu d'en changer.
-export default defineConfig({
-  plugins: [react()],
-  server: { port: 5173, strictPort: true },
+export default defineConfig(({ mode }) => {
+  // Lit les fichiers .env de ce dossier, et les variables passées au build.
+  const env = loadEnv(mode, import.meta.dirname)
+  const url = (env.VITE_SITE_URL || 'http://localhost:5173').replace(/\/$/, '')
+  return {
+    plugins: [react(), siteUrl(url)],
+  }
 })
