@@ -13,6 +13,11 @@ Plateforme d'orientation des nouveaux bacheliers vers les instituts privés de B
 
 Orienta centralise les fiches des instituts privés de Brazzaville (formations, programmes, diplômes, frais, agréments, contacts) pour aider les bacheliers à choisir leur orientation sans se déplacer.
 
+## Environnements
+
+- Site public (frontend) : https://orienta.flamme.work/
+- API (backend) : https://api-orienta.flamme.work
+
 ## Structure du projet
 
 ```
@@ -101,6 +106,21 @@ Le contrat complet compte 48 opérations ; ce tableau n'en donne que les famille
 | Dev Frontend | Site public (accueil, recherche, fiches, contact) |
 | Dev Back-office | Login, dashboard KPI, CRUD (instituts, formations, cours, diplômes, débouchés, séries, domaines) |
 
+## Répartition des travaux
+
+Rappel des tickets du roadmap (`docs/roadmap-dev.md`) : BK (backend, 6 blocs),
+S (socle des interfaces, 3 briques) et P (23 tickets de pages). Seuls les
+tickets livrés sont listés ; P8, P12, P13 et P18 ont été retirés du périmètre.
+
+| Développeur | Backend / socle | Site public | Back-office | Bilan |
+|-------------|-----------------|-------------|-------------|-------|
+| **Flamme** (lead dev) | BK1, BK2, BK5, S4 | - | - | Livré |
+| **Gilles BITEMO** | BK3, BK4, BK6 | - | - | Livré |
+| **Arsène AKIANA** | S5 | P2, P6 | P16, P17 | Livré |
+| **Samuel AKOMBO** | S6 | P3, P9 | P1, P10, P19 | Entièrement réalisé par lui |
+| **Elie NGANGA** | - | P4, P5 | P14, P15 | Non livré - tickets réalisés par Flamme |
+| **Fresnel OBA VERCHY** | - | P7 | P11, P20-P23 | Non livré - tickets réalisés par Flamme |
+
 ## Statut actuel
 
 - [x] Product Discovery (PM)
@@ -108,10 +128,10 @@ Le contrat complet compte 48 opérations ; ce tableau n'en donne que les famille
 - [x] Maquettes HTML (site public et back-office) alignées sur le catalogue d'exigences
 - [x] Contrat d'API OpenAPI
 - [x] Schéma de base de données + seeds
-- [ ] Développement backend
-- [ ] Développement frontend
-- [ ] Développement back-office
-- [ ] Intégration
+- [x] Développement backend
+- [x] Développement frontend
+- [x] Développement back-office
+- [x] Intégration
 
 ## Règles de gestion
 
