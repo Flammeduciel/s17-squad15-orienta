@@ -13,6 +13,11 @@ Plateforme d'orientation des nouveaux bacheliers vers les instituts privés de B
 
 Orienta centralise les fiches des instituts privés de Brazzaville (formations, programmes, diplômes, frais, agréments, contacts) pour aider les bacheliers à choisir leur orientation sans se déplacer.
 
+## Environnements
+
+- Site public (frontend) : https://orienta.flamme.work/
+- API (backend) : https://api-orienta.flamme.work
+
 ## Structure du projet
 
 ```
@@ -110,12 +115,12 @@ tickets livrés sont listés ; P8, P12, P13 et P18 ont été retirés du périm�
 
 | Développeur | Backend / socle | Site public | Back-office | Bilan |
 |-------------|-----------------|-------------|-------------|-------|
-| **Flamme** (lead dev) | BK1, BK2, BK5, S4 | — | — | ✅ Livré |
-| **Gilles BITEMO** | BK3, BK4, BK6 | — | — | ✅ Livré |
-| **Arsène AKIANA** | S5 | P2, P6 | P16, P17 | ✅ Livré |
-| **Samuel AKOMBO** | S6 | P3, P9 | P1, P10, P19 | ✅ Entièrement réalisé par lui |
-| **Elie NGANGA** | — | P4, P5 | P14, P15 | ❌ Non livré — tickets réalisés par Flamme |
-| **Fresnel OBA VERCHY** | — | P7 | P11, P20–P23 | ❌ Non livré — tickets réalisés par Flamme |
+| **Flamme** (lead dev) | BK1, BK2, BK5, S4 | - | - | Livré |
+| **Gilles BITEMO** | BK3, BK4, BK6 | - | - | Livré |
+| **Arsène AKIANA** | S5 | P2, P6 | P16, P17 | Livré |
+| **Samuel AKOMBO** | S6 | P3, P9 | P1, P10, P19 | Entièrement réalisé par lui |
+| **Elie NGANGA** | - | P4, P5 | P14, P15 | Non livré - tickets réalisés par Flamme |
+| **Fresnel OBA VERCHY** | - | P7 | P11, P20-P23 | Non livré - tickets réalisés par Flamme |
 
 ## Statut actuel
 
