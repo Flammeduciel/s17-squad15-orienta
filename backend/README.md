@@ -100,7 +100,7 @@ Un fichier par ressource dans `routes/`, `controllers/`, `models/` et
 | Formations, indicateurs | `programs` (+ `services/programs`) | BK5 |
 | Cours, contact | `courses`, `contact` | BK6 |
 
-Les six blocs sont en place : les 43 opérations du contrat `docs/openapi.yaml`
+Les six blocs sont en place : les 47 opérations du contrat `docs/openapi.yaml`
 répondent.
 
 Le socle (BK1) est en place : `config/`, les middlewares communs, `utils/` et

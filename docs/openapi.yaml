@@ -52,8 +52,6 @@ servers:
 tags:
   - name: Public
     description: Consultation libre - site étudiant (frontend)
-  - name: Contact
-    description: Formulaire public de contact d'un institut
   - name: Auth
     description: Authentification Squad (back-office)
   - name: Admin
@@ -262,43 +260,6 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Career" }
-
-  # --------------------------------------------------------------------------
-  # CONTACT (formulaire public)
-  # --------------------------------------------------------------------------
-  /contact:
-    post:
-      tags: [Contact]
-      summary: Envoyer une question à un institut
-      description: |
-        Transmet la question d'un bachelier au secrétariat de l'institut
-        (e-mail) sans créer de compte, et envoie un accusé de réception au
-        bachelier (EX-06). La demande est tracée dans `contact_requests` ; le
-        back-office n'a pas de boîte de réception.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/ContactRequestInput" }
-            example:
-              program_id: 12
-              name: Grâce Mabiala
-              email: grace.mabiala@email.com
-              message: Reste-t-il des places pour la rentrée ?
-      responses:
-        "202":
-          description: Demande acceptée et mise en file d'envoi
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [received]
-                properties:
-                  received: { type: boolean, example: true }
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "404":
-          $ref: "#/components/responses/NotFound"
 
   # --------------------------------------------------------------------------
   # AUTH (back-office)
@@ -1678,17 +1639,6 @@ components:
         registration_deadline: { type: string, format: date, nullable: true, example: "2026-09-27" }
         start_date: { type: string, format: date, nullable: true, example: "2026-10-20", description: Jamais avant `registration_deadline` }
         accreditation_number: { type: string, nullable: true, example: "N° 156/MESRTI/2012", description: null = institut non agréé }
-
-    # --------------------------------------------------------------- Divers
-    ContactRequestInput:
-      type: object
-      description: Colonnes `contact_requests`
-      required: [program_id, name, email, message]
-      properties:
-        program_id: { $ref: "#/components/schemas/Uuid" }
-        name: { type: string, example: "Grâce Mabiala" }
-        email: { type: string, format: email, example: "grace.mabiala@email.com" }
-        message: { type: string, example: "Reste-t-il des places pour la rentrée ?" }
 
     LoginInput:
       type: object

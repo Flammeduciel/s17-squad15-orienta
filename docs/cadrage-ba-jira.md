@@ -23,7 +23,7 @@ transposer, compléter les champs Jira et créer les liens.
 
 | Source | Rôle | Règle |
 |--------|------|-------|
-| `docs/openapi.yaml` | Contrat d'API (version 2.0.0). Ses 43 opérations décrivent ce que le système expose. | Une divergence entre le code et ce fichier se corrige dans le contrat, par PR dédié - jamais par une dérogation dans le code. |
+| `docs/openapi.yaml` | Contrat d'API (version 2.0.0). Ses 47 opérations décrivent ce que le système expose. | Une divergence entre le code et ce fichier se corrige dans le contrat, par PR dédié - jamais par une dérogation dans le code. |
 | `template/index.html` et `template/back-office.html` | Maquettes du site public et du back-office. Définissent l'apparence, les libellés et les parcours. | Une page peut diverger d'une maquette si le contrat l'impose ; dans ce cas, le signaler. |
 | `docs/roadmap-dev.md` | Répartition validée des pages et chantiers. | N'est pas modifiable par le BA sans arbitrage du lead technique. |
 | `docs/schema.sql` | Schéma de la base, 13 tables et une vue. | Toute colonne utilisée par un critère d'acceptation doit exister ici. |
