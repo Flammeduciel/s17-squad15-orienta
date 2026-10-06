@@ -1,45 +1,61 @@
-const multer = require("multer");
-const httpError = require("../utils/httpError");
-const env = require("../config/env");
+const path = require('node:path');
+const fs = require('node:fs');
+const crypto = require('node:crypto');
+const multer = require('multer');
+const httpError = require('../utils/httpError');
+const { uploadDir, maxUploadBytes } = require('../config/env');
 
-/** Taille maximale d'une image : 2 Mo par défaut. */
-const MAX_BYTES = env.maxUploadBytes || 2 * 1024 * 1024;
+/* Formats acceptés (EX-04) et extension donnée au fichier enregistré. */
+const EXTENSIONS = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+};
 
-const parser = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_BYTES, files: 1 },
-}).single("file");
+const instituteDir = path.join(uploadDir, 'institutes');
+
+const storage = multer.diskStorage({
+  destination: (req, file, done) => {
+    fs.mkdirSync(instituteDir, { recursive: true });
+    done(null, instituteDir);
+  },
+  // Le nom d'origine n'est jamais repris : on en fabrique un, impossible à deviner.
+  filename: (req, file, done) => {
+    done(null, `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${EXTENSIONS[file.mimetype]}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: maxUploadBytes, files: 1 },
+  fileFilter: (req, file, done) => {
+    if (!EXTENSIONS[file.mimetype]) {
+      return done(httpError(400, 'FICHIER_INVALIDE', 'Format non accepté : utilisez JPEG, PNG ou WebP.'));
+    }
+    return done(null, true);
+  },
+}).single('file');
 
 /**
- * Lit le champ multipart `file`. Les erreurs de multer n'ont pas de `status` :
- * on les convertit en 400 au format commun, sinon elles finiraient en 500.
+ * Reçoit une image d'institut envoyée en `multipart/form-data` (champ `file`)
+ * et l'enregistre dans `uploads/institutes/`. Le fichier est ensuite dans
+ * `req.file`.
+ *
+ * Un format refusé ou une image trop lourde répond 400 `FICHIER_INVALIDE`.
  *
  * @type {import('express').RequestHandler}
  */
-function receiveImage(req, res, next) {
-  parser(req, res, (error) => {
-    if (!error) return next();
-    if (error.code === "LIMIT_FILE_SIZE") {
-      const mb = Math.floor(MAX_BYTES / (1024 * 1024));
-      return next(
-        httpError(
-          400,
-          "PARAMETRE_INVALIDE",
-          `« file » : ne doit pas dépasser ${mb} Mo.`,
-        ),
-      );
-    }
-    if (error.code === "LIMIT_UNEXPECTED_FILE") {
-      return next(
-        httpError(
-          400,
-          "PARAMETRE_INVALIDE",
-          "« file » : le fichier doit être envoyé dans le champ « file ».",
-        ),
-      );
+function uploadInstituteImage(req, res, next) {
+  upload(req, res, (error) => {
+    if (error instanceof multer.MulterError) {
+      const message =
+        error.code === 'LIMIT_FILE_SIZE'
+          ? `Image trop lourde : ${Math.round(maxUploadBytes / 1024 / 1024)} Mo maximum.`
+          : "Envoyez une seule image, dans le champ « file ».";
+      return next(httpError(400, 'FICHIER_INVALIDE', message));
     }
     return next(error);
   });
 }
 
-module.exports = { receiveImage };
+module.exports = { uploadInstituteImage };
