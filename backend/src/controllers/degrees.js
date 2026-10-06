@@ -1,75 +1,48 @@
-const httpError = require("../utils/httpError");
-const { translatePgError } = require("../utils/pgErrors");
-const degrees = require("../models/degrees");
+const httpError = require('../utils/httpError');
+const degrees = require('../models/degrees');
 
-const notFound = () =>
-  httpError(
-    404,
-    "DIPLOME_INTROUVABLE",
-    "Aucun diplôme ne correspond à cet identifiant.",
-  );
+const NOT_FOUND = [404, 'DIPLOME_INTROUVABLE', 'Aucun diplôme ne correspond à cet identifiant.'];
 
-/** `GET /degrees` : diplômes avec leur durée et le nombre de formations publiées. */
-async function list(req, res) {
-  res.json(await degrees.listPublic());
+/** `GET /degrees` - liste des diplômes avec leur durée. */
+async function listDegrees(req, res) {
+  res.json(await degrees.findAll());
 }
 
-/** `POST /admin/degrees` : 201 avec le diplôme créé. */
-async function create(req, res) {
-  const { name } = req.valid.body;
-  try {
-    res.status(201).json(await degrees.create(req.valid.body));
-  } catch (error) {
-    throw translatePgError(error, {
-      duplicate: `Un diplôme nommé « ${name} » existe déjà.`,
-    });
+/** `POST /admin/degrees` */
+async function createDegree(req, res) {
+  const { name, duration } = req.valid.body;
+  if (await degrees.findByName(name)) {
+    throw httpError(409, 'DEJA_EXISTANT', `Le diplôme « ${name} » existe déjà.`);
   }
+  const degree = await degrees.create({ name, duration });
+  res.status(201).json({ ...degree, program_count: 0 });
 }
 
-/**
- * `PUT /admin/degrees/:id` : 200. Changer `duration` ajuste les formations du
- * diplôme (frais et cours) dans une transaction.
- */
-async function update(req, res) {
-  const { name } = req.valid.body;
-  let degree;
-  try {
-    degree = await degrees.updateWithPrograms(
-      req.valid.params.id,
-      req.valid.body,
-    );
-  } catch (error) {
-    throw translatePgError(error, {
-      duplicate: `Un diplôme nommé « ${name} » existe déjà.`,
-    });
+/** `PUT /admin/degrees/:id` - changer la durée ajuste les formations du diplôme. */
+async function updateDegree(req, res) {
+  const { id } = req.valid.params;
+  const { name, duration } = req.valid.body;
+  if (!(await degrees.findById(id))) throw httpError(...NOT_FOUND);
+  const sameName = await degrees.findByName(name);
+  if (sameName && sameName.id !== id) {
+    throw httpError(409, 'DEJA_EXISTANT', `Le diplôme « ${name} » existe déjà.`);
   }
-  if (!degree) throw notFound();
-  res.json(degree);
+  await degrees.update(id, { name, duration });
+  const all = await degrees.findAll();
+  res.json(all.find((degree) => degree.id === id));
 }
 
-/** `DELETE /admin/degrees/:id` : 204, ou 409 tant qu'une formation le délivre. */
-async function remove(req, res) {
+/** `DELETE /admin/degrees/:id` - refusé tant qu'une formation délivre ce diplôme. */
+async function deleteDegree(req, res) {
   const { id } = req.valid.params;
   const degree = await degrees.findById(id);
-  if (!degree) throw notFound();
-
-  const n = degree.program_count;
-  if (n > 0) {
-    throw httpError(
-      409,
-      "ELEMENT_UTILISE",
-      `« ${degree.name} » est utilisé par ${n} formation${n > 1 ? "s" : ""} : modifiez-${n > 1 ? "les" : "la"} d'abord.`,
-    );
+  if (!degree) throw httpError(...NOT_FOUND);
+  const total = await degrees.countPrograms(id);
+  if (total > 0) {
+    throw httpError(409, 'ELEMENT_UTILISE', `« ${degree.name} » est utilisé par ${total} formation(s) : modifiez-les d'abord.`);
   }
-  try {
-    await degrees.remove(id);
-  } catch (error) {
-    // Filet de sécurité : formation créée entre le comptage et la suppression.
-    throw translatePgError(error, {
-      inUse: `« ${degree.name} » est encore utilisé par une formation.`,
-    });
-  }
+  await degrees.remove(id);
   res.status(204).end();
 }
 
-module.exports = { list, create, update, remove };
+module.exports = { listDegrees, createDegree, updateDegree, deleteDegree };

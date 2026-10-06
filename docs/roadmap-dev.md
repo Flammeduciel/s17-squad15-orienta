@@ -1,4 +1,4 @@
-# Roadmap de développement — Orienta Brazzaville
+# Roadmap de développement - Orienta Brazzaville
 
 Ce qu'il faut construire, qui le construit, et ce qui dépend de quoi.
 
@@ -10,7 +10,7 @@ Le travail se découpe en trois ensembles :
 
 - **Le backend**, en **6 blocs**, porté par **Flamme** et **Gilles**.
 - **Le socle des interfaces**, en **3 briques**, dont dépendent toutes les pages.
-- **Les 19 pages** — 7 sur le site public, 12 dans le back-office — réparties
+- **Les 19 pages** - 7 sur le site public, 12 dans le back-office - réparties
   entre **Elie**, **Arsène**, **Fresnel** et **Samuel**. Chacun a des pages des
   deux côtés et suit un même sujet de bout en bout.
 
@@ -33,7 +33,7 @@ le contrat (`docs/openapi.yaml`, version 2.0.0) et le schéma de base ont suivi.
 - **Cinq pages ajoutées au back-office** (P19 à P23) : cours, diplômes,
   débouchés, séries du bac et domaines d'insertion.
 - **L'accueil part des instituts**, plus des métiers : recherche « institut,
-  filière ou diplôme » et quatre accès — instituts, formations, diplômes,
+  filière ou diplôme » et quatre accès - instituts, formations, diplômes,
   débouchés (EX-09).
 - **La durée appartient au diplôme**, les frais sont saisis par niveau, et les
   cours forment un catalogue partagé entre formations.
@@ -47,15 +47,15 @@ Les numéros P8, P12, P13 et P18 ne sont pas réattribués.
 
 ---
 
-## 2. Backend — 6 blocs
+## 2. Backend - 6 blocs
 
 Les routes citées sont celles de `docs/openapi.yaml`. La base est déjà décrite
 par `backend/scripts/migrate.sql` et remplie par `backend/scripts/seed.sql`.
 
 | # | Bloc | Développeur | Branche | Contenu | Dépend de |
 |---|------|-------------|---------|---------|-----------|
-| BK1 | Socle de l'API | **Flamme** | `feat/backend-socle-api` | Structure Express, connexion PostgreSQL, validation des entrées, format d'erreur commun (`Error`), CORS, service des images déposées. | — |
-| BK2 | Authentification | **Flamme** | `feat/backend-auth` | `POST /auth/login`, `POST /auth/logout`, `POST /auth/password-reset` et sa confirmation, protection de toutes les routes `/admin` par jeton. | BK1 |
+| BK1 | Socle de l'API | **Flamme** | `feat/backend-socle-api` | Structure Express, connexion PostgreSQL, validation des entrées, format d'erreur commun (`Error`), CORS, service des images déposées. | - |
+| BK2 | Authentification | **Flamme** | `feat/backend-auth` | `POST /auth/login` (adresse e-mail et mot de passe), `POST /auth/logout`, protection de toutes les routes `/admin` par jeton. | BK1 |
 | BK3 | Référentiels | **Gilles** | `feat/backend-referentiels` | Domaines, diplômes, séries du bac, débouchés : lecture publique (`/domains`, `/degrees`, `/bac-series`, `/careers`) et CRUD `/admin/…`. Suppression refusée (409) tant que l'élément est utilisé. Changer la durée d'un diplôme ajuste ses formations. | BK1 pour la lecture, BK2 pour le CRUD |
 | BK4 | Instituts | **Gilles** | `feat/backend-instituts` | `GET /institutes` (liste et filtres propres à l'institut), `GET /institutes/{id}`, `GET /districts`, CRUD `/admin/institutes`, dépôt d'image `/admin/images`. | BK1 pour la lecture, BK2 pour le CRUD |
 | BK5 | Formations | **Flamme** | `feat/backend-formations` | `GET /programs` (recherche multi-critères) et `GET /programs/{id}`, CRUD `/admin/programs` avec frais par niveau, séries et débouchés, statut publié ou brouillon. Ajoute à `GET /institutes` les filtres qui portent sur les formations. `GET /admin/indicators` (les 5 KPI). | BK3, BK4 |
@@ -66,11 +66,11 @@ besoin de l'authentification, seul leur CRUD l'attend.
 
 ---
 
-## 3. Socle des interfaces — 3 briques
+## 3. Socle des interfaces - 3 briques
 
 | # | Brique | Développeur | Branche | Contenu | Dépend de |
 |---|--------|-------------|---------|---------|-----------|
-| S4 | Design system | **Flamme** | `frontend-init-design` | Le CSS du prototype extrait en couches et branché dans les deux interfaces. **Livré.** | — |
+| S4 | Design system | **Flamme** | `frontend-init-design` | Le CSS du prototype extrait en couches et branché dans les deux interfaces. **Livré.** | - |
 | S5 | Couche commune des interfaces | **Arsène** | `feat/shared-socle-frontends` | Configuration Vite commune, client HTTP, gestion des erreurs, contextes de session et de thème, composants transverses. | S4 |
 | S6 | Squelette du back-office | **Samuel** | `feat/back-office-squelette-auth` | Disposition générale, navigation latérale, garde de session. Livré avec les pages P1 et P10. | S4, S5 |
 
@@ -79,7 +79,7 @@ les deux interfaces, `.env.example`) est préparé par **Flamme** avec BK1.
 
 ---
 
-## 4. Site public — 7 pages
+## 4. Site public - 7 pages
 
 | # | Page | Route | Développeur | Branche | Critère de recette |
 |---|------|-------|-------------|---------|---------------------|
@@ -93,11 +93,11 @@ les deux interfaces, `.env.example`) est préparé par **Flamme** avec BK1.
 
 ---
 
-## 5. Back-office — 12 pages
+## 5. Back-office - 12 pages
 
 | # | Page | Route | Développeur | Branche | Critère de recette |
 |---|------|-------|-------------|---------|---------------------|
-| P1 | Connexion | `/connexion` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | Le nom d'utilisateur et le mot de passe valides ouvrent la session ; les identifiants erronés affichent une erreur explicite. « Mot de passe oublié » demande l'e-mail du compte et envoie un lien de réinitialisation. Aucune inscription. La session se maintient d'une visite à l'autre et la page est inaccessible sans elle. |
+| P1 | Connexion | `/connexion` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | L'adresse e-mail et le mot de passe valides ouvrent la session ; les identifiants erronés affichent une erreur explicite. Aucune inscription, aucun « mot de passe oublié ». La session se maintient d'une visite à l'autre et la page est inaccessible sans elle. |
 | P10 | Compte | `/compte` | **Samuel AKOMBO** | `feat/back-office-squelette-auth` | Le compte connecté s'affiche et la déconnexion ferme la session puis revient à la connexion. |
 | P11 | Tableau de bord | `/admin` | **Fresnel OBA VERCHY** | `feat/back-office-dashboard` | Les 5 indicateurs de `GET /admin/indicators` s'affichent : établissements, formations et filières, arrondissements couverts, diplômes délivrés, débouchés. |
 | P14 | Liste des formations | `/admin/formations` | **Elie NGANGA** | `feat/back-office-formations-liste` | Le tableau liste toutes les formations, brouillons compris, se recherche, se filtre par domaine et par statut, et se pagine. Chaque ligne offre l'édition et la suppression avec confirmation. |
@@ -116,11 +116,11 @@ les deux interfaces, `.env.example`) est préparé par **Flamme** avec BK1.
 
 | Développeur | Sujet | Backend / socle | Site public | Back-office |
 |-------------|-------|-----------------|-------------|-------------|
-| **Flamme** (lead technique) | Backend | BK1, BK2, BK5, S4 | — | — |
-| **Gilles BITEMO** | Backend | BK3, BK4, BK6 | — | — |
-| **Elie NGANGA** | Formations | — | P4, P5 | P14, P15 |
+| **Flamme** (lead technique) | Backend | BK1, BK2, BK5, S4 | - | - |
+| **Gilles BITEMO** | Backend | BK3, BK4, BK6 | - | - |
+| **Elie NGANGA** | Formations | - | P4, P5 | P14, P15 |
 | **Arsène AKIANA** | Instituts | S5 | P2, P6 | P16, P17 |
-| **Fresnel OBA VERCHY** | Pilotage et référentiels | — | P7 | P11, P20, P21, P22, P23 |
+| **Fresnel OBA VERCHY** | Pilotage et référentiels | - | P7 | P11, P20, P21, P22, P23 |
 | **Samuel AKOMBO** | Accès et cours | S6 | P3, P9 | P1, P10, P19 |
 
 Le lead technique relit en plus l'ensemble des pull requests.
@@ -183,7 +183,7 @@ que son bloc backend soit prêt ; elle ne peut pas être **recettée** sans lui.
 | P6 Fiche institut | BK4 | Affiche la fiche d'un institut. |
 | P6 Fiche institut | BK5 | Liste ses formations, leurs tarifs et leurs conditions d'admission. |
 | P6 Fiche institut | P2 | Réutilise la carte de formation. |
-| P7 À propos | — | Page statique : seulement le socle. |
+| P7 À propos | - | Page statique : seulement le socle. |
 | P9 Question à un institut | P4 | Le formulaire s'intègre à la fiche formation. |
 | P9 Question à un institut | BK6 | Appelle `POST /contact`. |
 
@@ -191,7 +191,7 @@ que son bloc backend soit prêt ; elle ne peut pas être **recettée** sans lui.
 
 | Ceci | dépend de | parce que |
 |------|-----------|-----------|
-| P1 Connexion | BK2 | Appelle la connexion et le mot de passe oublié. |
+| P1 Connexion | BK2 | Appelle la connexion. |
 | P10 Compte | P1 | Affiche la session ouverte et la ferme. |
 | P11 Tableau de bord | BK5 | Lit les 5 KPI. |
 | P14 Liste des formations | BK5 | Liste, filtre et supprime les formations. |
@@ -216,7 +216,7 @@ jeu de démonstration.
 | 2 | BK2 (Flamme) ; BK3 et BK4 (Gilles) | S6 avec P1 et P10 (Samuel) |
 | 3 | BK5 (Flamme) | P16, P17, P6 (Arsène) ; P20 à P23 (Fresnel) |
 | 4 | BK6 (Gilles) | P2 (Arsène) ; P14, P15, P4 (Elie) ; P11 (Fresnel) ; P3 (Samuel) |
-| 5 | — | P5 (Elie) ; P19, P9 (Samuel) |
+| 5 | - | P5 (Elie) ; P19, P9 (Samuel) |
 
 En attendant leur étape, Elie et Samuel écrivent leurs pages contre le contrat,
 avec le jeu de démonstration des maquettes.
@@ -247,7 +247,7 @@ Le lead technique relit chaque pull request. Elle est acceptée si :
 
 1. `npm run lint` et `npm run build` passent.
 2. Le code respecte `docs/openapi.yaml`. Toute divergence se corrige dans le
-   contrat, par pull request dédié — jamais par une dérogation dans le code.
+   contrat, par pull request dédié - jamais par une dérogation dans le code.
 3. Le message de commit suit Conventional Commits, rédigé en français.
 4. La pull request porte sur un seul bloc ou une seule page. Une pull request qui
    en couvre deux est refusée, sauf les quatre référentiels (P20 à P23) et le

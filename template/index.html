@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Orienta Brazzaville — Les instituts privés de Brazzaville, au même endroit</title>
+<title>Orienta Brazzaville - Les instituts privés de Brazzaville, au même endroit</title>
 <meta name="description" content="Orienta centralise les formations, diplômes, frais, agréments et contacts des instituts privés de Brazzaville, pour aider les nouveaux bacheliers à choisir en connaissance de cause.">
 <style>
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -462,7 +462,7 @@ rebuildDerived();
 const fresh = () => ({q:"",cat:"",metiers:[],dips:[],durees:[],budget:MAXF,arrondissements:[],serie:"",soir:false,stage:false,tranches:false,sort:"pert",fav:false,vue:"inst"});
 const S = fresh();
 let favs = new Set(store.get("orienta-favs",[]));
-let V = store.get("orienta-visits",{});       /* popularité — compatible avec l'accès anonyme */
+let V = store.get("orienta-visits",{});       /* popularité - compatible avec l'accès anonyme */
 let REC = store.get("orienta-recent",[]);      /* consultées récemment */
 
 function track(id){
@@ -754,9 +754,9 @@ function pageDetail(f){
     + agb(i)
     + '<div class="dates"><div><small>Inscriptions jusqu\'au</small>'+esc(i.clot)+'</div><div><small>Rentrée</small>'+esc(i.rentree)+'</div></div>'
     + '<div class="lines"><div><span>Scolarité 1re année</span><span class="num">'+fcfa(f.frais)+'</span></div><div><span>Frais d\'inscription</span><span class="num">'+fcfa(i.insc)+'</span></div><div class="tot"><span>Total à prévoir</span><span class="num">'+fcfa(f.frais+i.insc)+'</span></div></div>'
-    + '<a class="btn wa" href="'+waLink(i,waMsg)+'" target="_blank" rel="noopener">WhatsApp — message pré-rempli</a>'
+    + '<a class="btn wa" href="'+waLink(i,waMsg)+'" target="_blank" rel="noopener">WhatsApp - message pré-rempli</a>'
     + '<div class="phone"><div><small style="color:var(--muted);display:block">Secrétariat</small><span>'+esc(i.tel)+'</span></div><button class="copy" type="button" data-copy="'+esc(i.tel)+'">Copier</button></div>'
-    + '<a class="btn line" href="'+mailLink(i,"Demande d'informations — "+f.nom)+'">Écrire par e-mail</a>'
+    + '<a class="btn line" href="'+mailLink(i,"Demande d'informations - "+f.nom)+'">Écrire par e-mail</a>'
     + '<form id="ask" style="display:grid;gap:12px">'
     + '<div class="fld"><label for="a-nom">Ton nom</label><input id="a-nom" required placeholder="ex. Grâce Mabiala"></div>'
     + '<div class="fld"><label for="a-mail">Ton e-mail</label><input id="a-mail" type="email" required placeholder="ton.adresse@email.com"></div>'
@@ -790,7 +790,7 @@ function pageInst(id){
     + '<div class="tot"><span>Rentrée</span><span>'+esc(i.rentree)+'</span></div>'
     + '</div>'
     + '<div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap">'
-    + '<a class="btn wa" href="'+waLink(i,"Bonjour "+i.sigle+", je souhaite obtenir des informations sur vos formations.")+'" target="_blank" rel="noopener">WhatsApp — message pré-rempli</a>'
+    + '<a class="btn wa" href="'+waLink(i,"Bonjour "+i.sigle+", je souhaite obtenir des informations sur vos formations.")+'" target="_blank" rel="noopener">WhatsApp - message pré-rempli</a>'
     + '<a class="btn line" href="'+mailLink(i,"Demande d'informations")+'">Écrire par e-mail</a>'
     + '<a class="btn line" href="tel:'+esc(i.tel.replace(/\s/g,""))+'">Appeler</a>'
     + '</div></section>'
@@ -811,7 +811,7 @@ function pageAbout(){
     + '<p class="lead">Orienta centralise l\'information sur les instituts privés de Brazzaville pour que chaque bachelier choisisse en connaissance de cause.</p>'
     + '<section><h2>Le problème</h2><p>Chaque année, des milliers de jeunes Congolais obtiennent leur baccalauréat et doivent choisir un institut supérieur. Mais une grande partie des instituts privés n\'a pas de site web : les familles doivent se déplacer d\'un établissement à l\'autre ou s\'en remettre au bouche-à-oreille, sans certitude sur les formations réellement proposées, les diplômes délivrés ou les frais pratiqués.</p></section>'
     + '<section><h2>Ce que fait Orienta</h2><p><b>Une fiche claire par formation</b> : diplôme préparé, durée, programme par année, métiers visés, frais détaillés et calendrier d\'inscription. <b>Un badge d\'agrément</b> affiché avec son numéro officiel pour chaque institut agréé. <b>Un contact direct</b> : WhatsApp, téléphone ou e-mail, sans créer de compte.</p></section>'
-    + '<section><h2>Pour qui&nbsp;?</h2><p><b>Pour les nouveaux bacheliers et leurs familles</b>, qui peuvent comparer les offres à distance, gratuitement et sans inscription. <b>Pour les instituts sérieux</b> sans site web, qui gagnent en visibilité auprès des futurs étudiants — notre équipe collecte et vérifie l\'information avec eux, gratuitement.</p></section>'
+    + '<section><h2>Pour qui&nbsp;?</h2><p><b>Pour les nouveaux bacheliers et leurs familles</b>, qui peuvent comparer les offres à distance, gratuitement et sans inscription. <b>Pour les instituts sérieux</b> sans site web, qui gagnent en visibilité auprès des futurs étudiants - notre équipe collecte et vérifie l\'information avec eux, gratuitement.</p></section>'
     + '<section><h2>Notre engagement sur l\'information</h2><p>Chaque fiche est renseignée avec l\'institut lui-même et le numéro d\'agrément est recopié du document officiel communiqué par l\'établissement. Un institut non agréé apparaît sans badge : nous ne publions jamais d\'information que nous ne pouvons pas sourcer. Les tarifs et calendriers sont ceux communiqués par l\'institut et restent susceptibles d\'évoluer : le secrétariat de l\'établissement reste la référence finale.</p></section>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="#accueil">Voir les instituts</a></div>'
     + '</div></div>';

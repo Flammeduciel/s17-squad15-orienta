@@ -1,9 +1,8 @@
-/* Connexion — route /connexion (ticket P1).
+/* Connexion - route /connexion (ticket P1).
    Maquette : template/back-office.html. */
 import { useEffect, useRef, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import AuthLayout from '../../components/auth/AuthLayout';
-import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
 import { PUBLIC_SITE_URL, USE_MOCK_AUTH } from '../../config';
 import { useAuth } from '../../context/auth-context';
 import { useToast } from '../../context/toast-context';
@@ -13,14 +12,13 @@ function Connexion() {
   const { user, login } = useAuth();
   const toast = useToast();
   const location = useLocation();
-  const [form, setForm] = useState({ login: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [forgotOpen, setForgotOpen] = useState(false);
   const passwordRef = useRef(null);
 
   useEffect(() => {
-    document.title = 'Connexion — Orienta Brazzaville';
+    document.title = 'Connexion - Orienta Brazzaville';
   }, []);
 
   // Déjà connecté (ou connexion réussie) : retour à la page demandée, sinon tableau de bord.
@@ -32,16 +30,16 @@ function Connexion() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.login.trim() || !form.password) {
-      setError("Veuillez saisir votre nom d'utilisateur et votre mot de passe.");
+    if (!form.email.trim() || !form.password) {
+      setError('Veuillez saisir votre adresse e-mail et votre mot de passe.');
       return;
     }
     setSubmitting(true);
     try {
-      await login(form.login.trim(), form.password);
+      await login(form.email.trim(), form.password);
       toast("Bienvenue dans l'espace Squad.");
     } catch (err) {
-      if (err.status === 401) {
+      if (err.status === 401 || err.status === 400) {
         setError('Identifiants incorrects.');
         toast('Connexion refusée : identifiants incorrects.', true);
       } else if (err.status === 429) {
@@ -65,12 +63,14 @@ function Connexion() {
         <p>Identifiez-vous pour accéder au tableau de bord et au catalogue.</p>
 
         <div className="fld">
-          <label htmlFor="u">Nom d'utilisateur</label>
+          <label htmlFor="u">Adresse e-mail</label>
           <input
             id="u"
-            name="login"
-            autoComplete="username"
-            value={form.login}
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="prenom@orienta.cg"
+            value={form.email}
             onChange={onChange}
           />
         </div>
@@ -98,15 +98,9 @@ function Connexion() {
           </div>
         )}
 
-        <p style={{ fontSize: '13.5px' }}>
-          <button className="linkbtn" type="button" onClick={() => setForgotOpen(true)}>
-            Mot de passe oublié ?
-          </button>
-        </p>
-
         {USE_MOCK_AUTH && (
           <p className="hint" style={{ color: 'var(--muted)', fontSize: '13.5px' }}>
-            Démo : <b>squad</b> / <b>orienta2026</b>.
+            Démo : <b>squad@orienta.cg</b> / <b>orienta2026</b>.
           </p>
         )}
 
@@ -117,7 +111,6 @@ function Connexion() {
         </p>
       </form>
 
-      {forgotOpen && <ForgotPasswordModal onClose={() => setForgotOpen(false)} />}
     </AuthLayout>
   );
 }

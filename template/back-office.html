@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Espace Squad — Orienta Brazzaville</title>
+<title>Espace Squad - Orienta Brazzaville</title>
 <meta name="description" content="Back-office de Orienta Brazzaville : tableau de bord, instituts, formations, diplômes et débouchés.">
 <style>
 :root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -489,7 +489,7 @@ function majProgrammes(){
   for(const f of Object.values(FORMES)) f.cours = f.programme.flat();
 }
 majProgrammes();
-const libForme = f => f.nom+" — "+(INST[f.inst] ? INST[f.inst].sigle : "institut supprimé");
+const libForme = f => f.nom+" - "+(INST[f.inst] ? INST[f.inst].sigle : "institut supprimé");
 const niveau = k => (k ? (k+1)+"e" : "1re")+" année";
 
 /* Le site public lit cet enregistrement : il reflète donc le back-office. */
@@ -750,11 +750,11 @@ function pageForme(rawId){
     + '<fieldset><legend>Identification</legend><div class="row two">'
     + '<div class="fld" data-f="nom"><label for="f-nom">Intitulé de la filière</label><input id="f-nom" required value="'+esc(f?f.nom:"")+'" placeholder="ex. Comptabilité et gestion des entreprises"></div>'
     + '<div class="fld" data-f="dip"><label for="f-dip">Diplôme délivré</label><select id="f-dip">'
-    + dips.map(d=>'<option value="'+esc(d)+'"'+(f&&f.dip===d?" selected":"")+'>'+esc(d)+(DUREE[d]?' — '+DUREE[d]+' an'+(DUREE[d]>1?"s":""):"")+'</option>').join("")
+    + dips.map(d=>'<option value="'+esc(d)+'"'+(f&&f.dip===d?" selected":"")+'>'+esc(d)+(DUREE[d]?' - '+DUREE[d]+' an'+(DUREE[d]>1?"s":""):"")+'</option>').join("")
     + '</select><span class="hint"><a href="#/diplomes" style="color:var(--green);font-weight:700">Gérer les diplômes</a></span></div>'
     + '</div><div class="row two">'
     + '<div class="fld" data-f="inst"><label for="f-inst">Institut</label><select id="f-inst">'
-    + Object.values(INST).map(i=>'<option value="'+esc(i.id)+'"'+(instCible===i.id?" selected":"")+'>'+esc(i.sigle)+' — '+esc(i.nom)+'</option>').join("")
+    + Object.values(INST).map(i=>'<option value="'+esc(i.id)+'"'+(instCible===i.id?" selected":"")+'>'+esc(i.sigle)+' - '+esc(i.nom)+'</option>').join("")
     + '</select><span class="hint" id="inst-hint">'+nbFormes+' formation'+(nbFormes>1?"s":"")+' déjà rattachée'+(nbFormes>1?"s":"")+' à cet institut.</span></div>'
     + '<div class="fld" data-f="dom"><label for="f-dom">Domaine</label><select id="f-dom">'
     + DOMAINES.map(d=>'<option value="'+d.id+'"'+(f&&f.dom===d.id?" selected":"")+'>'+esc(d.nom)+'</option>').join("")
@@ -775,7 +775,7 @@ function pageForme(rawId){
     + '</fieldset>'
     + '<fieldset><legend>Conditions d\'admission</legend><div class="row two">'
     + '<div class="fld" data-f="series"><label>Séries du bac acceptées</label><div class="sergrid" id="f-series">'
-    + (SERIES.map(x=>'<label class="check"><input type="checkbox" value="'+esc(x.nom)+'"'+(f&&f.series.includes(x.nom)?" checked":"")+'>Série '+esc(x.nom)+(x.lib?' — '+esc(x.lib):"")+'</label>').join("") || '<span class="hint">Aucune série au référentiel.</span>')
+    + (SERIES.map(x=>'<label class="check"><input type="checkbox" value="'+esc(x.nom)+'"'+(f&&f.series.includes(x.nom)?" checked":"")+'>Série '+esc(x.nom)+(x.lib?' - '+esc(x.lib):"")+'</label>').join("") || '<span class="hint">Aucune série au référentiel.</span>')
     + '</div><span class="hint">Aucune case cochée : la série n\'est pas un critère d\'admission. <a href="#/series" style="color:var(--green);font-weight:700">Gérer les séries</a></span></div>'
     + '<div class="fld" data-f="admission"><label for="f-admission">Autres conditions</label><input id="f-admission" value="'+esc(f?f.admission:"")+'" placeholder="ex. Étude de dossier et entretien"></div>'
     + '</div></fieldset>'
@@ -791,8 +791,8 @@ function pageForme(rawId){
     + '</div>'
     + '</div></fieldset>'
     + '<fieldset><legend>Publication</legend><div class="fld" data-f="statut"><label for="f-statut">Statut</label><select id="f-statut">'
-    + '<option value="publiee"'+(!f||f.statut==="publiee"?" selected":"")+'>Publiée — visible sur le site public</option>'
-    + '<option value="brouillon"'+(f&&f.statut==="brouillon"?" selected":"")+'>Brouillon — invisible du public</option>'
+    + '<option value="publiee"'+(!f||f.statut==="publiee"?" selected":"")+'>Publiée - visible sur le site public</option>'
+    + '<option value="brouillon"'+(f&&f.statut==="brouillon"?" selected":"")+'>Brouillon - invisible du public</option>'
     + '</select></div></fieldset>'
     + '<div class="formfoot"><button class="btn" type="submit">'+(f?"Enregistrer les modifications":"Créer la formation")+'</button>'
     + '<a class="btn line" href="#/formations">Annuler</a>'
@@ -907,7 +907,7 @@ function pageRefl(type){
   const cur = ed && ed.nom!==null ? rows.find(r=>r.nom===ed.nom) : null;
   /* Colonne et champ propres à chaque référentiel. */
   const col = {dip:"Durée des études", deb:"Domaine d'insertion", ser:"Libellé", dom:"Couleur"}[type];
-  const cell = r => type==="dom" ? '<span style="display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;background:'+esc(r.c)+'"></span> <small style="color:var(--muted)">'+DEBS.filter(x=>x.secteur===r.id).length+' débouché(s)</small>' : type==="dip" ? r.duree+' an'+(r.duree>1?"s":"") : type==="deb" ? esc(DOM[r.secteur]?DOM[r.secteur].nom:"—") : esc(r.lib||"—");
+  const cell = r => type==="dom" ? '<span style="display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;background:'+esc(r.c)+'"></span> <small style="color:var(--muted)">'+DEBS.filter(x=>x.secteur===r.id).length+' débouché(s)</small>' : type==="dip" ? r.duree+' an'+(r.duree>1?"s":"") : type==="deb" ? esc(DOM[r.secteur]?DOM[r.secteur].nom:"-") : esc(r.lib||"-");
   const champ = type==="dip" ? '<div class="fld" data-f="rduree"><label for="r-duree">Durée des études</label><select id="r-duree">'
         + [1,2,3,4,5].map(d=>'<option value="'+d+'"'+((cur?cur.duree:2)===d?" selected":"")+'>'+d+' an'+(d>1?"s":"")+'</option>').join("")
         + '</select><span class="hint">S\'applique à toutes les formations qui délivrent ce diplôme.</span></div>'
@@ -1069,7 +1069,7 @@ function render(){
   else if(h==="#/compte") out = pageCompte();
   else out = pageDash();
   document.getElementById("app").innerHTML = out;
-  document.title = (isAuthed()?"Espace Squad":"Connexion")+" — Orienta Brazzaville";
+  document.title = (isAuthed()?"Espace Squad":"Connexion")+" - Orienta Brazzaville";
   S.sideOpen = false;
   /* Sur une fiche, l'image déjà enregistrée est celle proposée par défaut.
      Ailleurs, le brouillon est abandonné. */
