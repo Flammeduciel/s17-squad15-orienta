@@ -1,5 +1,5 @@
 -- ============================================================================
--- ORIENTA BRAZZAVILLE — Database Schema (PostgreSQL 12+)
+-- ORIENTA BRAZZAVILLE - Database Schema (PostgreSQL 12+)
 -- ============================================================================
 -- Reference copy of the schema, for reading and for tools that want plain DDL.
 -- The executable version is backend/scripts/migrate.sql (idempotent, with the
@@ -9,14 +9,12 @@
 -- ============================================================================
 
 -- ---------------------------------------------------------------------------
--- Table: users (Squad accounts — EX-15, EX-16, EX-17)
+-- Table: users (Squad accounts - EX-15, EX-16)
 -- ---------------------------------------------------------------------------
--- `email` receives the password reset link. The API requires it when an account
--- is created; it stays nullable for accounts that predate the column.
+-- A member of the Squad signs in with an e-mail address and a password.
 CREATE TABLE users (
-    id              SERIAL PRIMARY KEY,
-    username        VARCHAR(50) NOT NULL UNIQUE,
-    email           VARCHAR(150) UNIQUE,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email           VARCHAR(150) NOT NULL UNIQUE,
     password_hash   TEXT NOT NULL,
     name            VARCHAR(100) NOT NULL,
     role            VARCHAR(20) NOT NULL DEFAULT 'superadmin',
@@ -27,11 +25,12 @@ CREATE TABLE users (
 -- ---------------------------------------------------------------------------
 -- Table: domains (domaines d'insertion)
 -- ---------------------------------------------------------------------------
--- The id is a stable slug: renaming a domain touches neither programs nor careers.
 CREATE TABLE domains (
-    id      VARCHAR(20) PRIMARY KEY,
+    id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name    VARCHAR(100) NOT NULL UNIQUE,
-    color   VARCHAR(7) NOT NULL
+    color   VARCHAR(7) NOT NULL,
+    -- Font Awesome icon name, without the "fa-" prefix (ex: 'stethoscope').
+    icon    VARCHAR(40) NOT NULL DEFAULT 'shapes'
 );
 
 -- ---------------------------------------------------------------------------
@@ -40,7 +39,7 @@ CREATE TABLE domains (
 -- The length of studies belongs to the degree: every program awarding it lasts
 -- `duration` years.
 CREATE TABLE degrees (
-    id          SERIAL PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(50) NOT NULL UNIQUE,
     duration    SMALLINT NOT NULL CHECK (duration BETWEEN 1 AND 5)
 );
@@ -49,10 +48,33 @@ CREATE TABLE degrees (
 -- Table: bac_series (séries du baccalauréat)
 -- ---------------------------------------------------------------------------
 CREATE TABLE bac_series (
-    id      SERIAL PRIMARY KEY,
+    id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code    VARCHAR(10) NOT NULL UNIQUE,
     label   VARCHAR(100)
 );
+
+-- ---------------------------------------------------------------------------
+-- Table: cities (villes)
+-- ---------------------------------------------------------------------------
+CREATE TABLE cities (
+    id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name    VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- ---------------------------------------------------------------------------
+-- Table: districts (arrondissements)
+-- ---------------------------------------------------------------------------
+-- A district belongs to one city; two cities may have a district with the same
+-- name. A city still holding districts, or a district still holding institutes,
+-- cannot be deleted.
+CREATE TABLE districts (
+    id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    city_id   UUID NOT NULL REFERENCES cities(id),
+    name      VARCHAR(100) NOT NULL,
+    UNIQUE (city_id, name)
+);
+
+CREATE INDEX idx_districts_city ON districts(city_id);
 
 -- ---------------------------------------------------------------------------
 -- Table: institutes
@@ -60,18 +82,17 @@ CREATE TABLE bac_series (
 -- An institute is accredited when it has an accreditation number: `accredited`
 -- is derived from it, so the blue badge can never disagree with the number.
 CREATE TABLE institutes (
-    id                    SERIAL PRIMARY KEY,
+    id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name                  VARCHAR(200) NOT NULL UNIQUE,
     short_name            VARCHAR(20) NOT NULL UNIQUE,
-    district              VARCHAR(50) NOT NULL
-                          CHECK (district IN ('Makélékélé', 'Bacongo', 'Poto-Poto', 'Moungali', 'Ouenzé',
-                                              'Talangaï', 'Mfilou', 'Madibou', 'Djoué')),
+    district_id           UUID NOT NULL REFERENCES districts(id),
     address               VARCHAR(300),
     phone                 VARCHAR(20),
     whatsapp              VARCHAR(20),
     email                 VARCHAR(150),
     color                 VARCHAR(7) DEFAULT '#17693F',
     image_url             TEXT,
+    banner_url            TEXT,
     description           TEXT,
     benefits              TEXT[] NOT NULL DEFAULT '{}',
     registration_fee      INTEGER NOT NULL DEFAULT 0 CHECK (registration_fee >= 0),
@@ -84,7 +105,7 @@ CREATE TABLE institutes (
     CHECK (registration_deadline IS NULL OR start_date IS NULL OR start_date >= registration_deadline)
 );
 
-CREATE INDEX idx_institutes_district ON institutes(district);
+CREATE INDEX idx_institutes_district ON institutes(district_id);
 
 -- ---------------------------------------------------------------------------
 -- Table: programs (formations)
@@ -93,10 +114,10 @@ CREATE INDEX idx_institutes_district ON institutes(district);
 -- the same name. A domain or a degree still used by a program cannot be deleted.
 -- Only `published` programs are shown on the public site.
 CREATE TABLE programs (
-    id                      SERIAL PRIMARY KEY,
-    institute_id            INTEGER NOT NULL REFERENCES institutes(id) ON DELETE CASCADE,
-    domain_id               VARCHAR(20) NOT NULL REFERENCES domains(id),
-    degree_id               INTEGER NOT NULL REFERENCES degrees(id),
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    institute_id            UUID NOT NULL REFERENCES institutes(id) ON DELETE CASCADE,
+    domain_id               UUID NOT NULL REFERENCES domains(id),
+    degree_id               UUID NOT NULL REFERENCES degrees(id),
     name                    VARCHAR(200) NOT NULL,
     description             TEXT,
     admission_requirements  TEXT,
@@ -121,7 +142,7 @@ CREATE INDEX idx_programs_status ON programs(status);
 -- One yearly amount per year of study. The API keeps `year` within the degree
 -- duration (a CHECK cannot read another table).
 CREATE TABLE program_fees (
-    program_id  INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+    program_id  UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
     year        SMALLINT NOT NULL CHECK (year >= 1),
     amount      INTEGER NOT NULL CHECK (amount > 0),
     PRIMARY KEY (program_id, year)
@@ -134,8 +155,8 @@ CREATE INDEX idx_program_fees_amount ON program_fees(amount);
 -- ---------------------------------------------------------------------------
 -- No row for a program means the series is not an admission criterion.
 CREATE TABLE program_bac_series (
-    program_id  INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-    series_id   INTEGER NOT NULL REFERENCES bac_series(id),
+    program_id  UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+    series_id   UUID NOT NULL REFERENCES bac_series(id),
     PRIMARY KEY (program_id, series_id)
 );
 
@@ -145,9 +166,9 @@ CREATE INDEX idx_program_bac_series_series ON program_bac_series(series_id);
 -- Table: careers (débouchés)
 -- ---------------------------------------------------------------------------
 CREATE TABLE careers (
-    id          SERIAL PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(100) NOT NULL UNIQUE,
-    domain_id   VARCHAR(20) NOT NULL REFERENCES domains(id)
+    domain_id   UUID NOT NULL REFERENCES domains(id)
 );
 
 CREATE INDEX idx_careers_domain ON careers(domain_id);
@@ -157,8 +178,8 @@ CREATE INDEX idx_careers_domain ON careers(domain_id);
 -- ---------------------------------------------------------------------------
 -- A career still attached to a program cannot be deleted.
 CREATE TABLE program_careers (
-    program_id    INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-    career_id     INTEGER NOT NULL REFERENCES careers(id),
+    program_id    UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+    career_id     UUID NOT NULL REFERENCES careers(id),
     PRIMARY KEY (program_id, career_id)
 );
 
@@ -170,7 +191,7 @@ CREATE INDEX idx_program_careers_career ON program_careers(career_id);
 -- Shared catalogue: one course (Français, Mathématiques…) can be attached to
 -- several programs.
 CREATE TABLE courses (
-    id      SERIAL PRIMARY KEY,
+    id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name    VARCHAR(200) NOT NULL UNIQUE
 );
 
@@ -181,8 +202,8 @@ CREATE TABLE courses (
 -- course removes it from every program. `year` is kept within the degree
 -- duration by the API.
 CREATE TABLE program_courses (
-    program_id  INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-    course_id   INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    program_id  UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+    course_id   UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
     year        SMALLINT NOT NULL CHECK (year >= 1),
     position    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (program_id, course_id)
@@ -196,8 +217,8 @@ CREATE INDEX idx_program_courses_course ON program_courses(course_id);
 -- Trace of the questions sent from a public program page and relayed by e-mail
 -- to the institute. The back-office has no inbox for them.
 CREATE TABLE contact_requests (
-    id              SERIAL PRIMARY KEY,
-    program_id      INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    program_id      UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
     name            VARCHAR(100) NOT NULL,
     email           VARCHAR(150) NOT NULL,
     message         TEXT NOT NULL,
@@ -205,12 +226,13 @@ CREATE TABLE contact_requests (
 );
 
 -- ---------------------------------------------------------------------------
--- View: indicators (the 5 dashboard KPI — EX-07)
+-- View: indicators (the 5 dashboard KPI - EX-07)
 -- ---------------------------------------------------------------------------
 CREATE VIEW indicators AS
 SELECT
     (SELECT COUNT(*) FROM institutes) AS nb_institutes,
     (SELECT COUNT(*) FROM programs) AS nb_programs,
-    (SELECT COUNT(DISTINCT district) FROM institutes) AS nb_districts_covered,
+    (SELECT COUNT(DISTINCT district_id) FROM institutes) AS nb_districts_covered,
+    (SELECT COUNT(*) FROM districts) AS nb_districts,
     (SELECT COUNT(*) FROM degrees) AS nb_degrees,
     (SELECT COUNT(*) FROM careers) AS nb_careers;

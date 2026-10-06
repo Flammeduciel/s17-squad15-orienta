@@ -2,20 +2,18 @@ const express = require('express');
 const corsMiddleware = require('./middlewares/cors');
 const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
+const domainRoutes = require('./routes/domains');
+const degreeRoutes = require('./routes/degrees');
+const bacSeriesRoutes = require('./routes/bacSeries');
+const careerRoutes = require('./routes/careers');
+const cityRoutes = require('./routes/cities');
+const instituteRoutes = require('./routes/institutes');
+const programRoutes = require('./routes/programs');
+const courseRoutes = require('./routes/courses');
 const { requireAuth } = require('./middlewares/auth');
 const { notFound, errorHandler } = require('./middlewares/errors');
-const districtsRoutes = require("./routes/districts");
 const { uploadDir } = require('./config/env');
-const institutesRoutes = require("./routes/institutes");
-const imagesRoutes = require("./routes/images");
 
-const domainsRoutes = require("./routes/domains");
-const bacSeriesRoutes = require("./routes/bacSeries");
-const careersRoutes = require("./routes/careers");
-const degreesRoutes = require("./routes/degrees");
-const programsRoutes = require('./routes/programs');
-const coursesRoutes = require('./routes/courses');
-const contactRoutes = require('./routes/contact');
 /**
  * L'application Express, sans l'écoute du port : `server.js` s'en charge.
  *
@@ -45,30 +43,25 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// Chaque ressource ajoute ici son fichier de routes, avant `notFound`.
 app.use(healthRoutes);
 app.use(authRoutes);
 
-// Tout ce qui commence par /admin exige une session Squad : les routes
-// d'administration des blocs suivants sont protégées sans rien ajouter.
+// Tout ce qui commence par /admin exige une session Squad. Cette ligne doit
+// rester AVANT les routes des ressources : c'est elle qui protège leurs
+// routes d'administration.
 app.use('/admin', requireAuth);
-// BK4 — instituts.
-app.use(districtsRoutes);
-app.use(institutesRoutes);
-app.use(imagesRoutes);
-// BK3 — référentiels (après requireAuth : leurs routes /admin sont protégées).
-app.use(domainsRoutes);
+
+// Chaque ressource ajoute ici son fichier de routes, avant `notFound`.
+app.use(domainRoutes);
+app.use(degreeRoutes);
 app.use(bacSeriesRoutes);
-app.use(careersRoutes);
-app.use(degreesRoutes);
-// BK5 - formations et indicateurs.
-app.use(programsRoutes);
-// BK6 - cours.
-app.use(coursesRoutes);
-// BK7 - formulaire de contact.
-app.use(contactRoutes);
+app.use(careerRoutes);
+app.use(cityRoutes);
+app.use(instituteRoutes);
+app.use(programRoutes);
+app.use(courseRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
-
 
 module.exports = app;
