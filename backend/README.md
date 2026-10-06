@@ -1,4 +1,4 @@
-# Backend — API Orienta
+# Backend - API Orienta
 
 API REST en Node.js (Express) sur PostgreSQL. Le contrat à respecter est
 `docs/openapi.yaml` ; le découpage du travail en blocs (BK1 à BK6) est dans
@@ -81,7 +81,7 @@ Toute nouvelle fonction suit la même forme.
 
 **Authentification.** Toute route sous `/admin` exige une session : c'est
 déclaré une fois dans `app.js`, les blocs suivants n'ont rien à ajouter. Le
-compte connecté est dans `req.user` (`id`, `username`, `email`, `name`,
+compte connecté est dans `req.user` (`id`, `email`, `name`,
 `role`). Pour protéger une route hors `/admin`, ajouter le middleware
 `requireAuth` de `middlewares/auth.js`.
 
@@ -93,11 +93,15 @@ Un fichier par ressource dans `routes/`, `controllers/`, `models/` et
 
 | Ressource | Nom de fichier | Bloc |
 |---|---|---|
-| Authentification | `auth` (+ `models/users`, `services/auth`, `services/mail`) | BK2, fait |
+| Authentification | `auth` (+ `models/users`, `services/auth`, `services/mail`) | BK2 |
 | Domaines, diplômes, séries du bac, débouchés | `domains`, `degrees`, `bacSeries`, `careers` | BK3 |
-| Instituts, arrondissements, images | `institutes`, `districts`, `images` | BK4 |
-| Formations, indicateurs | `programs`, `indicators` | BK5 |
+| Instituts, images | `institutes`, `images` (+ `middlewares/upload`) | BK4 |
+| Villes et arrondissements | `cities`, `districts` | - |
+| Formations, indicateurs | `programs` (+ `services/programs`) | BK5 |
 | Cours, contact | `courses`, `contact` | BK6 |
+
+Les six blocs sont en place : les 43 opérations du contrat `docs/openapi.yaml`
+répondent.
 
 Le socle (BK1) est en place : `config/`, les middlewares communs, `utils/` et
 `validators/common.js`.

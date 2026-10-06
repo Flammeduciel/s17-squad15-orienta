@@ -1,40 +1,24 @@
-const express = require("express");
-const validate = require("../middlewares/validate");
-const { idParams } = require("../validators/common");
-const {
-  instituteListQuery,
-  instituteBody,
-} = require("../validators/institutes");
-const institutes = require("../controllers/institutes");
+const express = require('express');
+const validate = require('../middlewares/validate');
+const { uploadInstituteImage } = require('../middlewares/upload');
+const { idParams } = require('../validators/common');
+const { institutesQuery, instituteBody } = require('../validators/institutes');
+const institutes = require('../controllers/institutes');
+const { uploadImage } = require('../controllers/images');
 
 /**
- * Instituts (bloc BK4) : lecture publique et écriture de la Squad.
- * Les chemins `/admin/...` sont protégés par `app.use('/admin', requireAuth)`.
+ * Routes des instituts et du dépôt d'image (bloc BK4).
  *
  * @type {import('express').Router}
  */
 const router = express.Router();
 
-router.get(
-  "/institutes",
-  validate({ query: instituteListQuery }),
-  institutes.list,
-);
-router.get("/institutes/:id", validate({ params: idParams }), institutes.get);
-router.post(
-  "/admin/institutes",
-  validate({ body: instituteBody }),
-  institutes.create,
-);
-router.put(
-  "/admin/institutes/:id",
-  validate({ params: idParams, body: instituteBody }),
-  institutes.update,
-);
-router.delete(
-  "/admin/institutes/:id",
-  validate({ params: idParams }),
-  institutes.remove,
-);
+router.get('/institutes', validate({ query: institutesQuery }), institutes.listInstitutes);
+router.get('/institutes/:id', validate({ params: idParams }), institutes.getInstitute);
+
+router.post('/admin/institutes', validate({ body: instituteBody }), institutes.createInstitute);
+router.put('/admin/institutes/:id', validate({ params: idParams, body: instituteBody }), institutes.updateInstitute);
+router.delete('/admin/institutes/:id', validate({ params: idParams }), institutes.deleteInstitute);
+router.post('/admin/images', uploadInstituteImage, uploadImage);
 
 module.exports = router;

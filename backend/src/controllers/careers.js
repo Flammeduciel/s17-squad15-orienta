@@ -1,96 +1,62 @@
-const httpError = require("../utils/httpError");
-const { translatePgError } = require("../utils/pgErrors");
-const careers = require("../models/careers");
-const domains = require("../models/domains");
+const httpError = require('../utils/httpError');
+const careers = require('../models/careers');
+const domains = require('../models/domains');
 
-const notFound = () =>
-  httpError(
-    404,
-    "DEBOUCHE_INTROUVABLE",
-    "Aucun débouché ne correspond à cet identifiant.",
-  );
+const NOT_FOUND = [404, 'DEBOUCHE_INTROUVABLE', 'Aucun débouché ne correspond à cet identifiant.'];
 
-/**
- * Refuse un `domain_id` qui n'existe pas, avec un message clair plutôt
- * qu'une erreur de clé étrangère.
- *
- * @param {string} domainId
- * @returns {Promise<void>}
- */
-async function assertDomainExists(domainId) {
+/** Vérifie que le domaine choisi existe, sinon 400. */
+async function checkDomain(domainId) {
   if (!(await domains.findById(domainId))) {
-    throw httpError(
-      400,
-      "PARAMETRE_INVALIDE",
-      "« domain_id » : ce domaine n'existe pas.",
-    );
+    throw httpError(400, 'PARAMETRE_INVALIDE', "« domain_id » : ce domaine n'existe pas.");
   }
 }
 
-/** `GET /careers` : débouchés portés par au moins une formation publiée. */
-async function listPublic(req, res) {
-  res.json(await careers.listPublic());
+/** `GET /careers` - débouchés proposés sur le site public. */
+async function listCareers(req, res) {
+  res.json(await careers.findPublished());
 }
 
-/** `GET /admin/careers` : tous les débouchés. */
-async function listAll(req, res) {
-  res.json(await careers.listAll());
+/** `GET /admin/careers` - tout le référentiel, pour le back-office. */
+async function listAllCareers(req, res) {
+  res.json(await careers.findAll());
 }
 
-/** `POST /admin/careers` : 201 avec le débouché créé. */
-async function create(req, res) {
-  const { name } = req.valid.body;
-  await assertDomainExists(req.valid.body.domain_id);
-  try {
-    res.status(201).json(await careers.create(req.valid.body));
-  } catch (error) {
-    throw translatePgError(error, {
-      duplicate: `Un débouché nommé « ${name} » existe déjà.`,
-      inUse: "Le domaine choisi n'existe plus.",
-    });
+/** `POST /admin/careers` */
+async function createCareer(req, res) {
+  const { name, domain_id } = req.valid.body;
+  await checkDomain(domain_id);
+  if (await careers.findByName(name)) {
+    throw httpError(409, 'DEJA_EXISTANT', `Le débouché « ${name} » existe déjà.`);
   }
+  const career = await careers.create({ name, domain_id });
+  res.status(201).json({ ...career, program_count: 0 });
 }
 
-/** `PUT /admin/careers/:id` : 200. Renommer se répercute dans les formations. */
-async function update(req, res) {
-  const { name } = req.valid.body;
-  await assertDomainExists(req.valid.body.domain_id);
-  let career;
-  try {
-    career = await careers.update(req.valid.params.id, req.valid.body);
-  } catch (error) {
-    throw translatePgError(error, {
-      duplicate: `Un débouché nommé « ${name} » existe déjà.`,
-      inUse: "Le domaine choisi n'existe plus.",
-    });
+/** `PUT /admin/careers/:id` */
+async function updateCareer(req, res) {
+  const { id } = req.valid.params;
+  const { name, domain_id } = req.valid.body;
+  await checkDomain(domain_id);
+  const sameName = await careers.findByName(name);
+  if (sameName && sameName.id !== id) {
+    throw httpError(409, 'DEJA_EXISTANT', `Le débouché « ${name} » existe déjà.`);
   }
-  if (!career) throw notFound();
-  res.json(career);
+  const career = await careers.update(id, { name, domain_id });
+  if (!career) throw httpError(...NOT_FOUND);
+  res.json({ ...career, program_count: await careers.countPrograms(id) });
 }
 
-/** `DELETE /admin/careers/:id` : 204, ou 409 tant qu'une formation le porte. */
-async function remove(req, res) {
+/** `DELETE /admin/careers/:id` - refusé tant qu'une formation porte ce débouché. */
+async function deleteCareer(req, res) {
   const { id } = req.valid.params;
   const career = await careers.findById(id);
-  if (!career) throw notFound();
-
-  if (career.program_count > 0) {
-    const n = career.program_count;
-    throw httpError(
-      409,
-      "ELEMENT_UTILISE",
-      `« ${career.name} » est porté par ${n} formation${n > 1 ? "s" : ""} : modifiez-les d'abord.`,
-    );
+  if (!career) throw httpError(...NOT_FOUND);
+  const total = await careers.countPrograms(id);
+  if (total > 0) {
+    throw httpError(409, 'ELEMENT_UTILISE', `« ${career.name} » est utilisé par ${total} formation(s) : modifiez-les d'abord.`);
   }
-  try {
-    await careers.remove(id);
-  } catch (error) {
-    // Filet de sécurité : rattachement créé entre le comptage et la suppression.
-    throw translatePgError(error, {
-      inUse: `« ${career.name} » est encore porté par une formation.`,
-    });
-  }
+  await careers.remove(id);
   res.status(204).end();
 }
 
-module.exports = { listPublic, listAll, create, update, remove };
+module.exports = { listCareers, listAllCareers, createCareer, updateCareer, deleteCareer };

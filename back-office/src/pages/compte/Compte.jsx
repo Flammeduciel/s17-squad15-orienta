@@ -1,21 +1,14 @@
-import { useEffect } from 'react';
+/* Compte - route /compte (ticket P10).
+   Maquette : template/back-office.html. */
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/Icon';
 import { useAuth } from '../../context/auth-context';
 import { useToast } from '../../context/toast-context';
 import { useTheme } from '../../hooks/useTheme';
 import { ROUTES } from '../../routes';
+import { dateFr } from '../../utils/format';
 
-/* Mon compte — route /compte (ticket P10).
-   Repris de la PR #24 (Samuel) puis aligné sur le design system.
-   Maquette : template/back-office.html (pageCompte). */
-
-// Date de connexion du profil gardé dans le navigateur.
-function formatDate(iso) {
-  const d = iso ? new Date(iso) : null;
-  if (!d || Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+const muted = { color: 'var(--muted)', fontSize: 14 };
 
 function Compte() {
   const { user, logout } = useAuth();
@@ -23,16 +16,11 @@ function Compte() {
   const toast = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = 'Mon compte — Espace Squad';
-  }, []);
-
-  // Fermeture de session : l'état est vidé même si l'appel échoue, puis retour à la connexion.
-  async function onLogout() {
+  const onLogout = async () => {
     await logout();
     toast('Session fermée.');
     navigate(ROUTES.connexion, { replace: true });
-  }
+  };
 
   return (
     <>
@@ -52,33 +40,32 @@ function Compte() {
             <div className="kv">
               <div>
                 <span>Nom</span>
-                <b>{user?.nom ?? '—'}</b>
+                <b>{user.nom}</b>
               </div>
               <div>
-                <span>Identifiant</span>
-                <b>{user?.login ?? '—'}</b>
+                <span>Adresse e-mail</span>
+                <b>{user.email}</b>
               </div>
               <div>
                 <span>Rôle</span>
-                <b>{user?.role ?? '—'}</b>
+                <b>{user.role}</b>
               </div>
               <div>
                 <span>Ouverture de session</span>
-                <b>{formatDate(user?.quand)}</b>
+                <b>{dateFr(user.quand)}</b>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="form">
+        <div style={{ display: 'grid', gap: 20 }}>
           <div className="panel">
             <header>
               <h2>Apparence</h2>
             </header>
-            <div className="pad">
-              <p>
-                Le thème sombre s'applique automatiquement à la nuit. Votre choix est mémorisé sur
-                cet appareil.
+            <div className="pad" style={{ display: 'grid', gap: 12 }}>
+              <p style={muted}>
+                Le thème sombre s'applique automatiquement à la nuit. Votre choix est mémorisé sur cet appareil.
               </p>
               <button className="btn line" type="button" onClick={toggle}>
                 <Icon name="moon" />
@@ -89,22 +76,10 @@ function Compte() {
 
           <div className="panel">
             <header>
-              <h2>Mot de passe</h2>
-            </header>
-            <div className="pad">
-              <p>
-                Pour changer de mot de passe, déconnectez-vous puis utilisez « Mot de passe oublié
-                » sur l'écran de connexion : un lien de réinitialisation est envoyé par e-mail.
-              </p>
-            </div>
-          </div>
-
-          <div className="panel">
-            <header>
               <h2>Session</h2>
             </header>
-            <div className="pad">
-              <button className="btn line" type="button" onClick={onLogout}>
+            <div className="pad" style={{ display: 'grid', gap: 12 }}>
+              <button className="btn line" type="button" style={{ justifyContent: 'flex-start' }} onClick={onLogout}>
                 <Icon name="logout" />
                 Se déconnecter
               </button>
@@ -116,4 +91,4 @@ function Compte() {
   );
 }
 
-export default Compte;
+export default Compte

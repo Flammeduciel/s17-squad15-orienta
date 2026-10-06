@@ -2,11 +2,11 @@ const { checkDatabase } = require('../config/db');
 const { version } = require('../../package.json');
 
 /**
- * `GET /health` — état de l'API, interrogé par le health check Dokploy
+ * `GET /health` - état de l'API, interrogé par le health check Dokploy
  * (voir deploy.md).
  *
  * Répond 200 tant que l'API peut servir : base joignable, ou base pas encore
- * branchée. Répond 503 si une base est configurée mais ne répond pas — l'API
+ * branchée. Répond 503 si une base est configurée mais ne répond pas - l'API
  * tourne, mais ne peut plus rien lire ni écrire.
  *
  * @param {import('express').Request} req

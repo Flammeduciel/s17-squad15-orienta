@@ -4,8 +4,8 @@ const cors = require('cors');
  * Middleware CORS de l'API.
  *
  * POUR L'INSTANT, TOUTES LES ORIGINES SONT ACCEPTÉES. Pendant le développement,
- * chaque développeur doit pouvoir appeler l'API — y compris celle déjà
- * déployée — depuis son poste, pour tester ses pages. Restreindre les origines
+ * chaque développeur doit pouvoir appeler l'API - y compris celle déjà
+ * déployée - depuis son poste, pour tester ses pages. Restreindre les origines
  * maintenant bloquerait ces tests.
  *
  * À rétablir avant la mise en production : remplacer l'export du bas par la

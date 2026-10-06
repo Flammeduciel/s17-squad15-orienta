@@ -1,4 +1,4 @@
-# Frontend — site public Orienta
+# Frontend - site public Orienta
 
 Site public en React (JavaScript, Vite). L'apparence, les libellés et les
 parcours viennent de la maquette `template/index.html` ; les appels respectent
@@ -19,37 +19,34 @@ npm run dev
 ```
 frontend/src/
 ├── main.jsx       # Point d'entrée : charge le design system et monte l'application
-├── App.jsx        # Routage : toutes les pages dans la mise en page commune
+├── App.jsx        # Routage : toutes les pages s'affichent dans l'en-tête et le pied de page
 ├── routes.js      # Toutes les adresses du site au même endroit
 ├── assets/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
-├── api/           # Client HTTP (request, ApiError, errorMessage, imageUrl)
-├── components/    # Composants partagés : mise en page, icônes, logo, état de chargement
-├── context/       # États partagés entre pages : favoris
-├── hooks/         # useFetch (lecture de l'API), useTheme (clair / sombre)
-├── utils/         # Mise en forme des montants, dates et durées
-└── pages/         # Un dossier par page, avec son fichier déjà créé
+├── api/           # Appels à l'API : http.js (client) et catalogue.js (une fonction par route)
+├── components/    # Composants partagés : en-tête, pied de page, cartes, badge d'agrément, icônes
+├── context/       # États partagés entre pages : favoris, filtres de l'accueil
+├── hooks/         # useApi (charger des données), useTheme (thème clair / sombre)
+├── utils/         # Petites fonctions : montants, dates, durées, liens de contact
+└── pages/         # Un dossier par page ; l'accueil a aussi ses sous-composants et ses filtres
 ```
 
-Chaque fichier de page existe déjà et n'affiche que son titre : il reste à le
-remplir en suivant la maquette. Les routes sont déjà branchées dans `App.jsx`,
-il n'y a pas à y toucher.
+## Charger des données dans une page
 
-## Appeler l'API
+```jsx
+import { getProgram } from '../../api/catalogue';
+import PageState from '../../components/PageState';
+import { useApi } from '../../hooks/useApi';
 
-- Pour lire une ressource : `useFetch('/institutes', { district, q })`. Il
-  renvoie `{ data, loading, error, reload }` et refait l'appel quand le chemin ou
-  les paramètres changent. Les paramètres vides sont ignorés.
-- Pour afficher l'attente ou l'échec : `<Status loading />` et
-  `<Status error={error} onRetry={reload} />`.
-- Pour envoyer des données (`POST /contact`) : `request(chemin, { method, body })`
-  de `api/http.js`.
-- Une erreur de l'API devient une `ApiError` avec `status` (0 si le serveur est
-  injoignable), `code` (code du contrat) et `message` (en français, à afficher tel quel).
-- Les images des instituts arrivent avec une adresse relative : on les affiche
-  avec `imageUrl(institut.image_url)` (qui renvoie `null` s'il n'y a pas d'image).
-- Les favoris se lisent avec `useFavoris()` : `{ ids, count, isFavori(id), toggle(id) }`.
-  Ils restent dans le navigateur (pas de compte étudiant).
+const { data: program, loading, error } = useApi(() => getProgram(id), [id]);
+if (!program) return <PageState loading={loading} error={error} notFound="Formation introuvable" />;
+```
+
+- `api/catalogue.js` a une fonction par route de l'API ; une page ne fait jamais
+  `fetch` elle-même.
+- Une erreur de l'API est une `ApiError` avec `status`, `code` et `message`.
+- Les favoris se lisent avec `useFavorites()`. Ils restent dans le navigateur :
+  le site public n'a pas de compte.
 
 ## Les pages
 
@@ -58,7 +55,7 @@ il n'y a pas à y toucher.
 | `pages/accueil/Accueil.jsx` | Accueil et recherche | `/` | P2 |
 | `pages/favoris/Favoris.jsx` | Favoris | `/favoris` | P3 |
 | `pages/formations/FicheFormation.jsx` | Fiche formation | `/formations/:id` | P4 |
-| `pages/formations/FormulaireQuestion.jsx` | Question à un institut, affichée dans la fiche formation | — | P9 |
+| `pages/formations/FormulaireQuestion.jsx` | Question à un institut, affichée dans la fiche formation | - | P9 |
 | `pages/debouches/Debouches.jsx` | Débouchés | `/debouches/:id` | P5 |
 | `pages/instituts/FicheInstitut.jsx` | Fiche institut | `/instituts/:id` | P6 |
 | `pages/a-propos/APropos.jsx` | À propos | `/a-propos` | P7 |

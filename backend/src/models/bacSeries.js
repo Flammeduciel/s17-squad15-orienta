@@ -3,85 +3,47 @@
  *
  * @module models/bacSeries
  */
-const { query } = require("../config/db");
+const { query } = require('../config/db');
 
-/**
- * @typedef {object} BacSeries
- * @property {number} id
- * @property {string} code
- * @property {string|null} label
- */
-
-const COLUMNS = "id, code, label";
-
-/** @returns {Promise<BacSeries[]>} */
-async function list() {
-  const { rows } = await query(
-    `SELECT ${COLUMNS} FROM bac_series ORDER BY code`,
-  );
+async function findAll() {
+  const { rows } = await query('SELECT id, code, label FROM bac_series ORDER BY code');
   return rows;
 }
 
-/**
- * @param {number} id
- * @returns {Promise<BacSeries|null>}
- */
 async function findById(id) {
-  const { rows } = await query(
-    `SELECT ${COLUMNS} FROM bac_series WHERE id = $1`,
-    [id],
-  );
+  const { rows } = await query('SELECT id, code, label FROM bac_series WHERE id = $1', [id]);
   return rows[0] || null;
 }
 
-/**
- * @param {{ code: string, label: string|null }} data
- * @returns {Promise<BacSeries>}
- */
+async function findByCode(code) {
+  const { rows } = await query('SELECT id, code, label FROM bac_series WHERE lower(code) = lower($1)', [code]);
+  return rows[0] || null;
+}
+
 async function create({ code, label }) {
   const { rows } = await query(
-    `INSERT INTO bac_series (code, label) VALUES ($1, $2) RETURNING ${COLUMNS}`,
+    'INSERT INTO bac_series (code, label) VALUES ($1, $2) RETURNING id, code, label',
     [code, label],
   );
   return rows[0];
 }
 
-/**
- * @param {number} id
- * @param {{ code: string, label: string|null }} data
- * @returns {Promise<BacSeries|null>} `null` si la série n'existe pas.
- */
 async function update(id, { code, label }) {
   const { rows } = await query(
-    `UPDATE bac_series SET code = $2, label = $3 WHERE id = $1 RETURNING ${COLUMNS}`,
-    [id, code, label],
+    'UPDATE bac_series SET code = $1, label = $2 WHERE id = $3 RETURNING id, code, label',
+    [code, label, id],
   );
   return rows[0] || null;
 }
 
-/**
- * @param {number} id
- * @returns {Promise<boolean>} `true` si une ligne a été supprimée.
- */
 async function remove(id) {
-  const { rowCount } = await query("DELETE FROM bac_series WHERE id = $1", [
-    id,
-  ]);
-  return rowCount > 0;
+  await query('DELETE FROM bac_series WHERE id = $1', [id]);
 }
 
-/**
- * Nombre de formations qui admettent cette série.
- *
- * @param {number} id
- * @returns {Promise<number>}
- */
+/** @returns {Promise<number>} Nombre de formations qui admettent cette série. */
 async function countPrograms(id) {
-  const { rows } = await query(
-    "SELECT COUNT(*)::int AS total FROM program_bac_series WHERE series_id = $1",
-    [id],
-  );
+  const { rows } = await query('SELECT COUNT(*)::int AS total FROM program_bac_series WHERE series_id = $1', [id]);
   return rows[0].total;
 }
 
-module.exports = { list, findById, create, update, remove, countPrograms };
+module.exports = { findAll, findById, findByCode, create, update, remove, countPrograms };

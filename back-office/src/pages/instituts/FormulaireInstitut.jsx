@@ -1,197 +1,332 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { errorMessage, imageUrl, request } from '../../api/http';
+/* Formulaire institut - routes /admin/instituts/nouveau et /admin/instituts/:id (ticket P17).
+   Champs de la maquette template/back-office.html, affichés dans une fenêtre. */
+import { useRef, useState } from 'react';
+import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import {
+  createInstitute,
+  getDistricts,
+  getInstitute,
+  getPrograms,
+  updateInstitute,
+  uploadImage,
+} from '../../api/catalogue';
 import Icon from '../../components/Icon';
-import Status from '../../components/Status';
+import Modal from '../../components/Modal';
+import PageState from '../../components/PageState';
 import { useToast } from '../../context/toast-context';
-import { useFetch } from '../../hooks/useFetch';
+import { useApi } from '../../hooks/useApi';
 import { ROUTES } from '../../routes';
-import { formatFcfa, plural } from '../../utils/format';
-import { EMPTY, toPayload, toValues, validate } from './formulaire';
-import ImageInstitut from './ImageInstitut';
+import { errorMessage, fcfa, imageUrl } from '../../utils/format';
 
-/* Formulaire institut — routes /admin/instituts/nouveau et /admin/instituts/:id (ticket P17).
-   Maquette : template/back-office.html. */
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
-// Couleur de l'aperçu quand l'institut n'a pas encore de couleur attribuée (création).
-const DEFAULT_COLOR = '#5E6B64';
+// Valeurs de départ du formulaire : celles de l'institut, ou un formulaire vide.
+function toForm(institute) {
+  return {
+    name: institute?.name ?? '',
+    short_name: institute?.short_name ?? '',
+    district_id: institute?.district_id ?? '',
+    address: institute?.address ?? '',
+    phone: institute?.phone ?? '',
+    whatsapp: institute?.whatsapp ?? '',
+    email: institute?.email ?? '',
+    accreditation_number: institute?.accreditation_number ?? '',
+    registration_fee: institute?.registration_fee ?? 50000,
+    registration_deadline: institute?.registration_deadline ?? '',
+    start_date: institute?.start_date ?? '',
+    description: institute?.description ?? '',
+    benefits: (institute?.benefits ?? []).join('\n'),
+    image_url: institute?.image_url ?? null,
+    banner_url: institute?.banner_url ?? null,
+  };
+}
 
-// Champ de formulaire : étiquette, saisie, aide et message d'erreur. Le reste des attributs va à la saisie.
-function Field({ id, label, hint, error, as: Input = 'input', ...props }) {
+// Contrôles faits avant l'envoi. Renvoie { champ: message } ; vide si tout est bon.
+function validate(form) {
+  const errors = {};
+  if (!form.name.trim()) errors.name = 'Le nom complet est obligatoire.';
+  if (!form.short_name.trim()) errors.short_name = 'Le sigle est obligatoire.';
+  if (!form.address.trim()) errors.address = "L'adresse est obligatoire.";
+  if (!form.phone.trim()) errors.phone = 'Le téléphone est obligatoire.';
+  if (form.whatsapp.replace(/\D/g, '').length < 8) errors.whatsapp = 'Le numéro WhatsApp est incomplet.';
+  if (form.email && !form.email.includes('@')) errors.email = 'Cette adresse électronique est incomplète.';
+  // Une rentrée avant la clôture des inscriptions n'a pas de sens.
+  if (form.registration_deadline && form.start_date && form.start_date < form.registration_deadline) {
+    errors.start_date = 'La rentrée est antérieure à la clôture des inscriptions.';
+  }
+  return errors;
+}
+
+// Champ d'image du formulaire : aperçu, bouton pour choisir un fichier, bouton
+// pour retirer l'image. wide : aperçu en largeur, pour la bannière.
+function ImageField({ label, hint, url, placeholder, color, wide, onPick, onRemove }) {
+  const fileInput = useRef(null);
+
+  const onChange = (event) => {
+    const file = event.target.files[0];
+    event.target.value = '';
+    if (file) onPick(file);
+  };
+
   return (
-    <div className={`fld${error ? ' bad' : ''}`}>
-      <label htmlFor={id}>{label}</label>
-      <Input id={id} aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-err` : undefined} {...props} />
-      {hint && <span className="hint">{hint}</span>}
-      {error && (
-        <span className="err" id={`${id}-err`}>
-          {error}
-        </span>
-      )}
+    <div className="fld" style={{ marginTop: 16 }}>
+      <label>{label}</label>
+      <div className="logoedit" role="group" aria-label={label}>
+        <div className={`ap${wide ? ' wide' : ''}`} style={{ background: url ? '#fff' : (color ?? '#5E6B64') }}>
+          {url ? <img src={imageUrl(url)} alt={`Aperçu : ${label}`} /> : placeholder}
+        </div>
+        <div className="cmd">
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="btn line sm" type="button" onClick={() => fileInput.current.click()}>
+              <Icon name="upload" />
+              {url ? "Changer l'image" : 'Choisir une image'}
+            </button>
+            {url && (
+              <button className="btn ghost sm" type="button" onClick={onRemove}>
+                Retirer
+              </button>
+            )}
+          </div>
+          <span className="hint">{hint}</span>
+        </div>
+      </div>
+      <input type="file" accept={IMAGE_TYPES.join(',')} hidden ref={fileInput} onChange={onChange} />
     </div>
   );
 }
 
-function Formulaire({ institute, linked, others, districts }) {
+function InstituteForm({ institute, districts, linked, onClose, onSaved }) {
   const toast = useToast();
-  const navigate = useNavigate();
-  const editing = Boolean(institute);
-
-  const [values, setValues] = useState(() =>
-    institute ? toValues(institute) : { ...EMPTY, district: districts[0]?.name ?? '' },
-  );
+  const [form, setForm] = useState(() => ({
+    ...toForm(institute),
+    district_id: institute?.district_id ?? districts[0].id,
+  }));
   const [errors, setErrors] = useState({});
-  // Nouvelle image choisie ({ file, url } : `url` est un aperçu local), envoyée à l'enregistrement.
-  const [picked, setPicked] = useState(null);
-  const [removed, setRemoved] = useState(false); // l'image enregistrée sera retirée
-  const [saving, setSaving] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  // L'aperçu local est libéré quand l'image change ou que la page se ferme.
-  useEffect(() => () => picked && URL.revokeObjectURL(picked.url), [picked]);
+  const onChange = (event) => setForm({ ...form, [event.target.name]: event.target.value });
 
-  const set = (field) => (event) => {
-    setValues((current) => ({ ...current, [field]: event.target.value }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
+  // Un champ du formulaire, avec son message d'erreur éventuel.
+  const field = (name, label, props = {}, hint) => (
+    <div className={`fld${errors[name] ? ' bad' : ''}`}>
+      <label htmlFor={`i-${name}`}>{label}</label>
+      <input id={`i-${name}`} name={name} value={form[name]} onChange={onChange} {...props} />
+      {hint && <span className="hint">{hint}</span>}
+      {errors[name] && <span className="err">{errors[name]}</span>}
+    </div>
+  );
+
+  // Une image est déposée dès qu'elle est choisie ; son adresse part avec le reste
+  // à l'enregistrement. key : 'image_url' (cartes) ou 'banner_url' (bannière).
+  const onImage = async (key, file) => {
+    if (!IMAGE_TYPES.includes(file.type)) {
+      toast('Format non accepté : utilisez JPEG, PNG ou WebP.', true);
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast('Image trop lourde : 2 Mo maximum.', true);
+      return;
+    }
+    try {
+      const { url } = await uploadImage(file);
+      setForm((current) => ({ ...current, [key]: url }));
+      toast("Image prête. Enregistrez la fiche pour l'appliquer.");
+    } catch (err) {
+      toast(errorMessage(err), true);
+    }
   };
 
-  async function submit(event) {
+  const onSubmit = async (event) => {
     event.preventDefault();
-    const found = validate(values, others);
+    setApiError('');
+    const found = validate(form);
     setErrors(found);
     const count = Object.keys(found).length;
     if (count > 0) {
-      toast(`${plural(count, 'erreur')} dans le formulaire.`, true);
-      document.querySelector('.fld.bad')?.scrollIntoView?.({ block: 'center' });
+      toast(`${count} erreur${count > 1 ? 's' : ''} dans le formulaire.`, true);
       return;
     }
-
-    setSaving(true);
+    const body = {
+      name: form.name.trim(),
+      short_name: form.short_name.trim().toUpperCase(),
+      district_id: form.district_id,
+      address: form.address.trim(),
+      phone: form.phone.trim(),
+      whatsapp: form.whatsapp.replace(/\D/g, ''),
+      email: form.email.trim() || null,
+      image_url: form.image_url,
+      banner_url: form.banner_url,
+      description: form.description.trim() || null,
+      benefits: form.benefits
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+      registration_fee: Number(form.registration_fee) || 0,
+      registration_deadline: form.registration_deadline || null,
+      start_date: form.start_date || null,
+      accreditation_number: form.accreditation_number.trim() || null,
+    };
+    setSubmitting(true);
     try {
-      // L'image part d'abord : l'institut n'est enregistré qu'avec une adresse d'image valide.
-      let image = removed ? null : (institute?.image_url ?? null);
-      if (picked) {
-        const body = new FormData();
-        body.append('file', picked.file);
-        image = (await request('/admin/images', { method: 'POST', body })).url;
+      if (institute) {
+        await updateInstitute(institute.id, body);
+        toast('Institut mis à jour.');
+      } else {
+        await createInstitute(body);
+        toast('Institut ajouté au catalogue.');
       }
-      const payload = toPayload(values, image, institute?.color);
-      if (editing) await request(`/admin/institutes/${institute.id}`, { method: 'PUT', body: payload });
-      else await request('/admin/institutes', { method: 'POST', body: payload });
-      toast(editing ? 'Institut mis à jour.' : 'Institut ajouté au catalogue.');
-      navigate(ROUTES.instituts);
-    } catch (error) {
-      toast(errorMessage(error), true);
-      setSaving(false);
+      onSaved();
+    } catch (err) {
+      // Nom ou sigle déjà pris (409), champ refusé (400) : l'API dit pourquoi.
+      setApiError(errorMessage(err));
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
-    <>
-      <div className="pagehead">
-        <div>
-          <Link className="btn ghost sm" to={ROUTES.instituts}>
-            <Icon name="back" />
-            Retour à la liste
-          </Link>
-          <h1>{editing ? `Modifier ${institute.short_name}` : 'Ajouter un institut'}</h1>
-          <p>
-            {editing
-              ? 'La fiche publique reprend ces informations.'
-              : 'Un institut doit être rattaché à un arrondissement de Brazzaville.'}
-          </p>
-        </div>
-        {linked.length > 0 && <span className="badge ok">{plural(linked.length, 'formation')} rattachée{linked.length > 1 ? 's' : ''}</span>}
-      </div>
-
-      <form className="form" noValidate onSubmit={submit}>
+    <Modal
+      title={institute ? `Modifier ${institute.short_name}` : 'Ajouter un institut'}
+      subtitle={
+        institute
+          ? 'La fiche publique reprend ces informations.'
+          : 'Un institut doit être rattaché à un arrondissement.'
+      }
+      onClose={onClose}
+    >
+      <form className="form" onSubmit={onSubmit} noValidate>
         <fieldset>
           <legend>Identité</legend>
           <div className="row two">
-            <Field id="i-name" label="Nom complet" required value={values.name} onChange={set('name')}
-              placeholder="ex. Institut Supérieur de Gestion du Fleuve" error={errors.name} />
-            <Field id="i-short" label="Sigle" required value={values.short_name} onChange={set('short_name')}
-              placeholder="ex. ISGF" maxLength={20} error={errors.short_name} />
+            {field('name', 'Nom complet', {
+              placeholder: 'ex. Institut Supérieur de Gestion du Fleuve',
+            })}
+            {field('short_name', 'Sigle', {
+              placeholder: 'ex. ISGF',
+              maxLength: 12,
+            })}
           </div>
-          <div className="row two">
-            <Field id="i-district" label="Arrondissement" as="select" value={values.district} onChange={set('district')}>
-              {districts.map((district) => (
-                <option key={district.name}>{district.name}</option>
-              ))}
-            </Field>
-            <Field id="i-address" label="Adresse" required value={values.address} onChange={set('address')}
-              placeholder="Avenue …, quartier" error={errors.address} />
+          <div className="row two" style={{ marginTop: 16 }}>
+            <div className="fld">
+              <label htmlFor="i-district">Arrondissement</label>
+              <select id="i-district" name="district_id" value={form.district_id} onChange={onChange}>
+                {districts.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({item.city})
+                  </option>
+                ))}
+              </select>
+            </div>
+            {field('address', 'Adresse', { placeholder: 'Avenue …, quartier' })}
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Contact</legend>
           <div className="row two">
-            <Field id="i-phone" label="Téléphone" required value={values.phone} onChange={set('phone')}
-              placeholder="+242 …" inputMode="tel" error={errors.phone} />
-            <Field id="i-whatsapp" label="WhatsApp" required value={values.whatsapp} onChange={set('whatsapp')}
-              placeholder="24206…" inputMode="numeric" hint="Format international, sans le +." error={errors.whatsapp} />
+            {field('phone', 'Téléphone', {
+              placeholder: '+242 …',
+              inputMode: 'tel',
+            })}
+            {field(
+              'whatsapp',
+              'WhatsApp',
+              { placeholder: '24206…', inputMode: 'numeric' },
+              'Format international, sans le +.',
+            )}
           </div>
-          <div className="row">
-            <Field id="i-email" label="Adresse électronique" type="email" value={values.email} onChange={set('email')}
-              placeholder="contact@institut.cg" error={errors.email} />
+          <div className="row" style={{ marginTop: 16 }}>
+            {field('email', 'Adresse électronique', {
+              type: 'email',
+              placeholder: 'contact@institut.cg',
+            })}
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Agrément et frais</legend>
           <div className="row two">
-            <Field id="i-accreditation" label="Numéro d'agrément" value={values.accreditation_number}
-              onChange={set('accreditation_number')} placeholder="ex. N° 047/MESRTI/2009"
-              hint="Laisser vide si l'institut n'est pas agréé : il apparaîtra sans badge." />
-            <Field id="i-fee" label="Frais d'inscription (FCFA)" type="number" min="0" step="1000" required
-              value={values.registration_fee} onChange={set('registration_fee')} error={errors.registration_fee} />
+            {field(
+              'accreditation_number',
+              "Numéro d'agrément",
+              { placeholder: 'ex. N° 047/MESRTI/2009' },
+              "Laisser vide si l'institut n'est pas agréé : il apparaîtra sans badge.",
+            )}
+            {field('registration_fee', "Frais d'inscription (FCFA)", {
+              type: 'number',
+              min: 0,
+              step: 1000,
+            })}
           </div>
-          <div className="row two">
-            <Field id="i-deadline" label="Clôture des inscriptions" type="date" value={values.registration_deadline}
-              onChange={set('registration_deadline')} />
-            <Field id="i-start" label="Rentrée" type="date" value={values.start_date} onChange={set('start_date')}
-              error={errors.start_date} />
+          <div className="row two" style={{ marginTop: 16 }}>
+            {field('registration_deadline', 'Clôture des inscriptions', {
+              type: 'date',
+            })}
+            {field('start_date', 'Rentrée', { type: 'date' })}
           </div>
         </fieldset>
 
         <fieldset>
-          <legend>Présentation et image</legend>
-          <Field id="i-description" label="Description" as="textarea" value={values.description}
-            onChange={set('description')} placeholder="Présentation courte, affichée sur la fiche publique" />
-          <Field id="i-benefits" label="Avantages (optionnel)" as="textarea" value={values.benefits}
-            onChange={set('benefits')} placeholder="Un avantage par ligne : bibliothèque, bourses, restauration…" />
+          <legend>Présentation et images</legend>
           <div className="fld">
-            <label id="image-label">Image de l'institut</label>
-            <ImageInstitut
-              shown={picked ? picked.url : removed ? null : imageUrl(institute?.image_url)}
-              sigle={values.short_name.trim().toUpperCase()}
-              color={institute?.color ?? DEFAULT_COLOR}
-              onPick={(file) => {
-                setPicked({ file, url: URL.createObjectURL(file) });
-                setRemoved(false);
-              }}
-              onRemove={() => {
-                setPicked(null);
-                setRemoved(true);
-              }}
-              onError={(message) => toast(message, true)}
+            <label htmlFor="i-description">Description</label>
+            <textarea
+              id="i-description"
+              name="description"
+              placeholder="Présentation courte, affichée sur la fiche publique"
+              value={form.description}
+              onChange={onChange}
             />
           </div>
+          <div className="fld" style={{ marginTop: 16 }}>
+            <label htmlFor="i-benefits">Avantages (optionnel)</label>
+            <textarea
+              id="i-benefits"
+              name="benefits"
+              placeholder="Un avantage par ligne : bibliothèque, bourses, restauration…"
+              value={form.benefits}
+              onChange={onChange}
+            />
+          </div>
+          <ImageField
+            label="Image des cartes"
+            hint="JPEG, PNG ou WebP, 2 Mo maximum. Affichée sur les cartes de l'institut, dans les listes du site public."
+            url={form.image_url}
+            placeholder={form.short_name || 'IMAGE'}
+            color={institute?.color}
+            onPick={(file) => onImage('image_url', file)}
+            onRemove={() => setForm({ ...form, image_url: null })}
+          />
+          <ImageField
+            wide
+            label="Bannière de la fiche"
+            hint="Grande image en largeur, affichée en haut de la fiche publique de l'institut. Sans bannière, l'image des cartes est utilisée."
+            url={form.banner_url}
+            placeholder="BANNIÈRE"
+            color={institute?.color}
+            onPick={(file) => onImage('banner_url', file)}
+            onRemove={() => setForm({ ...form, banner_url: null })}
+          />
         </fieldset>
 
+        {apiError && (
+          <div className="err" role="alert">
+            {apiError}
+          </div>
+        )}
+
         <div className="formfoot">
-          <button className="btn" type="submit" disabled={saving}>
-            {saving ? 'Enregistrement…' : editing ? 'Enregistrer les modifications' : "Créer l'institut"}
+          <button className="btn" type="submit" disabled={submitting}>
+            {institute ? 'Enregistrer les modifications' : "Créer l'institut"}
           </button>
-          <Link className="btn line" to={ROUTES.instituts}>
+          <button className="btn line" type="button" onClick={onClose}>
             Annuler
-          </Link>
-          {linked.length > 0 && (
-            <span className="sp">
-              Cet institut porte {plural(linked.length, 'formation')} : elles seront retirées du catalogue public s'il
-              est supprimé.
-            </span>
-          )}
+          </button>
+          <span className="sp" style={{ color: 'var(--muted)', fontSize: '13.5px' }}>
+            {linked.length > 0 &&
+              `Cet institut porte ${linked.length} formation(s) : elles seront retirées du catalogue public s'il est supprimé.`}
+          </span>
         </div>
       </form>
 
@@ -217,7 +352,7 @@ function Formulaire({ institute, linked, others, districts }) {
                       <b>{program.name}</b>
                     </td>
                     <td>{program.degree.name}</td>
-                    <td className="num">{formatFcfa(program.tuition)}</td>
+                    <td className="num">{fcfa(program.tuition)}</td>
                     <td>
                       {program.status === 'published' ? (
                         <span className="badge ok">Publiée</span>
@@ -232,51 +367,65 @@ function Formulaire({ institute, linked, others, districts }) {
           </div>
         </div>
       )}
-    </>
+    </Modal>
   );
 }
 
+// Route /admin/instituts/nouveau ou /admin/instituts/:id : le formulaire s'ouvre
+// dans une fenêtre, par-dessus la liste des instituts. Les données sont chargées
+// d'abord, pour que le formulaire parte directement des valeurs de l'institut.
 function FormulaireInstitut() {
   const { id } = useParams();
-  const editing = id !== undefined;
-  // Une adresse qui n'est pas un identifiant (/admin/instituts/abc) ne mène à aucun institut.
-  const validId = !editing || /^[1-9]\d*$/.test(id);
+  const navigate = useNavigate();
+  // La liste, affichée derrière, fournit de quoi se recharger après un enregistrement.
+  const { reloadList } = useOutletContext();
+  const { data, loading, error } = useApi(async () => {
+    const [districts, programs, institute] = await Promise.all([
+      getDistricts(),
+      getPrograms(),
+      id ? getInstitute(id) : null,
+    ]);
+    return { districts, programs, institute };
+  }, [id]);
 
-  const institute = useFetch(editing && validId ? `/institutes/${id}` : null);
-  const everyInstitute = useFetch('/institutes');
-  const districts = useFetch('/districts');
-  const programs = useFetch(editing && validId ? '/admin/programs' : null);
+  const close = () => navigate(ROUTES.instituts);
 
-  if (!validId || institute.error?.status === 404) {
+  if (!data || loading) {
     return (
-      <div className="empty">
-        <h3>Institut introuvable</h3>
-        <p>Cet institut n'existe pas ou a été supprimé.</p>
-        <Link className="btn line" to={ROUTES.instituts}>
-          Retour à la liste
-        </Link>
-      </div>
+      <Modal title={id ? "Modifier l'institut" : 'Ajouter un institut'} onClose={close}>
+        <PageState loading={loading} error={error} />
+      </Modal>
     );
   }
 
-  const failed = [institute, everyInstitute, districts, programs].find((source) => source.error);
-  if (failed) return <Status error={failed.error} onRetry={failed.reload} />;
-  if (!districts.data || !everyInstitute.data || (editing && (!institute.data || !programs.data))) {
-    return <Status loading />;
+  if (data.districts.length === 0) {
+    return (
+      <Modal title="Ajouter un institut" size="medium" onClose={close}>
+        <div className="empty">
+          <h3>Aucun arrondissement enregistré</h3>
+          <p>Un institut est situé dans un arrondissement : créez d'abord une ville et ses arrondissements.</p>
+          <Link className="btn line" to={ROUTES.arrondissements}>
+            Voir les arrondissements
+          </Link>
+        </div>
+      </Modal>
+    );
   }
 
-  const others = everyInstitute.data.items.filter((other) => other.id !== institute.data?.id);
-  const linked = editing ? programs.data.items.filter((program) => program.institute.id === institute.data.id) : [];
-
+  const linked = data.institute ? data.programs.filter((program) => program.institute.id === data.institute.id) : [];
   return (
-    <Formulaire
+    <InstituteForm
       key={id ?? 'nouveau'}
-      institute={institute.data}
+      institute={data.institute}
+      districts={data.districts}
       linked={linked}
-      others={others}
-      districts={districts.data}
+      onClose={close}
+      onSaved={() => {
+        reloadList();
+        close();
+      }}
     />
   );
 }
 
-export default FormulaireInstitut;
+export default FormulaireInstitut

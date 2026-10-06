@@ -1,175 +1,178 @@
-import { useMemo, useState } from 'react';
+/* Cours - route /admin/cours (ticket P19).
+   Maquette : template/back-office.html. */
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { errorMessage, request } from '../../api/http';
+import {
+  createCourse,
+  deleteCourse,
+  getCourses,
+  getPrograms,
+  linkCourse,
+  unlinkCourse,
+  updateCourse,
+} from '../../api/catalogue';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Icon from '../../components/Icon';
-import Pagination from '../../components/Pagination';
-import Status from '../../components/Status';
+import Modal from '../../components/Modal';
+import PageState from '../../components/PageState';
+import Pager from '../../components/Pager';
 import { useToast } from '../../context/toast-context';
-import { useFetch } from '../../hooks/useFetch';
-import { plural } from '../../utils/format';
-import CoursForm from './CoursForm';
-
-/* Cours — route /admin/cours (ticket P19).
-   Le filtre « formation » vit dans l'adresse (?formation=12) : la fiche formation y renvoie.
-   Maquette : template/back-office.html. */
+import { useApi } from '../../hooks/useApi';
+import { errorMessage, matches, niveau, pageOf } from '../../utils/format';
 
 const PER_PAGE = 10;
 
-// Pour la recherche : sans accents ni majuscules.
-const plain = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
-// (0) → « 1re année », (1) → « 2e année »…
-const niveau = (index) => `${index === 0 ? '1re' : `${index + 1}e`} année`;
-
-// Rattachement proposé pour un nouveau cours ouvert depuis le filtre formation.
-function liensParDefaut(editingId, formeActive, forme) {
-  if (editingId || !formeActive) return [];
-  return [{ program_id: forme, year: 1 }];
-}
+// Libellé d'une formation dans les listes : « Sage-femme - ISD ».
+const programLabel = (program) => `${program.name} - ${program.institute.short_name}`;
 
 function Cours() {
   const toast = useToast();
+  const { data, loading, error, reload } = useApi(async () => {
+    const [courses, programs] = await Promise.all([getCourses(), getPrograms()]);
+    programs.sort((a, b) => programLabel(a).localeCompare(programLabel(b), 'fr'));
+    return { courses, programs };
+  }, []);
+  // L'adresse garde la formation filtrée : /admin/cours?formation=12.
+  // « ajout=1 » ouvre d'emblée le formulaire (arrivée depuis une formation neuve).
   const [params, setParams] = useSearchParams();
-  const cours = useFetch('/admin/courses');
-  const formations = useFetch('/admin/programs');
-
-  const [q, setQ] = useState('');
+  const programId = params.get('formation') || null;
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [editing, setEditing] = useState(null); // null | { id: integer | null } (null = nouveau cours)
+  // editing : null (liste seule), 'new' (ajout) ou le cours en cours de modification.
+  const [editing, setEditing] = useState(params.get('ajout') ? 'new' : null);
+  const [name, setName] = useState('');
+  // links : formations rattachées au cours du formulaire, [{ program_id, year }].
+  const [links, setLinks] = useState(programId ? [{ program_id: programId, year: 1 }] : []);
+  const [formError, setFormError] = useState('');
+  const [attach, setAttach] = useState({ courseId: '', year: 1 });
   const [toDelete, setToDelete] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [attachCours, setAttachCours] = useState('');
-  const [attachAnnee, setAttachAnnee] = useState(1);
 
-  const items = useMemo(() => cours.data ?? [], [cours.data]);
-  const formationListe = useMemo(() => formations.data?.items ?? [], [formations.data]);
-  const filtre = params.get('formation') ?? '';
-  // Un filtre sur une formation inconnue est ignoré.
-  const formeActive = formationListe.some((formation) => String(formation.id) === filtre) ? filtre : '';
-  const forme = Number(formeActive);
-  const formationFiltree = formationListe.find((formation) => formation.id === forme);
+  if (!data) return <PageState loading={loading} error={error} />;
 
-  const rows = useMemo(() => {
-    const needle = plain(q);
-    return items
-      .filter((coursItem) => !formeActive || coursItem.programs.some((lien) => lien.program_id === forme))
-      .filter((coursItem) => !needle || plain(coursItem.name).includes(needle))
-      .sort((a, b) => {
-        if (formeActive) {
-          const ya = a.programs.find((lien) => lien.program_id === forme).year;
-          const yb = b.programs.find((lien) => lien.program_id === forme).year;
-          if (ya !== yb) return ya - yb;
-        }
-        return a.name.localeCompare(b.name, 'fr');
-      });
-  }, [items, q, formeActive, forme]);
+  const { courses, programs } = data;
+  const program = programs.find((item) => item.id === programId) ?? null;
+  const durationOf = (id) => programs.find((item) => item.id === id)?.duration ?? 1;
+  // Rattachement d'un cours à la formation filtrée, s'il existe.
+  const linkOf = (course) => course.programs.find((item) => item.program_id === programId);
 
-  // Cours du catalogue non rattachés à la formation filtrée : rattachable directement.
-  const libres = useMemo(
-    () =>
-      formeActive
-        ? items
-            .filter((coursItem) => !coursItem.programs.some((lien) => lien.program_id === forme))
-            .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
-        : [],
-    [items, formeActive, forme],
-  );
-  const attachSelection = libres.some((coursItem) => String(coursItem.id) === attachCours)
-    ? attachCours
-    : (libres[0]?.id.toString() ?? '');
-  const dureeFiltree = formationFiltree?.duration ?? 1;
+  const rows = courses
+    .filter((course) => (!program || linkOf(course)) && matches(search, course.name))
+    .sort((a, b) => (program ? linkOf(a).year - linkOf(b).year : 0) || a.name.localeCompare(b.name, 'fr'));
+  const visible = pageOf(rows, page, PER_PAGE);
+  // Cours du catalogue pas encore rattachés à la formation filtrée.
+  const free = program ? courses.filter((course) => !linkOf(course)) : [];
 
-  const pages = Math.max(1, Math.ceil(rows.length / PER_PAGE));
-  const pageCourante = Math.min(page, pages);
-  const visibles = rows.slice((pageCourante - 1) * PER_PAGE, pageCourante * PER_PAGE);
-  const edited = editing?.id ? items.find((coursItem) => coursItem.id === editing.id) : null;
-
-  const setFiltre = (id) => {
-    setParams(id ? { formation: id } : {}, { replace: true });
+  const setFilter = (id) => {
+    setParams(id ? { formation: id } : {});
     setPage(1);
   };
 
-  // ---------------------------------------------------------------- Actions
+  const startAdd = () => {
+    setName('');
+    setLinks(program ? [{ program_id: program.id, year: 1 }] : []);
+    setFormError('');
+    setEditing('new');
+  };
+  const startEdit = (course) => {
+    setName(course.name);
+    setLinks(
+      course.programs.map((item) => ({
+        program_id: item.program_id,
+        year: item.year,
+      })),
+    );
+    setFormError('');
+    setEditing(course);
+  };
 
-  async function saveCours({ name, programs: liens }) {
+  // --- Lignes « formation + année » du formulaire
+  const addLink = () => {
+    const unused = programs.find((item) => !links.some((link) => link.program_id === item.id));
+    if (!unused) {
+      toast('Ce cours est déjà rattaché à toutes les formations.', true);
+      return;
+    }
+    setLinks([...links, { program_id: unused.id, year: 1 }]);
+  };
+  const changeLink = (index, patch) => {
+    const next = links.map((link, position) => (position === index ? { ...link, ...patch } : link));
+    // Si on change de formation, l'année ne doit pas dépasser la durée de son diplôme.
+    next[index].year = Math.min(next[index].year, durationOf(next[index].program_id));
+    setLinks(next);
+  };
+  const removeLink = (index) => setLinks(links.filter((_, position) => position !== index));
+
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    setFormError('');
+    const cleanName = name.trim();
+    if (!cleanName) {
+      setFormError("L'intitulé est obligatoire.");
+      return;
+    }
+    const body = { name: cleanName, programs: links };
     try {
-      if (editing?.id) {
-        await request(`/admin/courses/${editing.id}`, { method: 'PUT', body: { name, programs: liens } });
-        toast('Cours mis à jour.');
+      if (editing === 'new') {
+        await createCourse(body);
+        toast(
+          `« ${cleanName} » ajouté${links.length ? ` et rattaché à ${links.length} formation(s)` : ' au catalogue'}.`,
+        );
+        // Le formulaire reste ouvert sur les mêmes formations, pour enchaîner les cours.
+        setName('');
       } else {
-        await request('/admin/courses', { method: 'POST', body: { name, programs: liens } });
-        toast(liens.length > 0 ? `« ${name} » rattaché à ${plural(liens.length, 'formation')}.` : `« ${name} » ajouté au catalogue.`);
+        await updateCourse(editing.id, body);
+        toast('Cours mis à jour.');
+        setEditing(null);
       }
-      setEditing(null);
-      cours.reload();
-    } catch (error) {
-      toast(errorMessage(error), true);
-      throw error; // le formulaire reste ouvert pour corriger
+      reload();
+    } catch (err) {
+      // Intitulé déjà au catalogue (409), formation rattachée deux fois (400)… l'API dit pourquoi.
+      setFormError(errorMessage(err));
     }
-  }
+  };
 
-  // Rattacher / retirer = renvoyer la liste complète des rattachements du cours.
-  async function rattacher() {
-    const coursItem = items.find((coursItem) => String(coursItem.id) === attachSelection);
-    if (!coursItem) return;
+  // --- Actions sur la formation filtrée
+  const onAttach = async () => {
+    const course = courses.find((item) => item.id === (attach.courseId || free[0]?.id));
+    if (!course) return;
     try {
-      await request(`/admin/courses/${coursItem.id}`, {
-        method: 'PUT',
-        body: {
-          name: coursItem.name,
-          programs: [...coursItem.programs.map((lien) => ({ program_id: lien.program_id, year: lien.year })), { program_id: forme, year: attachAnnee }],
-        },
-      });
-      toast(`« ${coursItem.name} » rattaché à « ${formationFiltree.name} ».`);
-      cours.reload();
-    } catch (error) {
-      toast(errorMessage(error), true);
+      await linkCourse(program.id, course.id, Math.min(attach.year, program.duration));
+      toast(`« ${course.name} » rattaché à « ${program.name} ».`);
+      setAttach({ courseId: '', year: attach.year });
+      reload();
+    } catch (err) {
+      toast(errorMessage(err), true);
     }
-  }
-
-  async function retirer(coursItem) {
+  };
+  const onDetach = async (course) => {
     try {
-      await request(`/admin/courses/${coursItem.id}`, {
-        method: 'PUT',
-        body: {
-          name: coursItem.name,
-          programs: coursItem.programs
-            .filter((lien) => lien.program_id !== forme)
-            .map((lien) => ({ program_id: lien.program_id, year: lien.year })),
-        },
-      });
-      toast(`« ${coursItem.name} » retiré de cette formation. Il reste au catalogue.`);
-      cours.reload();
-    } catch (error) {
-      toast(errorMessage(error), true);
+      await unlinkCourse(program.id, course.id);
+      toast(`« ${course.name} » retiré de cette formation. Il reste au catalogue.`);
+      reload();
+    } catch (err) {
+      toast(errorMessage(err), true);
     }
-  }
+  };
 
-  async function remove() {
-    setDeleting(true);
+  const onDelete = async () => {
+    const course = toDelete;
+    setToDelete(null);
     try {
-      await request(`/admin/courses/${toDelete.id}`, { method: 'DELETE' });
-      toast(`« ${toDelete.name} » supprimé du catalogue.`);
-      if (editing?.id === toDelete.id) setEditing(null);
-      setToDelete(null);
-      cours.reload();
-    } catch (error) {
-      toast(errorMessage(error), true);
-    } finally {
-      setDeleting(false);
+      await deleteCourse(course.id);
+      toast(`Cours « ${course.name} » supprimé du catalogue.`);
+      if (editing?.id === course.id) setEditing(null);
+      reload();
+    } catch (err) {
+      toast(errorMessage(err), true);
     }
-  }
+  };
 
-  // ---------------------------------------------------------------- Affichage
-
-  const failed = cours.error || formations.error;
-  if (failed) {
-    return <Status error={failed} onRetry={cours.error ? cours.reload : formations.reload} />;
-  }
-  if (!cours.data || !formations.data) {
-    return <Status loading />;
-  }
+  const yearOptions = (id) =>
+    Array.from({ length: durationOf(id) }, (_, index) => (
+      <option key={index} value={index + 1}>
+        {niveau(index + 1)}
+      </option>
+    ));
 
   return (
     <>
@@ -177,34 +180,108 @@ function Cours() {
         <div>
           <h1>Cours</h1>
           <p>
-            {items.length} cours au catalogue. Un même cours peut être rattaché à plusieurs formations, chacune avec son
-            année d'études.
+            {courses.length} cours au catalogue. Un même cours peut être rattaché à plusieurs formations, chacune avec
+            son année d'études.
           </p>
         </div>
-        {!editing && (
-          <button
-            className="btn"
-            type="button"
-            onClick={() => {
-              setEditing({ id: null });
-              window.scrollTo(0, 0);
-            }}
-          >
-            <Icon name="plus" />
-            Ajouter un cours
-          </button>
-        )}
+        <button className="btn" type="button" onClick={startAdd}>
+          <Icon name="plus" />
+          Ajouter un cours
+        </button>
       </div>
 
+      {/* L'ajout et la modification se font dans une fenêtre, par-dessus la liste. */}
       {editing && (
-        <CoursForm
-          key={editing.id ?? 'nouveau'}
-          initial={edited}
-          formations={formationListe}
-          defaultPrograms={liensParDefaut(editing.id, formeActive, forme)}
-          onSubmit={saveCours}
-          onCancel={() => setEditing(null)}
-        />
+        <Modal title={editing === 'new' ? 'Ajouter un cours' : 'Modifier le cours'} onClose={() => setEditing(null)}>
+          <form className="form" onSubmit={onSubmit} noValidate>
+            <fieldset>
+              <legend>Cours et formations</legend>
+              <div className="row">
+                <div className={`fld${formError ? ' bad' : ''}`}>
+                  <label htmlFor="c-nom">Intitulé du cours</label>
+                  <input
+                    id="c-nom"
+                    autoFocus
+                    placeholder="ex. Français"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                  {formError && (
+                    <span className="err" role="alert">
+                      {formError}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="row" style={{ marginTop: 16 }}>
+                <div className="fld">
+                  <label>Formations rattachées</label>
+                  <div>
+                    {links.map((link, index) => (
+                      <div className="lien" key={index}>
+                        <select
+                          className="lien-forme"
+                          aria-label="Formation"
+                          value={link.program_id}
+                          onChange={(event) =>
+                            changeLink(index, {
+                              program_id: event.target.value,
+                            })
+                          }
+                        >
+                          {programs.map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {programLabel(item)} ({item.degree.name})
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          className="lien-annee"
+                          aria-label="Année d'études"
+                          value={link.year}
+                          onChange={(event) =>
+                            changeLink(index, {
+                              year: Number(event.target.value),
+                            })
+                          }
+                        >
+                          {yearOptions(link.program_id)}
+                        </select>
+                        <button
+                          className="act del"
+                          type="button"
+                          title="Retirer cette formation"
+                          aria-label="Retirer cette formation"
+                          onClick={() => removeLink(index)}
+                        >
+                          <Icon name="x" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {programs.length > 0 && (
+                    <button className="btn line sm" type="button" onClick={addLink}>
+                      <Icon name="plus" />
+                      Rattacher à une formation
+                    </button>
+                  )}
+                  <span className="hint" style={{ display: 'block' }}>
+                    Les années proposées viennent du diplôme de chaque formation. Un cours sans formation reste au
+                    catalogue.
+                  </span>
+                </div>
+              </div>
+            </fieldset>
+            <div className="formfoot">
+              <button className="btn" type="submit">
+                {editing === 'new' ? 'Ajouter le cours' : 'Enregistrer les modifications'}
+              </button>
+              <button className="btn line" type="button" onClick={() => setEditing(null)}>
+                {editing === 'new' ? 'Terminer' : 'Annuler'}
+              </button>
+            </div>
+          </form>
+        </Modal>
       )}
 
       <div className="panel">
@@ -216,23 +293,25 @@ function Cours() {
                 type="search"
                 placeholder="Rechercher un cours"
                 aria-label="Rechercher"
-                value={q}
+                value={search}
                 onChange={(event) => {
-                  setQ(event.target.value);
+                  setSearch(event.target.value);
                   setPage(1);
                 }}
               />
             </span>
-            <select className="field" aria-label="Filtrer par formation" value={formeActive} onChange={(event) => setFiltre(event.target.value)}>
+            <select
+              className="field"
+              aria-label="Filtrer par formation"
+              value={programId ?? ''}
+              onChange={(event) => setFilter(event.target.value)}
+            >
               <option value="">Toutes les formations</option>
-              {formationListe
-                .slice()
-                .sort((a, b) => `${a.name} ${a.institute.short_name}`.localeCompare(`${b.name} ${b.institute.short_name}`, 'fr'))
-                .map((formation) => (
-                  <option key={formation.id} value={formation.id}>
-                    {formation.name} — {formation.institute.short_name}
-                  </option>
-                ))}
+              {programs.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {programLabel(item)}
+                </option>
+              ))}
             </select>
           </div>
           <small>
@@ -241,95 +320,109 @@ function Cours() {
         </header>
 
         {/* Formation filtrée : on peut lui rattacher directement un cours déjà au catalogue. */}
-        {formeActive && libres.length > 0 && (
+        {program && free.length > 0 && (
           <div className="attach">
-            <b>Rattacher un cours existant</b>
+            <b style={{ fontSize: 14 }}>Rattacher un cours existant</b>
             <select
               aria-label="Cours à rattacher"
-              value={attachSelection}
-              onChange={(event) => setAttachCours(event.target.value)}
+              value={attach.courseId || free[0].id}
+              onChange={(event) => setAttach({ ...attach, courseId: event.target.value })}
             >
-              {libres.map((coursItem) => (
-                <option key={coursItem.id} value={coursItem.id}>
-                  {coursItem.name}
+              {free.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.name}
                 </option>
               ))}
             </select>
             <select
-              aria-label="Année d'études pour le rattachement"
-              value={Math.min(attachAnnee, dureeFiltree)}
-              onChange={(event) => setAttachAnnee(Number(event.target.value))}
+              aria-label="Année d'études"
+              style={{ flex: '0 1 150px' }}
+              value={Math.min(attach.year, program.duration)}
+              onChange={(event) => setAttach({ ...attach, year: Number(event.target.value) })}
             >
-              {Array.from({ length: dureeFiltree }, (_, k) => (
-                <option key={k + 1} value={k + 1}>
-                  {niveau(k)}
-                </option>
-              ))}
+              {yearOptions(program.id)}
             </select>
-            <button className="btn sm" type="button" onClick={rattacher}>
+            <button className="btn sm" type="button" onClick={onAttach}>
               <Icon name="plus" />
               Rattacher
             </button>
           </div>
         )}
 
-        {visibles.length > 0 ? (
+        {visible.length === 0 ? (
+          <div className="pad">
+            <div className="empty">
+              <h3>Aucun cours</h3>
+              <p>
+                {program && !search
+                  ? "Cette formation n'a pas encore de cours : rattachez-en un ou ajoutez-en un nouveau."
+                  : 'Modifiez la recherche ou le filtre.'}
+              </p>
+            </div>
+          </div>
+        ) : (
           <>
             <div className="tblwrap">
               <table className="tbl">
                 <thead>
                   <tr>
                     <th>Cours</th>
-                    <th>{formeActive ? 'Année' : 'Formations rattachées'}</th>
+                    <th>{program ? 'Année' : 'Formations rattachées'}</th>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
-                  {visibles.map((coursItem) => {
-                    const line = formeActive ? coursItem.programs.find((lien) => lien.program_id === forme) : null;
-                    const noms = coursItem.programs.map((lien) => lien.program_name);
+                  {visible.map((course) => {
+                    const count = course.programs.length;
                     return (
-                      <tr key={coursItem.id}>
+                      <tr key={course.id}>
                         <td>
-                          <b>{coursItem.name}</b>
+                          <b>{course.name}</b>
                         </td>
-                        <td>
-                          {line ? (
-                            <div className="who">
-                              <span>
-                                <b>{niveau(line.year - 1)}</b>
-                                {coursItem.programs.length > 1 && (
-                                  <small>
-                                    aussi dans {coursItem.programs.length - 1} autre{coursItem.programs.length > 2 ? 's' : ''}{' '}
-                                    formation{coursItem.programs.length > 2 ? 's' : ''}
-                                  </small>
-                                )}
-                              </span>
-                            </div>
-                          ) : noms.length > 0 ? (
-                            <div className="who">
-                              <span>
-                                <span className={`badge ${noms.length > 1 ? 'ok' : 'wait'}`}>{plural(noms.length, 'formation')}</span>
+                        {program ? (
+                          <td>
+                            {niveau(linkOf(course).year)}
+                            {count > 1 && (
+                              <>
                                 <br />
-                                <small>
-                                  {noms.slice(0, 2).join(' · ')}
-                                  {noms.length > 2 ? ' …' : ''}
+                                <small style={{ color: 'var(--muted)' }}>
+                                  aussi dans {count - 1} autre
+                                  {count > 2 ? 's' : ''} formation
+                                  {count > 2 ? 's' : ''}
                                 </small>
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="badge wait">Aucune</span>
-                          )}
-                        </td>
+                              </>
+                            )}
+                          </td>
+                        ) : (
+                          <td>
+                            {count === 0 ? (
+                              <span className="badge wait">Aucune</span>
+                            ) : (
+                              <>
+                                <span className={`badge ${count > 1 ? 'ok' : 'wait'}`}>
+                                  {count} formation{count > 1 ? 's' : ''}
+                                </span>
+                                <br />
+                                <small style={{ color: 'var(--muted)' }}>
+                                  {course.programs
+                                    .slice(0, 2)
+                                    .map((item) => `${item.program_name} - ${item.institute_short_name}`)
+                                    .join(' · ')}
+                                  {count > 2 ? ' …' : ''}
+                                </small>
+                              </>
+                            )}
+                          </td>
+                        )}
                         <td>
                           <div className="acts">
-                            {formeActive && line && (
+                            {program && (
                               <button
                                 className="act"
                                 type="button"
                                 title="Retirer de cette formation"
-                                aria-label={`Retirer ${coursItem.name} de cette formation`}
-                                onClick={() => retirer(coursItem)}
+                                aria-label={`Retirer ${course.name} de cette formation`}
+                                onClick={() => onDetach(course)}
                               >
                                 <Icon name="x" />
                               </button>
@@ -338,11 +431,8 @@ function Cours() {
                               className="act"
                               type="button"
                               title="Modifier"
-                              aria-label={`Modifier ${coursItem.name}`}
-                              onClick={() => {
-                                setEditing({ id: coursItem.id });
-                                window.scrollTo(0, 0);
-                              }}
+                              aria-label={`Modifier ${course.name}`}
+                              onClick={() => startEdit(course)}
                             >
                               <Icon name="pencil" />
                             </button>
@@ -350,8 +440,8 @@ function Cours() {
                               className="act del"
                               type="button"
                               title="Supprimer du catalogue"
-                              aria-label={`Supprimer ${coursItem.name}`}
-                              onClick={() => setToDelete(coursItem)}
+                              aria-label={`Supprimer ${course.name}`}
+                              onClick={() => setToDelete(course)}
                             >
                               <Icon name="trash" />
                             </button>
@@ -363,33 +453,18 @@ function Cours() {
                 </tbody>
               </table>
             </div>
-            <Pagination total={rows.length} page={pageCourante} perPage={PER_PAGE} onPage={setPage} />
+            <Pager total={rows.length} perPage={PER_PAGE} page={page} onPage={setPage} />
           </>
-        ) : (
-          <div className="pad">
-            <div className="empty">
-              <h3>Aucun cours</h3>
-              <p>
-                {formeActive && !q
-                  ? "Cette formation n'a pas encore de cours : rattachez-en un ou ajoutez-en un nouveau."
-                  : 'Modifiez la recherche ou le filtre.'}
-              </p>
-            </div>
-          </div>
         )}
       </div>
 
       {toDelete && (
         <ConfirmDialog
           title="Supprimer ce cours ?"
-          message={`« ${toDelete.name} » sera supprimé du catalogue${
-            toDelete.programs.length
-              ? ` et retiré du programme de ${plural(toDelete.programs.length, 'formation')}`
-              : ''
+          body={`« ${toDelete.name} » sera supprimé du catalogue${
+            toDelete.programs.length ? ` et retiré du programme de ${toDelete.programs.length} formation(s)` : ''
           }. Cette action est définitive.`}
-          confirmLabel="Supprimer"
-          busy={deleting}
-          onConfirm={remove}
+          onConfirm={onDelete}
           onCancel={() => setToDelete(null)}
         />
       )}
@@ -397,4 +472,4 @@ function Cours() {
   );
 }
 
-export default Cours;
+export default Cours

@@ -51,9 +51,11 @@
   letter-spacing: .03em;
 }
 
-.dcover svg.big {
+.dcover svg.big,
+.dcover .icon.big {
   width: 120px;
   height: 120px;
+  font-size: 102px;
 }
 
 .dgrid {
@@ -99,11 +101,13 @@
   align-items: flex-start;
 }
 
-.hl svg {
+.hl svg,
+.hl .icon {
   flex: none;
   width: 26px;
   height: 26px;
   margin-top: 2px;
+  font-size: 22px;
 }
 
 .hl b {
