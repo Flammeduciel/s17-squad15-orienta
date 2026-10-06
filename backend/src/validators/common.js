@@ -9,13 +9,10 @@
 const { z } = require('zod');
 
 /**
- * Identifiant numérique (colonnes `SERIAL`), reçu en texte dans l'URL.
- * `'12'` devient `12` ; `'abc'` ou `'-3'` sont refusés.
+ * Identifiant d'une ligne en base : un UUID, comme
+ * `3f2b8c1e-9a4d-4e7b-8c21-5d6f7a8b9c0d`. Toute autre valeur est refusée.
  */
-const id = z.coerce
-  .number({ error: 'doit être un nombre entier.' })
-  .int('doit être un nombre entier.')
-  .positive('doit être supérieur à zéro.');
+const id = z.uuid({ error: 'doit être un identifiant valide (UUID).' });
 
 /** Paramètres d'une route `/…/:id`. */
 const idParams = z.object({ id });
@@ -34,6 +31,21 @@ const positiveIntQuery = z.coerce
   .number({ error: 'doit être un nombre entier positif.' })
   .int('doit être un nombre entier positif.')
   .min(0, 'doit être un nombre entier positif.');
+
+/**
+ * Liste de valeurs de filtre dans l'URL, séparées par des virgules :
+ * `?duration=2,3` devient `[2, 3]`. Une seule valeur donne une liste d'un élément.
+ *
+ * @param {import('zod').ZodType} item Schéma de chaque valeur.
+ *
+ * @example
+ * const query = z.object({ degree_id: listQuery(id).optional() });
+ */
+const listQuery = (item) =>
+  z
+    .string()
+    .transform((value) => value.split(','))
+    .pipe(z.array(item));
 
 /**
  * Texte obligatoire d'un corps de requête, débarrassé des espaces autour.
@@ -64,4 +76,4 @@ const optionalText = (max) =>
     .nullish()
     .transform((value) => value || null);
 
-module.exports = { id, idParams, booleanQuery, positiveIntQuery, requiredText, optionalText };
+module.exports = { id, idParams, booleanQuery, positiveIntQuery, listQuery, requiredText, optionalText };
