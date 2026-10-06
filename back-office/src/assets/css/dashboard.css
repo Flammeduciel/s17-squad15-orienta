@@ -62,9 +62,11 @@
   place-items: center;
 }
 
-.stat .ico svg {
+.stat .ico svg,
+.stat .ico .icon {
   width: 19px;
   height: 19px;
+  font-size: 16px;
 }
 
 .stat .ico.blue {

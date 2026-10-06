@@ -16,9 +16,11 @@
   font-weight: 800;
 }
 
-.agb svg {
+.agb svg,
+.agb .icon {
   width: 13px;
   height: 13px;
+  font-size: 11px;
 }
 
 .agb.p {
