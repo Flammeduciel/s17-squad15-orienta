@@ -9,6 +9,7 @@ import { useFetch } from '../../hooks/useFetch';
 import { ROUTES } from '../../routes';
 import { formatDate, formatDuration, formatFcfa } from '../../utils/format';
 import { admissionText, feeLines } from '../../utils/program';
+import FormulaireQuestion from './FormulaireQuestion';
 
 /* Fiche formation — route /formations/:id (ticket P4).
    Maquette : template/index.html. */
@@ -332,6 +333,11 @@ function FicheFormation() {
               Écrire par e-mail
             </a>
           )}
+
+          <FormulaireQuestion
+            institut={{ name: program.institute.name, short_name: program.institute.short_name }}
+            formation={{ id: program.id, name: program.name }}
+          />
         </aside>
       </div>
     </div>
