@@ -1,7 +1,10 @@
-/* Diplômes — route /admin/diplomes (ticket P20).
-   Maquette : template/back-office.html. */
+// Diplômes — route /admin/diplomes (ticket P20).
+// Maquette : template/back-office.html (pageRefl).
+import Referentiel from './Referentiel';
+import { DIPLOMES } from './referentiels';
+
 function Diplomes() {
-  return <h1>Diplômes</h1>
+  return <Referentiel config={DIPLOMES} />;
 }
 
-export default Diplomes
+export default Diplomes;

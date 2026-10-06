@@ -38,7 +38,9 @@ COPY server.js ./
 COPY src ./src
 COPY scripts ./scripts
 
-RUN chmod +x ./scripts/start.sh && chown -R backend:nodejs /app
+# Le dossier des images est créé ici pour appartenir au compte `backend` : un
+# volume monté dessus (voir deploy.md) hérite ainsi des bons droits.
+RUN mkdir -p ./uploads && chmod +x ./scripts/start.sh && chown -R backend:nodejs /app
 
 USER backend
 

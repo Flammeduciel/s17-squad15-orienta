@@ -19,25 +19,37 @@ npm run dev
 ```
 frontend/src/
 ├── main.jsx       # Point d'entrée : charge le design system et monte l'application
-├── App.jsx        # Choisit la page à afficher
+├── App.jsx        # Routage : toutes les pages dans la mise en page commune
+├── routes.js      # Toutes les adresses du site au même endroit
 ├── assets/
 │   └── css/       # Design system (ne pas écrire de CSS ailleurs)
+├── api/           # Client HTTP (request, ApiError, errorMessage, imageUrl)
+├── components/    # Composants partagés : mise en page, icônes, logo, état de chargement
+├── context/       # États partagés entre pages : favoris
+├── hooks/         # useFetch (lecture de l'API), useTheme (clair / sombre)
+├── utils/         # Mise en forme des montants, dates et durées
 └── pages/         # Un dossier par page, avec son fichier déjà créé
 ```
 
 Chaque fichier de page existe déjà et n'affiche que son titre : il reste à le
-remplir en suivant la maquette.
+remplir en suivant la maquette. Les routes sont déjà branchées dans `App.jsx`,
+il n'y a pas à y toucher.
 
-D'autres dossiers arriveront avec le premier fichier qui en a besoin — git ne
-garde pas un dossier vide :
+## Appeler l'API
 
-| Dossier | Ce qu'on y mettra |
-|---|---|
-| `components/` | Les composants utilisés par plusieurs pages (en-tête, pied de page, carte de formation…) |
-| `services/` | Les appels à l'API, un fichier par ressource |
-| `context/` | Les états partagés entre pages : thème, favoris |
-| `utils/` | Les petites fonctions sans dépendance (formatage des montants, des dates…) |
-| `assets/images/` | Les images importées par le code |
+- Pour lire une ressource : `useFetch('/institutes', { district, q })`. Il
+  renvoie `{ data, loading, error, reload }` et refait l'appel quand le chemin ou
+  les paramètres changent. Les paramètres vides sont ignorés.
+- Pour afficher l'attente ou l'échec : `<Status loading />` et
+  `<Status error={error} onRetry={reload} />`.
+- Pour envoyer des données (`POST /contact`) : `request(chemin, { method, body })`
+  de `api/http.js`.
+- Une erreur de l'API devient une `ApiError` avec `status` (0 si le serveur est
+  injoignable), `code` (code du contrat) et `message` (en français, à afficher tel quel).
+- Les images des instituts arrivent avec une adresse relative : on les affiche
+  avec `imageUrl(institut.image_url)` (qui renvoie `null` s'il n'y a pas d'image).
+- Les favoris se lisent avec `useFavoris()` : `{ ids, count, isFavori(id), toggle(id) }`.
+  Ils restent dans le navigateur (pas de compte étudiant).
 
 ## Les pages
 
