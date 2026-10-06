@@ -4,7 +4,6 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import Compte from './pages/compte/Compte.jsx'
 import Connexion from './pages/connexion/Connexion.jsx'
-import ResetPassword from './pages/connexion/ResetPassword.jsx'
 import Cours from './pages/cours/Cours.jsx'
 import FormulaireFormation from './pages/formations/FormulaireFormation.jsx'
 import ListeFormations from './pages/formations/ListeFormations.jsx'
@@ -12,7 +11,9 @@ import FormulaireInstitut from './pages/instituts/FormulaireInstitut.jsx'
 import ListeInstituts from './pages/instituts/ListeInstituts.jsx'
 import Debouches from './pages/referentiels/Debouches.jsx'
 import Diplomes from './pages/referentiels/Diplomes.jsx'
+import Arrondissements from './pages/referentiels/Arrondissements.jsx'
 import Domaines from './pages/referentiels/Domaines.jsx'
+import Villes from './pages/referentiels/Villes.jsx'
 import SeriesBac from './pages/referentiels/SeriesBac.jsx'
 import TableauDeBord from './pages/tableau-de-bord/TableauDeBord.jsx'
 import { ROUTES } from './routes.js'
@@ -27,26 +28,31 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path={ROUTES.connexion} element={<Connexion />} />
-          <Route path={ROUTES.reinitialisation} element={<ResetPassword />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<BackOfficeLayout />}>
               <Route path="/" element={<Navigate to={ROUTES.accueil} replace />} />
               <Route path={ROUTES.accueil} element={<TableauDeBord />} />
 
-              <Route path={ROUTES.instituts} element={<ListeInstituts />} />
-              <Route path={`${ROUTES.instituts}/nouveau`} element={<FormulaireInstitut />} />
-              <Route path={`${ROUTES.instituts}/:id`} element={<FormulaireInstitut />} />
+              {/* Les formulaires sont des routes enfants de leur liste : ils s'ouvrent
+                  en fenêtre par-dessus elle, et gardent leur propre adresse. */}
+              <Route path={ROUTES.instituts} element={<ListeInstituts />}>
+                <Route path="nouveau" element={<FormulaireInstitut />} />
+                <Route path=":id" element={<FormulaireInstitut />} />
+              </Route>
 
-              <Route path={ROUTES.formations} element={<ListeFormations />} />
-              <Route path={`${ROUTES.formations}/nouvelle`} element={<FormulaireFormation />} />
-              <Route path={`${ROUTES.formations}/:id`} element={<FormulaireFormation />} />
+              <Route path={ROUTES.formations} element={<ListeFormations />}>
+                <Route path="nouvelle" element={<FormulaireFormation />} />
+                <Route path=":id" element={<FormulaireFormation />} />
+              </Route>
 
               <Route path={ROUTES.cours} element={<Cours />} />
               <Route path={ROUTES.diplomes} element={<Diplomes />} />
               <Route path={ROUTES.debouches} element={<Debouches />} />
               <Route path={ROUTES.series} element={<SeriesBac />} />
               <Route path={ROUTES.domaines} element={<Domaines />} />
+              <Route path={ROUTES.villes} element={<Villes />} />
+              <Route path={ROUTES.arrondissements} element={<Arrondissements />} />
               <Route path={ROUTES.compte} element={<Compte />} />
             </Route>
           </Route>
