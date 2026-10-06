@@ -23,6 +23,3 @@ export const getDegrees = () => request('/degrees');
 export const getBacSeries = () => request('/bac-series');
 export const getCareers = () => request('/careers');
 export const getDistricts = () => request('/districts');
-
-// Question d'un bachelier à un institut (EX-06).
-export const sendQuestion = (body) => request('/contact', { method: 'POST', body });

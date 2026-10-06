@@ -55,7 +55,6 @@ if (!program) return <PageState loading={loading} error={error} notFound="Format
 | `pages/accueil/Accueil.jsx` | Accueil et recherche | `/` | P2 |
 | `pages/favoris/Favoris.jsx` | Favoris | `/favoris` | P3 |
 | `pages/formations/FicheFormation.jsx` | Fiche formation | `/formations/:id` | P4 |
-| `pages/formations/FormulaireQuestion.jsx` | Question à un institut, affichée dans la fiche formation | - | P9 |
 | `pages/debouches/Debouches.jsx` | Débouchés | `/debouches/:id` | P5 |
 | `pages/instituts/FicheInstitut.jsx` | Fiche institut | `/instituts/:id` | P6 |
 | `pages/a-propos/APropos.jsx` | À propos | `/a-propos` | P7 |
